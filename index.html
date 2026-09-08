@@ -102,12 +102,12 @@ h1,h2,h3{font-family:var(--f-display);font-weight:600;text-wrap:balance;margin:0
    der Schleier deckt nur noch das Textband — sonst sieht man vom Film nichts. */
 .buehne.mit-film .buehne-boden{background:linear-gradient(to top,
   var(--zucker) 0%,
-  rgba(255,248,244,.97) 15%,
-  rgba(255,248,244,.86) 25%,
-  rgba(255,248,244,.5) 35%,
-  rgba(255,248,244,.16) 45%,
-  rgba(255,248,244,0) 56%)}
-.buehne.mit-film .buehne-schein{opacity:.16}
+  rgba(255,248,244,.94) 9%,
+  rgba(255,248,244,.74) 17%,
+  rgba(255,248,244,.38) 25%,
+  rgba(255,248,244,.11) 33%,
+  rgba(255,248,244,0) 42%)}
+.buehne.mit-film .buehne-schein{opacity:.08}
 /* Die Kopfzeile steht beim Film auf dunklem Bild — dort wird sie hell,
    mit einem kurzen Verlauf darunter, damit sie nicht im Zweig verschwindet. */
 /* Der Verlauf geht über die ganze Breite, die Schrift behält ihren Einzug —
@@ -117,7 +117,7 @@ h1,h2,h3{font-family:var(--f-display);font-weight:600;text-wrap:balance;margin:0
   pointer-events:none}
 .buehne.mit-film .kopfleiste .marke{color:#ffd9a8;text-shadow:0 1px 3px rgba(40,22,18,.8)}
 .buehne.mit-film .kopfleiste .ort{color:rgba(255,248,244,.9);text-shadow:0 1px 3px rgba(40,22,18,.8)}
-.buehne.mit-film .buehne-inhalt{padding-top:clamp(300px,56vh,640px)}
+.buehne.mit-film .buehne-inhalt{padding-top:clamp(340px,64vh,720px)}
 .buehne.mit-film{min-height:min(88dvh,900px)}
 .buehne.mit-film h1,
 .buehne.mit-film .unterzeile,
@@ -503,7 +503,6 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 
     <div class="kopfleiste">
       <span class="marke">Ninas Weihnachtscounter</span>
-      <span class="ort">Bei uns · 24. Dezember, nicht der 25.</span>
     </div>
 
     <div class="buehne-inhalt">
