@@ -1223,32 +1223,44 @@ const heuteTag = imDezember ? Math.min(24, jetzt.getDate()) : null;
 /* ---------------- Die Bühne des Tages ----------------
    Eigenes Ding, wie der Zauber: sie verrät nichts aus den Türchen,
    sie hält nur die Stimmung des Tages. Farben, Motiv und Text wechseln täglich. */
+/* Weihnachten hat mehr als eine Farbe. Jeder Tag bekommt eine davon —
+   die Seite bleibt dieselbe, der Ton wechselt. Die Werte sind so gewaehlt,
+   dass Text auf hellem Grund in jeder Stimmung lesbar bleibt. */
+const stimmungen = {
+  rosa:      {rot:"#c0303f", tief:"#96222f", satt:"#e8809a", gold:"#dd9433", linie:"rgba(232,128,154,.30)"},
+  tiefrot:   {rot:"#9d1b2a", tief:"#71101c", satt:"#c2495c", gold:"#c98a2f", linie:"rgba(157,27,42,.28)"},
+  tanne:     {rot:"#2f6b4f", tief:"#1f4c38", satt:"#5c9576", gold:"#c69a35", linie:"rgba(47,107,79,.28)"},
+  lebkuchen: {rot:"#8f4a1d", tief:"#65330f", satt:"#c07b41", gold:"#cf9330", linie:"rgba(143,74,29,.28)"},
+  gold:      {rot:"#b0611b", tief:"#7f4310", satt:"#d38a4a", gold:"#c68a1f", linie:"rgba(198,138,31,.32)"},
+  eis:       {rot:"#2d5f86", tief:"#1e4361", satt:"#6f9ec2", gold:"#b78a3d", linie:"rgba(45,95,134,.26)"}
+};
+
 const buehnen = {
- 1:{tag:"Der erste Advent-Tag", t:["Es fängt","heute an."], u:"Vier Kerzen, eine brennt. Der Rest der Geschichte kommt von selbst.", m:"kranz", m2:"kerze", a:"#fff4ef", b:"#ffe6e9", c:"#ffeadb", l:"rgba(221,148,51,.34)"},
- 2:{tag:"Es riecht nach Ofen", t:["Die Küche","gehört uns."], u:"Ab heute ist Mehl auf der Arbeitsplatte, und das bleibt drei Wochen so.", m:"keks", m2:"zimtstern", a:"#fff6ee", b:"#ffeadd", c:"#ffe3d2", l:"rgba(221,148,51,.4)"},
- 3:{tag:"Ein ruhiger Tag", t:["Snoopy hat","entschieden."], u:"Der beste Platz im Haus ist heute besetzt. Diskussion zwecklos.", m:"katze", m2:"karton", a:"#fff7f2", b:"#ffeee5", c:"#ffe8e2", l:"rgba(232,128,154,.34)"},
- 4:{tag:"Barbaratag", t:["Etwas,","das wartet."], u:"Manches muss man drei Wochen stehen lassen, damit es am richtigen Tag da ist.", m:"schneekugel", m2:"tanne", a:"#f6fbff", b:"#ffeef2", c:"#fff0e6", l:"rgba(232,128,154,.3)"},
- 5:{tag:"Die Nacht davor", t:["Hörst du","die Schellen?"], u:"Heute wird es laut im Dorf. Wer die Glocken hört, weiß, wer unterwegs ist.", m:"glocke", m2:"stern", a:"#fff2f2", b:"#ffe4e6", c:"#f9e6dc", l:"rgba(192,48,63,.26)"},
- 6:{tag:"Nikolaus", t:["Kleines","zuerst."], u:"Mandarinen, Nüsse, Schokolade. Das Große kommt später — deshalb zählt das Kleine heute.", m:"socke", m2:"geschenk", a:"#fff4ee", b:"#ffe8dc", c:"#ffe0e4", l:"rgba(221,148,51,.42)"},
- 7:{tag:"Weiß geworden", t:["Draußen","liegt was."], u:"Die erste unberührte Fläche im Garten gehört dem, der zuerst hinausgeht.", m:"schneemann", m2:"schnee", a:"#f7fbff", b:"#fff2f4", c:"#fff3ea", l:"rgba(255,255,255,.85)"},
- 8:{tag:"Dampf am Fenster", t:["Es wird","warm."], u:"Draußen kalt, drinnen Zimt. So gehört sich das im Dezember.", m:"punsch", m2:"bratapfel", a:"#fff3ea", b:"#ffe6e0", c:"#ffdfd6", l:"rgba(192,48,63,.28)"},
- 9:{tag:"Kisten vom Dachboden", t:["Alles","wieder da."], u:"Jedes Jahr geht eine kaputt, jedes Jahr kommt eine dazu. So bleibt die Schachtel voll.", m:"stern", m2:"schneekugel", a:"#fffaf0", b:"#ffeeea", c:"#ffe9f0", l:"rgba(221,148,51,.46)"},
-10:{tag:"Es wird hell", t:["Licht","ins Dunkle."], u:"Warmweiß. Am Geländer entlang. Über blinkend reden wir gar nicht.", m:"licht", m2:"kerze", a:"#fff8ee", b:"#ffece2", c:"#ffe6ec", l:"rgba(221,148,51,.5)"},
-11:{tag:"Baustelle Küche", t:["Es wird","schief."], u:"Und genau deshalb wird es gut. Zuckerguss verzeiht fast alles.", m:"lebkuchenmann", m2:"keks", a:"#fff3e8", b:"#ffe7d8", c:"#ffdfd4", l:"rgba(169,102,47,.3)"},
-12:{tag:"Snoopys Tag", t:["Eine Regel","gilt immer."], u:"Sie hat sie nicht gemacht. Sie ist der Grund dafür.", m:"katze", m2:"tanne", a:"#fff6f4", b:"#ffe9ee", c:"#ffe4e0", l:"rgba(232,128,154,.4)"},
-13:{tag:"Luzia", t:["Der kürzeste","Nachmittag."], u:"Heute wird jede Kerze angezündet, die im Haus zu finden ist.", m:"kerze", m2:"kranz", a:"#fff9ec", b:"#ffeee0", c:"#ffe6e8", l:"rgba(221,148,51,.55)"},
-14:{tag:"Post geht raus", t:["Drei Wünsche","reichen."], u:"Auf Papier, mit der Hand. Der Rest ist Sache des Christkinds.", m:"stern", m2:"socke", a:"#fdf6ff", b:"#ffeef2", c:"#fff0e4", l:"rgba(232,128,154,.36)"},
-15:{tag:"Unter Leuten", t:["Einmal","ganz herum."], u:"Beim zweiten Mal weiß man, wo der gute Punsch steht. Das ist der ganze Trick.", m:"licht", m2:"punsch", a:"#fff4ec", b:"#ffe6e4", c:"#ffdee8", l:"rgba(192,48,63,.3)"},
-16:{tag:"Türe zu", t:["Nicht","hereinschauen."], u:"Heute wird auf dem Boden gearbeitet. Papier, Schere, Band — und niemand darf gucken.", m:"geschenk", m2:"katze", a:"#fff2f5", b:"#ffe4ea", c:"#ffe8db", l:"rgba(232,128,154,.42)"},
-17:{tag:"Wetterlage", t:["Draußen","steht wer."], u:"Zwei Karotten, ein Zylinder, ein Ohrring. Mehr braucht es nicht.", m:"schneemann", m2:"schneefrau", a:"#f6fbff", b:"#fff0f2", c:"#fff4ea", l:"rgba(255,255,255,.9)"},
-18:{tag:"Auf den Berg", t:["Hinauf","dauert länger."], u:"Dreimal so lang wie hinunter. Genau deshalb macht man es.", m:"schlitten", m2:"berg", a:"#f8fbff", b:"#ffeef0", c:"#ffeee2", l:"rgba(63,110,86,.2)"},
-19:{tag:"Er kommt herein", t:["Ein Baum","im Wohnzimmer."], u:"Lieber eine Handbreit zu klein als eine zu groß. Die Decke gewinnt immer.", m:"tanne", m2:"berg", a:"#f5fbf6", b:"#ffeff0", c:"#fff1e4", l:"rgba(63,110,86,.26)"},
-20:{tag:"Aufputzen", t:["Lichter,","dann Kugeln."], u:"Zuletzt der Stern. Und die unteren dreißig Zentimeter bleiben leer.", m:"tanne", m2:"zuckerstange", a:"#fff8ef", b:"#ffece6", c:"#ffe4ee", l:"rgba(221,148,51,.5)"},
-21:{tag:"Sonnenwende", t:["Die längste","Nacht."], u:"Ab morgen werden die Tage wieder länger. Man merkt es drei Wochen lang nicht.", m:"stern", m2:"schneekugel", a:"#fdf5ff", b:"#ffedf3", c:"#fff0e8", l:"rgba(232,128,154,.34)"},
-22:{tag:"Austragen", t:["Die schönen","kommen weg."], u:"Die schiefen bleiben daheim. So war es immer, so bleibt es.", m:"kletzenbrot", m2:"keks", a:"#fff5ea", b:"#ffe8dc", c:"#ffe2d6", l:"rgba(169,102,47,.32)"},
-23:{tag:"Der Tag davor", t:["Heute","nichts."], u:"Nicht mehr einkaufen, nicht mehr putzen. Vorfreude braucht Platz.", m:"rentier", m2:"gespann", a:"#fffaf3", b:"#fff0ea", c:"#ffeae6", l:"rgba(221,148,51,.3)"},
-24:{tag:"Heiliger Abend", t:["Jetzt","ist es soweit."], u:"Am Nachmittag geht die Tür zu. Dann ist es lange still. Und dann läutet es.", m:"glocke", m2:"gespann", a:"#fff6ea", b:"#ffe4e6", c:"#ffd9dd", l:"rgba(221,148,51,.62)"},
- 0:{tag:"Noch weit weg", t:["Noch ein bisschen","Geduld, Nina."], u:"Bei uns kommt das Christkind am Heiligen Abend. Bis dahin zählt der Zähler, und Snoopy schläft.", m:"schneekugel", m2:"katze", a:"#fff7f3", b:"#ffedf0", c:"#fff0e6", l:"rgba(232,128,154,.3)"}
+ 1:{tag:"Der erste Advent-Tag", t:["Es fängt","heute an."], u:"Vier Kerzen, eine brennt. Der Rest der Geschichte kommt von selbst.", m:"kranz", m2:"kerze", a:"#fff4ef", b:"#ffe6e9", c:"#ffeadb", l:"rgba(221,148,51,.34)", s:"gold"},
+ 2:{tag:"Es riecht nach Ofen", t:["Die Küche","gehört uns."], u:"Ab heute ist Mehl auf der Arbeitsplatte, und das bleibt drei Wochen so.", m:"keks", m2:"zimtstern", a:"#fff6ee", b:"#ffeadd", c:"#ffe3d2", l:"rgba(221,148,51,.4)", s:"lebkuchen"},
+ 3:{tag:"Ein ruhiger Tag", t:["Snoopy hat","entschieden."], u:"Der beste Platz im Haus ist heute besetzt. Diskussion zwecklos.", m:"katze", m2:"karton", a:"#fff7f2", b:"#ffeee5", c:"#ffe8e2", l:"rgba(232,128,154,.34)", s:"rosa"},
+ 4:{tag:"Barbaratag", t:["Etwas,","das wartet."], u:"Manches muss man drei Wochen stehen lassen, damit es am richtigen Tag da ist.", m:"schneekugel", m2:"tanne", a:"#f6fbff", b:"#ffeef2", c:"#fff0e6", l:"rgba(232,128,154,.3)", s:"eis"},
+ 5:{tag:"Die Nacht davor", t:["Hörst du","die Schellen?"], u:"Heute wird es laut im Dorf. Wer die Glocken hört, weiß, wer unterwegs ist.", m:"glocke", m2:"stern", a:"#fff2f2", b:"#ffe4e6", c:"#f9e6dc", l:"rgba(192,48,63,.26)", s:"tiefrot"},
+ 6:{tag:"Nikolaus", t:["Kleines","zuerst."], u:"Mandarinen, Nüsse, Schokolade. Das Große kommt später — deshalb zählt das Kleine heute.", m:"socke", m2:"geschenk", a:"#fff4ee", b:"#ffe8dc", c:"#ffe0e4", l:"rgba(221,148,51,.42)", s:"tiefrot"},
+ 7:{tag:"Weiß geworden", t:["Draußen","liegt was."], u:"Die erste unberührte Fläche im Garten gehört dem, der zuerst hinausgeht.", m:"schneemann", m2:"schnee", a:"#f7fbff", b:"#fff2f4", c:"#fff3ea", l:"rgba(255,255,255,.85)", s:"eis"},
+ 8:{tag:"Dampf am Fenster", t:["Es wird","warm."], u:"Draußen kalt, drinnen Zimt. So gehört sich das im Dezember.", m:"punsch", m2:"bratapfel", a:"#fff3ea", b:"#ffe6e0", c:"#ffdfd6", l:"rgba(192,48,63,.28)", s:"tiefrot"},
+ 9:{tag:"Kisten vom Dachboden", t:["Alles","wieder da."], u:"Jedes Jahr geht eine kaputt, jedes Jahr kommt eine dazu. So bleibt die Schachtel voll.", m:"stern", m2:"schneekugel", a:"#fffaf0", b:"#ffeeea", c:"#ffe9f0", l:"rgba(221,148,51,.46)", s:"gold"},
+10:{tag:"Es wird hell", t:["Licht","ins Dunkle."], u:"Warmweiß. Am Geländer entlang. Über blinkend reden wir gar nicht.", m:"licht", m2:"kerze", a:"#fff8ee", b:"#ffece2", c:"#ffe6ec", l:"rgba(221,148,51,.5)", s:"gold"},
+11:{tag:"Baustelle Küche", t:["Es wird","schief."], u:"Und genau deshalb wird es gut. Zuckerguss verzeiht fast alles.", m:"lebkuchenmann", m2:"keks", a:"#fff3e8", b:"#ffe7d8", c:"#ffdfd4", l:"rgba(169,102,47,.3)", s:"lebkuchen"},
+12:{tag:"Snoopys Tag", t:["Eine Regel","gilt immer."], u:"Sie hat sie nicht gemacht. Sie ist der Grund dafür.", m:"katze", m2:"tanne", a:"#fff6f4", b:"#ffe9ee", c:"#ffe4e0", l:"rgba(232,128,154,.4)", s:"rosa"},
+13:{tag:"Luzia", t:["Der kürzeste","Nachmittag."], u:"Heute wird jede Kerze angezündet, die im Haus zu finden ist.", m:"kerze", m2:"kranz", a:"#fff9ec", b:"#ffeee0", c:"#ffe6e8", l:"rgba(221,148,51,.55)", s:"gold"},
+14:{tag:"Post geht raus", t:["Drei Wünsche","reichen."], u:"Auf Papier, mit der Hand. Der Rest ist Sache des Christkinds.", m:"stern", m2:"socke", a:"#fdf6ff", b:"#ffeef2", c:"#fff0e4", l:"rgba(232,128,154,.36)", s:"rosa"},
+15:{tag:"Unter Leuten", t:["Einmal","ganz herum."], u:"Beim zweiten Mal weiß man, wo der gute Punsch steht. Das ist der ganze Trick.", m:"licht", m2:"punsch", a:"#fff4ec", b:"#ffe6e4", c:"#ffdee8", l:"rgba(192,48,63,.3)", s:"tiefrot"},
+16:{tag:"Türe zu", t:["Nicht","hereinschauen."], u:"Heute wird auf dem Boden gearbeitet. Papier, Schere, Band — und niemand darf gucken.", m:"geschenk", m2:"katze", a:"#fff2f5", b:"#ffe4ea", c:"#ffe8db", l:"rgba(232,128,154,.42)", s:"rosa"},
+17:{tag:"Wetterlage", t:["Draußen","steht wer."], u:"Zwei Karotten, ein Zylinder, ein Ohrring. Mehr braucht es nicht.", m:"schneemann", m2:"schneefrau", a:"#f6fbff", b:"#fff0f2", c:"#fff4ea", l:"rgba(255,255,255,.9)", s:"eis"},
+18:{tag:"Auf den Berg", t:["Hinauf","dauert länger."], u:"Dreimal so lang wie hinunter. Genau deshalb macht man es.", m:"schlitten", m2:"berg", a:"#f8fbff", b:"#ffeef0", c:"#ffeee2", l:"rgba(63,110,86,.2)", s:"tanne"},
+19:{tag:"Er kommt herein", t:["Ein Baum","im Wohnzimmer."], u:"Lieber eine Handbreit zu klein als eine zu groß. Die Decke gewinnt immer.", m:"tanne", m2:"berg", a:"#f5fbf6", b:"#ffeff0", c:"#fff1e4", l:"rgba(63,110,86,.26)", s:"tanne"},
+20:{tag:"Aufputzen", t:["Lichter,","dann Kugeln."], u:"Zuletzt der Stern. Und die unteren dreißig Zentimeter bleiben leer.", m:"tanne", m2:"zuckerstange", a:"#fff8ef", b:"#ffece6", c:"#ffe4ee", l:"rgba(221,148,51,.5)", s:"tanne"},
+21:{tag:"Sonnenwende", t:["Die längste","Nacht."], u:"Ab morgen werden die Tage wieder länger. Man merkt es drei Wochen lang nicht.", m:"stern", m2:"schneekugel", a:"#fdf5ff", b:"#ffedf3", c:"#fff0e8", l:"rgba(232,128,154,.34)", s:"eis"},
+22:{tag:"Austragen", t:["Die schönen","kommen weg."], u:"Die schiefen bleiben daheim. So war es immer, so bleibt es.", m:"kletzenbrot", m2:"keks", a:"#fff5ea", b:"#ffe8dc", c:"#ffe2d6", l:"rgba(169,102,47,.32)", s:"lebkuchen"},
+23:{tag:"Der Tag davor", t:["Heute","nichts."], u:"Nicht mehr einkaufen, nicht mehr putzen. Vorfreude braucht Platz.", m:"rentier", m2:"gespann", a:"#fffaf3", b:"#fff0ea", c:"#ffeae6", l:"rgba(221,148,51,.3)", s:"lebkuchen"},
+24:{tag:"Heiliger Abend", t:["Jetzt","ist es soweit."], u:"Am Nachmittag geht die Tür zu. Dann ist es lange still. Und dann läutet es.", m:"glocke", m2:"gespann", a:"#fff6ea", b:"#ffe4e6", c:"#ffd9dd", l:"rgba(221,148,51,.62)", s:"tiefrot"},
+ 0:{tag:"Noch weit weg", t:["Noch ein bisschen","Geduld, Nina."], u:"Bei uns kommt das Christkind am Heiligen Abend. Bis dahin zählt der Zähler, und Snoopy schläft.", m:"schneekugel", m2:"katze", a:"#fff7f3", b:"#ffedf0", c:"#fff0e6", l:"rgba(232,128,154,.3)", s:"rosa"}
 };
 
 function buehneSetzen(n){
@@ -1258,6 +1270,16 @@ function buehneSetzen(n){
   w.style.setProperty("--h-b", h.b);
   w.style.setProperty("--h-c", h.c);
   w.style.setProperty("--h-licht", h.l);
+
+  /* Der Ton gilt fuer die ganze Seite, nicht nur fuer die Buehne — sonst
+     stuende ein gruener Kopf ueber einem rosa Rest. */
+  const f = stimmungen[h.s] || stimmungen.rosa;
+  const r = document.documentElement.style;
+  r.setProperty("--rot", f.rot);
+  r.setProperty("--rot-tief", f.tief);
+  r.setProperty("--rosa-satt", f.satt);
+  r.setProperty("--gold", f.gold);
+  r.setProperty("--linie", f.linie);
   document.getElementById("buehne-tag").textContent = h.tag;
   document.getElementById("buehne-titel").innerHTML = h.t[0] + "<em>" + h.t[1] + "</em>";
   document.getElementById("buehne-unter").textContent = h.u;
