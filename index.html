@@ -46,6 +46,9 @@
 body{
   margin:0;
   background:var(--zucker);
+  /* Der Grundton wechselt mit dem Tag — gleitend, damit der Sprung von
+     Rosa nach Tannengruen nicht wie ein Fehler wirkt. */
+  transition:background-color .7s ease;
   color:var(--tinte);
   font-family:var(--f-text);
   font-size:17px;
@@ -1263,12 +1266,18 @@ const heuteTag = imDezember ? Math.min(24, jetzt.getDate()) : null;
    die Seite bleibt dieselbe, der Ton wechselt. Die Werte sind so gewaehlt,
    dass Text auf hellem Grund in jeder Stimmung lesbar bleibt. */
 const stimmungen = {
-  rosa:      {rot:"#c0303f", tief:"#96222f", satt:"#e8809a", gold:"#dd9433", linie:"rgba(232,128,154,.30)"},
-  tiefrot:   {rot:"#9d1b2a", tief:"#71101c", satt:"#c2495c", gold:"#c98a2f", linie:"rgba(157,27,42,.28)"},
-  tanne:     {rot:"#2f6b4f", tief:"#1f4c38", satt:"#5c9576", gold:"#c69a35", linie:"rgba(47,107,79,.28)"},
-  lebkuchen: {rot:"#8f4a1d", tief:"#65330f", satt:"#c07b41", gold:"#cf9330", linie:"rgba(143,74,29,.28)"},
-  gold:      {rot:"#b0611b", tief:"#7f4310", satt:"#d38a4a", gold:"#c68a1f", linie:"rgba(198,138,31,.32)"},
-  eis:       {rot:"#2d5f86", tief:"#1e4361", satt:"#6f9ec2", gold:"#b78a3d", linie:"rgba(45,95,134,.26)"}
+  rosa:      {rot:"#c0303f", tief:"#96222f", satt:"#e8809a", gold:"#dd9433", linie:"rgba(232,128,154,.30)",
+              grund:"#fff8f4", glasur:"#ffeef0", pastell:"#f7ccd4", zart:"rgba(232,128,154,.14)", schein:"rgba(192,48,63,.45)"},
+  tiefrot:   {rot:"#9d1b2a", tief:"#71101c", satt:"#c2495c", gold:"#c98a2f", linie:"rgba(157,27,42,.28)",
+              grund:"#fff6f3", glasur:"#ffe7e3", pastell:"#f2c3bf", zart:"rgba(157,27,42,.13)", schein:"rgba(157,27,42,.42)"},
+  tanne:     {rot:"#2f6b4f", tief:"#1f4c38", satt:"#5c9576", gold:"#c69a35", linie:"rgba(47,107,79,.28)",
+              grund:"#f6faf6", glasur:"#e6f2ea", pastell:"#c2dccd", zart:"rgba(47,107,79,.13)", schein:"rgba(31,76,56,.40)"},
+  lebkuchen: {rot:"#8f4a1d", tief:"#65330f", satt:"#c07b41", gold:"#cf9330", linie:"rgba(143,74,29,.28)",
+              grund:"#fff8ef", glasur:"#fbecd8", pastell:"#eecfa7", zart:"rgba(143,74,29,.13)", schein:"rgba(101,51,15,.40)"},
+  gold:      {rot:"#b0611b", tief:"#7f4310", satt:"#d38a4a", gold:"#c68a1f", linie:"rgba(198,138,31,.32)",
+              grund:"#fffaef", glasur:"#fdf0d6", pastell:"#f2d9a3", zart:"rgba(198,138,31,.15)", schein:"rgba(127,67,16,.38)"},
+  eis:       {rot:"#2d5f86", tief:"#1e4361", satt:"#6f9ec2", gold:"#b78a3d", linie:"rgba(45,95,134,.26)",
+              grund:"#f6fafd", glasur:"#e8f1f8", pastell:"#c6dced", zart:"rgba(45,95,134,.12)", schein:"rgba(30,67,97,.38)"}
 };
 
 const buehnen = {
@@ -1299,12 +1308,23 @@ const buehnen = {
  0:{tag:"Noch weit weg", t:["Noch ein bisschen","Geduld, Nina."], u:"Bei uns kommt das Christkind am Heiligen Abend. Bis dahin zählt der Zähler, und Snoopy schläft.", m:"schneekugel", m2:"katze", a:"#fff7f3", b:"#ffedf0", c:"#fff0e6", l:"rgba(232,128,154,.3)", s:"rosa"}
 };
 
+/** Zwei Farben mischen; teil ist der Anteil der zweiten. */
+function mischen(a, b, teil){
+  const z = (f) => [1,3,5].map(i => parseInt(f.substr(i,2),16));
+  const [r1,g1,b1] = z(a), [r2,g2,b2] = z(b);
+  const m = (x,y) => Math.round(x + (y - x) * teil).toString(16).padStart(2,"0");
+  return "#" + m(r1,r2) + m(g1,g2) + m(b1,b2);
+}
+
 function buehneSetzen(n){
   const h = buehnen[n] || buehnen[0];
   const w = document.getElementById("buehne");
+  /* Der oberste Ton bleibt der des Tages, die beiden unteren ziehen zur
+     Stimmung — sonst staende eine rosa Buehne ueber einer gruenen Seite. */
+  const g = stimmungen[h.s] || stimmungen.rosa;
   w.style.setProperty("--h-a", h.a);
-  w.style.setProperty("--h-b", h.b);
-  w.style.setProperty("--h-c", h.c);
+  w.style.setProperty("--h-b", mischen(g.glasur, "#ffffff", .35));
+  w.style.setProperty("--h-c", mischen(g.pastell, "#ffffff", .55));
   w.style.setProperty("--h-licht", h.l);
 
   /* Der Ton gilt fuer die ganze Seite, nicht nur fuer die Buehne — sonst
@@ -1316,6 +1336,15 @@ function buehneSetzen(n){
   r.setProperty("--rosa-satt", f.satt);
   r.setProperty("--gold", f.gold);
   r.setProperty("--linie", f.linie);
+  r.setProperty("--zucker", f.grund);
+  r.setProperty("--glasur", f.glasur);
+  r.setProperty("--rosa", f.pastell);
+  r.setProperty("--linie-zart", f.zart);
+  r.setProperty("--schein", "0 18px 44px -26px " + f.schein);
+
+  /* Auch die Leiste des Browsers am Telefon zieht mit. */
+  const balken = document.querySelector('meta[name="theme-color"]');
+  if (balken) balken.setAttribute("content", f.grund);
   document.getElementById("buehne-tag").textContent = h.tag;
   document.getElementById("buehne-titel").innerHTML = h.t[0] + "<em>" + h.t[1] + "</em>";
   document.getElementById("buehne-unter").textContent = h.u;
