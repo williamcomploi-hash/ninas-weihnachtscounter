@@ -389,7 +389,7 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 .snoopy-koerper svg,
 .snoopy-koerper img{width:100%;height:100%;display:block;object-fit:contain;object-position:bottom}
 .snoopy-koerper img{image-rendering:auto}
-.snoopy-koerper.blickt-links{transform:scaleX(-1)}
+.snoopy-koerper[data-blick="links"] img{transform:scaleX(-1)}
 
 /* Gang: kleines Auf und Ab, die Beine macht die Zeichnung */
 .snoopy-koerper.geht{animation:snoopyschritt .46s ease-in-out infinite}
@@ -1526,7 +1526,10 @@ function snoopyBild(name){
 }
 /* Für jede Haltung eine Aufnahme. Das Gehen wechselt zwischen zwei Schritten. */
 const snoopyBilder = {
-  gehen:   [snoopyBild("schritt1"), snoopyBild("schritt2")],
+  /* Fünf Bilder ergeben den Gangzyklus: Aufsetzen, Durchschwingen,
+     Ausgreifen und zurück. Bei zwei Bildern sah es aus wie Hüpfen. */
+  gehen:   [snoopyBild("schritt1"), snoopyBild("schritt3"), snoopyBild("schritt2"),
+            snoopyBild("schritt5"), snoopyBild("schritt4")],
   stehen:  [snoopyBild("stehen")],
   sitzen:  [snoopyBild("sitzen")],
   liegen:  [snoopyBild("liegen")],
@@ -1577,7 +1580,7 @@ const snoopySprueche = {
         const jetztBild = koerper.querySelector("img");
         if (jetztBild) jetztBild.remove();
         koerper.insertAdjacentHTML("afterbegin", reihe[schrittZaehler]);
-      }, 300);
+      }, 160);
     }
   }
   function sagen(wort){
@@ -1634,7 +1637,6 @@ const snoopySprueche = {
 
   koerper.addEventListener("click", () => {
     wechsle("sitzen", 4000, snoopySprueche.hallo);
-    koerper.classList.toggle("blickt-links", richtung < 0);
   });
 
   let zuletzt = performance.now();
@@ -1649,7 +1651,10 @@ const snoopySprueche = {
       if (x > breite){ x = breite; richtung = -1; }
       if (Math.abs(x - ziel) < 6) bisWann = Math.min(bisWann, jetztMs + 200);
     }
-    koerper.style.transform = "translateX(" + x.toFixed(1) + "px)" + (richtung < 0 ? " scaleX(-1)" : "");
+    /* Gespiegelt wird nur die Katze — die Sprechblase bleibt lesbar.
+       Deshalb steht die Drehung an <img>, nicht am ganzen Körper. */
+    koerper.style.transform = "translateX(" + x.toFixed(1) + "px)";
+    koerper.dataset.blick = richtung < 0 ? "links" : "rechts";
 
     if (jetztMs > bisWann){
       const h = naechste();
