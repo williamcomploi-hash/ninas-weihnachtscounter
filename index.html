@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Adventkalender mit Countdown bis zum Heiligen Abend am 24. Dezember.">
+<meta name="theme-color" content="#fff8f4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Ctext y=%22.9em%22 font-size=%2256%22%3E%F0%9F%8E%84%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<title>Ninas Weihnachtscounter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Karla:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap">
+
+<style>
+:root{
+  /* Grundtöne */
+  --zucker:#fff8f4;
+  --glasur:#ffeef0;
+  --rosa:#f7ccd4;
+  --rosa-satt:#e8809a;
+  --rot:#c0303f;
+  --rot-tief:#96222f;
+  --lebkuchen:#a9662f;
+  --lebkuchen-hell:#d59a5f;
+  --gold:#dd9433;
+  --gold-hell:#f3c987;
+  --tanne:#3f6e56;
+  --tinte:#4a2a24;
+  --tinte-matt:#8a6259;
+  --linie:rgba(169,102,47,.22);
+  --linie-zart:rgba(169,102,47,.13);
+
+  --f-display:"Fraunces",Georgia,"Times New Roman",serif;
+  --f-text:"Karla",-apple-system,"Segoe UI",sans-serif;
+  --f-zahl:"JetBrains Mono",ui-monospace,Consolas,monospace;
+
+  --breite:1180px;
+  --rund:14px;
+  --schein:0 18px 44px -26px rgba(192,48,63,.45);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--zucker);
+  color:var(--tinte);
+  font-family:var(--f-text);
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+h1,h2,h3{font-family:var(--f-display);font-weight:600;text-wrap:balance;margin:0;
+  font-variation-settings:"SOFT" 30,"WONK" 1}
+
+.huelle{max-width:var(--breite);margin:0 auto;padding:0 28px}
+
+.marke{font-family:var(--f-zahl);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--rot)}
+.ort{font-family:var(--f-zahl);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinte-matt)}
+
+/* ---------- Strahlender Grund ---------- */
+.grund{position:fixed;inset:0;z-index:-2;
+  background:
+    radial-gradient(90% 62% at 50% -8%, #ffd9de 0%, rgba(255,222,228,0) 60%),
+    radial-gradient(70% 50% at 88% 6%, rgba(221,148,51,.34) 0%, transparent 58%),
+    radial-gradient(60% 46% at 6% 20%, rgba(232,128,154,.26) 0%, transparent 62%),
+    linear-gradient(180deg,#fff3f2 0%,var(--zucker) 46%,#fff1e9 100%);
+}
+.strahl{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+  background:repeating-conic-gradient(from 0deg at 50% -12%,
+    rgba(255,255,255,.55) 0deg 3deg, rgba(255,255,255,0) 3deg 9deg);
+  mask-image:radial-gradient(60% 55% at 50% 0%, #000 0%, transparent 72%);
+  -webkit-mask-image:radial-gradient(60% 55% at 50% 0%, #000 0%, transparent 72%);
+  animation:drehen 90s linear infinite}
+@keyframes drehen{to{transform:rotate(360deg)}}
+#himmel{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ---------- Kopf ---------- */
+header{position:relative;z-index:2;padding:clamp(34px,6vw,64px) 0 0}
+.kopfzeile{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;
+  padding-bottom:16px;border-bottom:1px solid var(--linie)}
+
+.titelblock{padding:clamp(32px,5.5vw,58px) 0 clamp(24px,4vw,38px);
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:34px;align-items:end}
+@media(max-width:820px){.titelblock{grid-template-columns:1fr;align-items:start}}
+
+h1{font-size:clamp(40px,8.2vw,84px);line-height:1;letter-spacing:-.02em;
+  font-variation-settings:"SOFT" 60,"WONK" 1;font-weight:800}
+h1 em{font-style:normal;display:block;
+  background:linear-gradient(96deg,var(--rot) 0%,var(--rosa-satt) 42%,var(--gold) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.unterzeile{color:var(--tinte-matt);max-width:45ch;margin-top:20px;font-size:17.5px}
+
+.kerze-halter{display:flex;flex-direction:column;align-items:center;gap:10px;min-width:100px}
+.kerze-koerper{width:36px;height:100px;border-radius:3px 3px 6px 6px;
+  background:linear-gradient(180deg,#fffdfb 0%,var(--glasur) 50%,var(--rosa) 100%);
+  box-shadow:0 0 34px rgba(221,148,51,.5), inset -6px 0 10px -6px rgba(169,102,47,.35)}
+.flamme{width:16px;height:28px;border-radius:50% 50% 46% 46%;
+  background:radial-gradient(ellipse at 50% 74%,#fffaf0 0%,var(--gold) 44%,var(--rot) 100%);
+  box-shadow:0 0 26px 8px rgba(221,148,51,.45);
+  transform-origin:50% 100%;animation:flackern 2.4s ease-in-out infinite}
+@keyframes flackern{
+  0%,100%{transform:scale(1) rotate(-1.5deg);opacity:.95}
+  28%{transform:scale(1.1,.93) rotate(2deg);opacity:1}
+  52%{transform:scale(.93,1.09) rotate(-2.5deg);opacity:.9}
+  74%{transform:scale(1.05,.97) rotate(1deg);opacity:1}}
+.kerze-schrift{font-family:var(--f-zahl);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--tinte-matt)}
+
+/* ---------- Zähler ---------- */
+.zaehler{position:relative;z-index:2;
+  border:1px solid var(--linie);border-radius:26px;
+  background:linear-gradient(150deg,#fffdfc 0%,var(--glasur) 55%,#fff1e6 100%);
+  padding:clamp(22px,3.4vw,36px);box-shadow:var(--schein)}
+.zaehler::after{content:"";position:absolute;inset:6px;border-radius:20px;
+  border:1px dashed rgba(232,128,154,.5);pointer-events:none}
+
+.zaehler-kopf{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  flex-wrap:wrap;margin-bottom:20px}
+.zaehler-kopf h2{font-size:clamp(19px,2.4vw,25px)}
+.ziel{font-family:var(--f-zahl);font-size:11.5px;color:var(--rot);letter-spacing:.1em}
+
+.uhr{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.6vw,16px)}
+.feld{text-align:center;padding:clamp(13px,1.9vw,20px) 6px;border-radius:16px;
+  background:linear-gradient(180deg,#fff 0%,#fff6f7 100%);
+  border:1px solid var(--linie-zart);box-shadow:0 8px 18px -14px rgba(150,34,47,.5)}
+.feld .zahl{font-family:var(--f-zahl);font-weight:700;font-variant-numeric:tabular-nums;
+  font-size:clamp(30px,6.6vw,58px);line-height:1;display:block;color:var(--rot-tief)}
+.feld .name{font-family:var(--f-zahl);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--tinte-matt);margin-top:9px;display:block}
+.feld.sek .zahl{color:var(--gold)}
+
+.balken{margin-top:22px}
+.balken-schiene{height:8px;border-radius:99px;background:rgba(169,102,47,.14);overflow:hidden}
+.balken-fuellung{height:100%;border-radius:99px;transition:width 1s linear;
+  background:linear-gradient(90deg,var(--tanne),var(--gold) 45%,var(--rosa-satt) 75%,var(--rot));
+  box-shadow:0 0 14px rgba(221,148,51,.6)}
+.balken-schrift{display:flex;justify-content:space-between;margin-top:9px;
+  font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.09em;color:var(--tinte-matt)}
+
+/* ---------- Abschnitte ---------- */
+.abschnittskopf{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;
+  padding-bottom:14px;border-bottom:1px solid var(--linie);margin-bottom:26px}
+.abschnittskopf h2{font-size:clamp(24px,3.6vw,38px)}
+.abschnittskopf p{margin:6px 0 0;color:var(--tinte-matt);font-size:15px;max-width:52ch}
+
+.heute{position:relative;z-index:2;margin-top:clamp(46px,7vw,80px)}
+.heute-karte{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);
+  gap:clamp(20px,3vw,38px);align-items:center;padding:clamp(20px,3vw,32px);
+  border-radius:24px;border:1px solid rgba(232,128,154,.55);
+  background:linear-gradient(120deg,#fff 0%,#ffeef1 52%,#fdf0e2 100%);
+  box-shadow:var(--schein)}
+@media(max-width:720px){.heute-karte{grid-template-columns:1fr}}
+.heute-karte h3{font-size:clamp(22px,3vw,30px);margin-bottom:10px}
+.heute-karte p{margin:0;color:var(--tinte-matt)}
+.heute-marke{font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--rot);margin-bottom:12px;display:block}
+
+/* ---------- Türchen ---------- */
+.kalender{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
+.gitter{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(9px,1.4vw,16px)}
+@media(max-width:900px){.gitter{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:520px){.gitter{grid-template-columns:repeat(3,1fr)}}
+
+.tuer{position:relative;aspect-ratio:1;border:0;padding:0;background:none;cursor:pointer;
+  perspective:660px;font-family:inherit;color:inherit}
+.tuer:focus-visible{outline:2px solid var(--rot);outline-offset:3px;border-radius:16px}
+
+.tuer-blatt{position:absolute;inset:0;border-radius:16px;
+  border:1px solid rgba(169,102,47,.35);
+  background:linear-gradient(148deg,var(--lebkuchen-hell) 0%,var(--lebkuchen) 100%);
+  display:flex;align-items:center;justify-content:center;
+  transform-origin:left center;backface-visibility:hidden;z-index:2;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 10px 22px -16px rgba(74,42,36,.7);
+  transition:transform .62s cubic-bezier(.34,1.32,.5,1), box-shadow .3s}
+.tuer-blatt::after{content:"";position:absolute;inset:7px;border-radius:11px;
+  border:2px dotted rgba(255,248,244,.75)}
+.tuer:hover .tuer-blatt{box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 0 0 2px var(--gold), 0 14px 28px -16px rgba(192,48,63,.7)}
+.tuer.auf .tuer-blatt{transform:rotateY(-116deg)}
+
+.tuer-zahl{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,3.4vw,36px);
+  color:#fff8f4;text-shadow:0 2px 0 rgba(120,66,26,.55)}
+.tuer.heute-tuer .tuer-blatt{border-color:var(--rot);box-shadow:0 0 0 3px var(--gold), 0 12px 26px -16px rgba(192,48,63,.8)}
+
+.tuer-innen{position:absolute;inset:0;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 40%, #fff 0%, var(--glasur) 46%, var(--rosa) 100%);
+  border:1px solid rgba(232,128,154,.5);overflow:hidden;z-index:1}
+.tuer-innen svg{width:66%;height:66%}
+.tuer.auf .tuer-innen{box-shadow:inset 0 0 30px rgba(221,148,51,.4)}
+
+.werkzeuge{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.knopf{font-family:var(--f-zahl);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  padding:11px 20px;border-radius:99px;cursor:pointer;transition:.22s;
+  border:1px solid var(--linie);background:#fff;color:var(--tinte-matt)}
+.knopf:hover{border-color:var(--rot);color:var(--rot);transform:translateY(-1px)}
+.knopf:focus-visible{outline:2px solid var(--rot);outline-offset:2px}
+.knopf.stark{background:linear-gradient(100deg,var(--rot),var(--rosa-satt));border-color:transparent;
+  color:#fff8f4;box-shadow:0 10px 22px -14px rgba(192,48,63,.9)}
+.knopf.stark:hover{color:#fff}
+
+/* ---------- Tafel ---------- */
+.tafel{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:22px;
+  background:rgba(120,60,60,.34);backdrop-filter:blur(6px)}
+.tafel[data-offen="ja"]{display:flex}
+.tafel-inhalt{position:relative;max-width:660px;width:100%;max-height:88vh;overflow-y:auto;
+  border-radius:26px;padding:clamp(26px,4vw,44px);border:1px solid rgba(232,128,154,.6);
+  background:linear-gradient(160deg,#fff 0%,#ffeef1 58%,#fdefe0 100%);
+  box-shadow:0 44px 90px -40px rgba(74,42,36,.6)}
+.tafel-kopf{display:flex;align-items:center;gap:16px;margin-bottom:22px;
+  padding-bottom:18px;border-bottom:1px solid var(--linie)}
+.tafel-tag{font-family:var(--f-display);font-weight:800;font-size:48px;line-height:1;color:var(--rot)}
+.tafel-datum{font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--tinte-matt)}
+.tafel-art{font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.tafel-inhalt h3{font-size:clamp(26px,4vw,36px);margin-bottom:14px}
+.tafel-inhalt p{color:var(--tinte-matt);margin:0 0 16px}
+.tafel-bild{display:flex;justify-content:center;margin:6px 0 24px}
+.tafel-bild svg{width:150px;height:150px}
+.tafel-fuss{margin-top:8px;padding-top:18px;border-top:1px solid var(--linie);
+  display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
+.katzenwort{font-style:italic;color:var(--rot-tief);font-size:15px;margin:0;max-width:38ch}
+.katzenwort b{font-style:normal;font-family:var(--f-zahl);font-weight:700;font-size:10.5px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:4px}
+.zu{position:absolute;top:14px;right:16px;background:none;border:0;color:var(--tinte-matt);
+  font-size:28px;line-height:1;cursor:pointer;padding:4px 8px}
+.zu:hover{color:var(--rot)}
+.zu:focus-visible{outline:2px solid var(--rot)}
+
+/* ---------- Katze ---------- */
+.katzenband{position:relative;z-index:2;margin-top:clamp(50px,7vw,86px);
+  display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:center;
+  padding:clamp(24px,3.4vw,38px);border-radius:26px;
+  background:linear-gradient(110deg,#fff6ee 0%,#ffeef1 100%);border:1px solid var(--linie-zart)}
+@media(max-width:640px){.katzenband{grid-template-columns:1fr}}
+.katzenband h2{font-size:clamp(22px,3vw,30px);margin-bottom:10px}
+.katzenband p{margin:0;color:var(--tinte-matt);max-width:54ch}
+
+footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 0 48px;
+  border-top:1px solid var(--linie);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tinte-matt)}
+
+/* Bewegung in den Zeichnungen */
+.zw{animation:zwinker 5.2s infinite}
+@keyframes zwinker{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+.schweif{transform-origin:8px 30px;animation:wedeln 3.4s ease-in-out infinite}
+@keyframes wedeln{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(13deg)}}
+.dampf{animation:steigen 3.1s ease-in-out infinite}
+.dampf.b{animation-delay:.7s}.dampf.c{animation-delay:1.4s}
+@keyframes steigen{0%{opacity:0;transform:translateY(4px) scale(.85)}35%{opacity:.9}100%{opacity:0;transform:translateY(-16px) scale(1.2)}}
+.funkel{animation:funkeln 2.3s ease-in-out infinite;transform-origin:center}
+.funkel.b{animation-delay:.8s}.funkel.c{animation-delay:1.5s}
+@keyframes funkeln{0%,100%{opacity:.3;transform:scale(.75)}50%{opacity:1;transform:scale(1.15)}}
+.schaukel{transform-origin:50% 12%;animation:schaukeln 2.8s ease-in-out infinite}
+@keyframes schaukeln{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.flimmer{animation:flimmern 1.9s ease-in-out infinite}
+.flimmer.b{animation-delay:.45s}.flimmer.c{animation-delay:.9s}.flimmer.d{animation-delay:1.35s}
+@keyframes flimmern{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* ---------- Zauberschicht ---------- */
+#zauber{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.z-teil{position:absolute;top:0;left:0;will-change:transform;opacity:var(--deck,.9)}
+.z-teil svg{width:100%;height:100%;display:block}
+
+.z-fallen{animation:zfall var(--dauer) linear var(--warten) infinite}
+@keyframes zfall{
+  from{transform:translate3d(0,-16vh,0) rotate(0deg)}
+  to{transform:translate3d(var(--drift),114vh,0) rotate(var(--dreh))}}
+
+.z-schweben{animation:zschweb var(--dauer) ease-in-out var(--warten) infinite}
+@keyframes zschweb{
+  0%{transform:translate3d(0,-18vh,0) rotate(-7deg)}
+  50%{transform:translate3d(var(--drift),46vh,0) rotate(7deg)}
+  100%{transform:translate3d(0,116vh,0) rotate(-7deg)}}
+
+.z-steigen{animation:zsteig var(--dauer) ease-in var(--warten) infinite}
+@keyframes zsteig{
+  0%{transform:translate3d(0,112vh,0) scale(.5);opacity:0}
+  18%{opacity:var(--deck,.9)}
+  100%{transform:translate3d(var(--drift),-14vh,0) scale(1.15);opacity:0}}
+
+.z-laufen{animation:zlauf var(--dauer) linear var(--warten) infinite}
+@keyframes zlauf{from{transform:translate3d(-24vw,0,0)}to{transform:translate3d(118vw,0,0)}}
+.z-huepf{animation:zhuepf .52s ease-in-out infinite}
+@keyframes zhuepf{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-7px) rotate(1.5deg)}}
+
+.z-wippen{animation:zwipp var(--dauer) ease-in-out var(--warten) infinite}
+@keyframes zwipp{
+  0%{transform:translate3d(0,-14vh,0) rotate(-14deg)}
+  100%{transform:translate3d(var(--drift),115vh,0) rotate(14deg)}}
+
+.zauber-leiste{position:relative;z-index:2;margin-top:26px;display:flex;align-items:center;
+  gap:14px;flex-wrap:wrap;padding:16px 20px;border-radius:99px;
+  background:linear-gradient(100deg,#fff 0%,#ffeef1 100%);border:1px solid var(--linie-zart)}
+.zauber-leiste .was{font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold)}
+.zauber-leiste .name{font-family:var(--f-display);font-weight:600;font-size:19px}
+.zauber-leiste .rest{color:var(--tinte-matt);font-size:14.5px;flex:1;min-width:180px}
+
+/* ---------- Elfen ---------- */
+.werkstatt{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
+.elfen{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(10px,1.5vw,18px)}
+@media(max-width:940px){.elfen{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.elfen{grid-template-columns:repeat(2,1fr)}}
+.elf{padding:20px 16px 18px;border-radius:20px;text-align:center;
+  background:linear-gradient(170deg,#fff 0%,#ffeef1 100%);
+  border:1px solid var(--linie-zart);transition:transform .25s, box-shadow .25s}
+.elf:hover{transform:translateY(-4px);box-shadow:var(--schein)}
+.elf .kopf{width:78px;height:78px;margin:0 auto 12px}
+.elf h3{font-size:19px;margin-bottom:4px}
+.elf .amt{font-family:var(--f-zahl);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);display:block;margin-bottom:8px}
+.elf p{margin:0;font-size:14px;color:var(--tinte-matt);line-height:1.5}
+.elf.katze-karte{background:linear-gradient(170deg,#fff6ee 0%,#ffe2e7 100%);border-color:rgba(232,128,154,.5)}
+
+/* ---------- Tisch ---------- */
+.tisch{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
+.speisen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.8vw,20px)}
+@media(max-width:820px){.speisen{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.speisen{grid-template-columns:1fr}}
+.speise{display:grid;grid-template-columns:66px minmax(0,1fr);gap:16px;align-items:center;
+  padding:16px 18px;border-radius:18px;background:#fff;border:1px solid var(--linie-zart)}
+.speise .bild{width:66px;height:66px}
+.speise h3{font-size:17px;margin-bottom:2px}
+.speise .wann{font-family:var(--f-zahl);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--rot);display:block;margin-bottom:5px}
+.speise p{margin:0;font-size:13.5px;color:var(--tinte-matt);line-height:1.45}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}
+  #zauber{display:none}}
+</style>
+
+<div class="grund"></div>
+<div class="strahl"></div>
+<canvas id="himmel"></canvas>
+<div id="zauber" aria-hidden="true"></div>
+
+<header>
+  <div class="huelle">
+    <div class="kopfzeile">
+      <span class="marke">Ninas Weihnachtscounter</span>
+      <span class="ort">Bei uns · 24. Dezember, nicht der 25.</span>
+    </div>
+
+    <div class="titelblock">
+      <div>
+        <h1>Noch ein bisschen<em>Geduld, Nina.</em></h1>
+        <p class="unterzeile">Bei uns kommt das Christkind am Heiligen Abend — und bis dahin gibt es
+          jeden Tag etwas zu backen, zu holen oder einfach mit Snoopy auszusitzen.</p>
+      </div>
+      <div class="kerze-halter">
+        <div class="flamme"></div>
+        <div class="kerze-koerper"></div>
+        <span class="kerze-schrift">brennt seit heute</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="huelle">
+
+  <section class="zaehler" aria-labelledby="z-titel">
+    <div class="zaehler-kopf">
+      <h2 id="z-titel">Bis zur Bescherung</h2>
+      <span class="ziel" id="ziel-datum">24. Dezember, 18:00</span>
+    </div>
+    <div class="uhr">
+      <div class="feld"><span class="zahl" id="d">--</span><span class="name">Tage</span></div>
+      <div class="feld"><span class="zahl" id="h">--</span><span class="name">Stunden</span></div>
+      <div class="feld"><span class="zahl" id="m">--</span><span class="name">Minuten</span></div>
+      <div class="feld sek"><span class="zahl" id="s">--</span><span class="name">Sekunden</span></div>
+    </div>
+    <div class="balken">
+      <div class="balken-schiene"><div class="balken-fuellung" id="fuellung" style="width:0%"></div></div>
+      <div class="balken-schrift">
+        <span>seit dem letzten Heiligen Abend</span>
+        <span id="anteil">0 %</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="heute" aria-labelledby="h-titel">
+    <div class="abschnittskopf">
+      <div>
+        <h2 id="h-titel">Das Highlight für heute</h2>
+        <p id="heute-hinweis">Im Dezember steht hier jeden Morgen etwas Neues.</p>
+      </div>
+      <button class="knopf stark" id="heute-knopf">Türchen öffnen</button>
+    </div>
+    <div class="heute-karte">
+      <div class="tafel-bild" id="heute-bild"></div>
+      <div>
+        <span class="heute-marke" id="heute-marke">Vorschau</span>
+        <h3 id="heute-titel">—</h3>
+        <p id="heute-text">—</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="kalender" aria-labelledby="k-titel">
+    <div class="abschnittskopf">
+      <div>
+        <h2 id="k-titel">Vierundzwanzig Türchen</h2>
+        <p>Durcheinander angeordnet, wie sich das für einen ordentlichen Kalender gehört.
+           Vorschauen ist erlaubt — wir verraten dich nicht.</p>
+      </div>
+      <span class="ort" id="stand">0 von 24 offen</span>
+    </div>
+    <div class="gitter" id="gitter"></div>
+    <div class="werkzeuge">
+      <button class="knopf" id="alle-auf">Alle öffnen</button>
+      <button class="knopf" id="alle-zu">Alle schließen</button>
+      <button class="knopf" id="zufall">Zufälliges Türchen</button>
+    </div>
+  </section>
+
+
+  <div class="zauber-leiste" id="zauber-leiste">
+    <span class="was" id="zauber-was">Zauber am 1. Dezember</span>
+    <span class="name" id="zauber-name">Kerzenschein</span>
+    <span class="rest" id="zauber-rest">Funken steigen auf. Öffne ein anderes Türchen — der ganze Bildschirm wechselt mit.</span>
+  </div>
+
+  <section class="werkstatt" aria-labelledby="w-titel">
+    <div class="abschnittskopf">
+      <div>
+        <h2 id="w-titel">Die Werkstatt</h2>
+        <p>Wer beim Christkind was macht. Aufgeteilt ist es streng, gehalten wird es locker.</p>
+      </div>
+      <span class="ort">Fünf Zuständigkeiten</span>
+    </div>
+    <div class="elfen" id="elfen"></div>
+  </section>
+
+  <section class="tisch" aria-labelledby="t-titel">
+    <div class="abschnittskopf">
+      <div>
+        <h2 id="t-titel">Was auf den Tisch kommt</h2>
+        <p>Nichts Kompliziertes. Am 24. wird nicht stundenlang gekocht — dafür ist der Abend zu schade.</p>
+      </div>
+      <span class="ort">Vom 1. bis zum 25.</span>
+    </div>
+    <div class="speisen" id="speisen"></div>
+  </section>
+
+  <section class="katzenband">
+    <div id="grosse-katze"></div>
+    <div>
+      <h2>Snoopys Regeln</h2>
+      <p>Kein Lametta, keine Glaskugeln in Bodennähe, und der Christbaum wird oben an der Wand
+         angebunden — Snoopy hat sich das nicht ausgedacht, aber sie ist der Grund dafür. Wer schon einmal einen umgelegten Baum am 24. um halb sechs wieder aufgestellt
+         hat, weiß warum. Dafür gehört der leere Geschenkkarton ab dem 25. offiziell ihr.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Für Nina &amp; Snoopy</span>
+    <span id="fuss-jahr">Heiliger Abend</span>
+  </footer>
+</main>
+
+<div class="tafel" id="tafel" role="dialog" aria-modal="true" aria-labelledby="tafel-titel">
+  <div class="tafel-inhalt">
+    <button class="zu" id="tafel-zu" aria-label="Schließen">×</button>
+    <div class="tafel-kopf">
+      <span class="tafel-tag" id="tafel-tag">1</span>
+      <div>
+        <div class="tafel-datum" id="tafel-datum">1. Dezember</div>
+        <div class="tafel-art" id="tafel-art">Anzünden</div>
+      </div>
+    </div>
+    <div class="tafel-bild" id="tafel-bild"></div>
+    <h3 id="tafel-titel">—</h3>
+    <p id="tafel-text">—</p>
+    <div class="tafel-fuss">
+      <p class="katzenwort" id="tafel-katze">—</p>
+      <button class="knopf" id="tafel-weiter">Nächstes Türchen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- Farben der Zeichnungen ---------------- */
+const GOLD="#dd9433", GOLDH="#f3c987", ROT="#c0303f", ROSA="#e8809a",
+      LEB="#a9662f", LEBH="#d59a5f", CREME="#fff8f4", TANNE="#3f6e56", TINTE="#4a2a24";
+
+const bild = {
+  kerze:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <ellipse cx="32" cy="57" rx="17" ry="3" fill="${ROSA}" opacity=".5"/>
+    <rect x="24" y="22" width="16" height="35" rx="3" fill="${CREME}" stroke="${ROSA}" stroke-width="1.5"/>
+    <rect x="26" y="24" width="4" height="31" rx="2" fill="#fff"/>
+    <path d="M32 7c4.5 5.5 6.5 8.5 6.5 11.5a6.5 6.5 0 1 1-13 0C25.5 15.5 27.5 12.5 32 7z" fill="${GOLD}" class="flamme"/>
+    <circle cx="32" cy="19" r="2.6" fill="#fffaf0"/>
+  </svg>`,
+
+  keks:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M17 41c-4-11 3-21 13-23s19 5 19 13" stroke="${LEB}" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="22" cy="34" r="2.2" fill="${CREME}" class="funkel"/>
+    <circle cx="32" cy="26" r="2.2" fill="${ROT}" class="funkel b"/>
+    <circle cx="42" cy="30" r="2.2" fill="${CREME}" class="funkel c"/>
+    <path d="M14 49h36" stroke="${ROSA}" stroke-width="4" stroke-linecap="round"/>
+  </svg>`,
+
+  katze:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path class="schweif" d="M12 46c-6-2-8-8-4-12" stroke="${LEBH}" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="34" cy="44" rx="16" ry="12" fill="${LEBH}"/>
+    <circle cx="36" cy="26" r="13" fill="${LEBH}"/>
+    <path d="M25 17l-1-9 9 5zM47 17l1-9-9 5z" fill="${LEBH}"/>
+    <path d="M26 16l-.5-4.5 4.5 2.5zM46 16l.5-4.5-4.5 2.5z" fill="${ROSA}"/>
+    <g class="zw">
+      <ellipse cx="31" cy="25" rx="2.2" ry="3" fill="${TINTE}"/>
+      <ellipse cx="41" cy="25" rx="2.2" ry="3" fill="${TINTE}"/>
+    </g>
+    <path d="M36 31l-2.5 2h5z" fill="${ROT}"/>
+    <path d="M28 34c2 2 6 2 8 0M44 34c-2 2-6 2-8 0" stroke="${TINTE}" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M22 40c-4-1-7-2-9-4M50 40c4-1 7-2 9-4" stroke="${TINTE}" stroke-width="1" opacity=".4"/>
+  </svg>`,
+
+  tanne:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <rect x="29" y="49" width="6" height="9" rx="1" fill="${LEB}"/>
+    <path d="M32 7l11 16H21zM32 18l14 19H18zM32 30l17 20H15z" fill="${TANNE}"/>
+    <circle cx="24" cy="34" r="2.6" fill="${ROT}" class="flimmer"/>
+    <circle cx="40" cy="31" r="2.6" fill="${GOLD}" class="flimmer b"/>
+    <circle cx="32" cy="44" r="2.6" fill="${ROSA}" class="flimmer c"/>
+    <circle cx="22" cy="46" r="2.6" fill="${GOLDH}" class="flimmer d"/>
+    <path d="M32 3l1.7 4.3L38 9l-4.3 1.7L32 15l-1.7-4.3L26 9l4.3-1.7z" fill="${GOLD}"/>
+  </svg>`,
+
+  punsch:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path class="dampf" d="M26 20c0-4 4-4 4-8" stroke="${ROSA}" stroke-width="2.6" stroke-linecap="round"/>
+    <path class="dampf b" d="M34 19c0-4 4-4 4-8" stroke="${ROSA}" stroke-width="2.6" stroke-linecap="round"/>
+    <path class="dampf c" d="M42 21c0-4 3-4 3-7" stroke="${ROSA}" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M16 28h30v14a12 12 0 0 1-12 12h-6a12 12 0 0 1-12-12z" fill="${ROT}"/>
+    <path d="M46 32h5a6 6 0 0 1 0 12h-5" stroke="${ROT}" stroke-width="4" fill="none"/>
+    <ellipse cx="31" cy="28" rx="15" ry="4" fill="${GOLD}"/>
+    <path d="M22 44h18" stroke="${CREME}" stroke-width="2" opacity=".6" stroke-linecap="round"/>
+  </svg>`,
+
+  geschenk:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <rect x="10" y="26" width="44" height="30" rx="4" fill="${ROSA}"/>
+    <rect x="8" y="18" width="48" height="11" rx="4" fill="${ROT}"/>
+    <rect x="28" y="18" width="8" height="38" fill="${GOLD}"/>
+    <g class="schaukel">
+      <path d="M32 18c-6-2-12-4-12-9 0-3 4-4 6-2 3 3 6 11 6 11z" fill="${GOLD}"/>
+      <path d="M32 18c6-2 12-4 12-9 0-3-4-4-6-2-3 3-6 11-6 11z" fill="${GOLD}"/>
+    </g>
+  </svg>`,
+
+  stern:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M32 5l6.6 18L57 30l-18.4 7L32 55l-6.6-18L7 30l18.4-7z" fill="${GOLD}"/>
+    <path d="M32 15l3.4 9.6L45 28l-9.6 3.4L32 41l-3.4-9.6L19 28l9.6-3.4z" fill="${GOLDH}"/>
+    <circle cx="12" cy="13" r="2.2" fill="${ROSA}" class="funkel"/>
+    <circle cx="53" cy="17" r="1.9" fill="${ROT}" class="funkel b"/>
+    <circle cx="49" cy="51" r="2" fill="${ROSA}" class="funkel c"/>
+  </svg>`,
+
+  schnee:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <g stroke="${ROSA}" stroke-width="3.2" stroke-linecap="round" class="schaukel">
+      <path d="M32 8v48M11 20l42 24M53 20L11 44"/>
+      <path d="M32 16l-6-5M32 16l6-5M32 48l-6 5M32 48l6 5"/>
+      <path d="M18 24l-8 .5M18 24l-3.5-7M46 40l8-.5M46 40l3.5 7"/>
+    </g>
+    <circle cx="32" cy="32" r="4.5" fill="${GOLD}"/>
+  </svg>`,
+
+  glocke:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <g class="schaukel">
+      <path d="M32 10a4 4 0 0 1 4 4c8 3 12 11 12 20v10H16V34c0-9 4-17 12-20a4 4 0 0 1 4-4z" fill="${GOLD}"/>
+      <path d="M24 20c-4 4-6 9-6 14v10h6z" fill="${GOLDH}"/>
+      <rect x="12" y="44" width="40" height="6" rx="3" fill="${ROT}"/>
+      <circle cx="32" cy="55" r="4.2" fill="${GOLD}"/>
+    </g>
+    <path d="M18 18l-6-5M46 18l6-5" stroke="${ROSA}" stroke-width="2.4" stroke-linecap="round"/>
+  </svg>`,
+
+  licht:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M4 17c10 12 20 12 28 0s18-12 28 0" stroke="${TANNE}" stroke-width="2.2" fill="none"/>
+    <circle cx="14" cy="25" r="5" fill="${ROT}" class="flimmer"/>
+    <circle cx="27" cy="23" r="5" fill="${GOLD}" class="flimmer b"/>
+    <circle cx="40" cy="25" r="5" fill="${ROSA}" class="flimmer c"/>
+    <circle cx="53" cy="23" r="5" fill="${GOLDH}" class="flimmer d"/>
+    <path d="M4 43c10 12 20 12 28 0s18-12 28 0" stroke="${TANNE}" stroke-width="2.2" fill="none"/>
+    <circle cx="20" cy="50" r="5" fill="${GOLD}" class="flimmer c"/>
+    <circle cx="46" cy="50" r="5" fill="${ROT}" class="flimmer b"/>
+  </svg>`,
+
+  karton:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M10 28h44v27a3 3 0 0 1-3 3H13a3 3 0 0 1-3-3z" fill="${LEBH}"/>
+    <path d="M10 28l6-11h32l6 11z" fill="${LEB}"/>
+    <path d="M32 17v11" stroke="${CREME}" stroke-width="2"/>
+    <ellipse cx="26" cy="35" rx="9" ry="7.5" fill="${GOLDH}"/>
+    <path d="M19 30l-1-6 6 3zM33 30l1-6-6 3z" fill="${GOLDH}"/>
+    <g class="zw">
+      <circle cx="23" cy="34" r="1.9" fill="${TINTE}"/>
+      <circle cx="29" cy="34" r="1.9" fill="${TINTE}"/>
+    </g>
+    <path d="M26 37l-1.5 1.5h3z" fill="${ROT}"/>
+    <path class="schweif" d="M50 47c5-1 6-6 3-9" stroke="${GOLDH}" stroke-width="4.5" stroke-linecap="round"/>
+  </svg>`,
+
+  berg:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <circle cx="48" cy="15" r="8" fill="${GOLDH}"/>
+    <path d="M2 54l18-31 11 18 8-13 23 26z" fill="${TANNE}"/>
+    <path d="M20 23l7 12H13zM52 28l7 9H46z" fill="${CREME}"/>
+    <circle cx="10" cy="12" r="1.8" fill="${ROSA}" class="funkel"/>
+    <circle cx="24" cy="8" r="1.5" fill="${ROT}" class="funkel b"/>
+    <circle cx="36" cy="13" r="1.6" fill="${ROSA}" class="funkel c"/>
+  </svg>`,
+  elf:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M32 6c9 0 15 7 15 14l4 6H13l4-6c0-7 6-14 15-14z" fill="${TANNE}"/>
+    <circle cx="32" cy="5" r="3.2" fill="${GOLD}" class="funkel"/>
+    <circle cx="32" cy="32" r="10" fill="${GOLDH}"/>
+    <path d="M22 31l-4 2 4 2zM42 31l4 2-4 2z" fill="${GOLDH}"/>
+    <g class="zw"><circle cx="28.5" cy="31" r="1.7" fill="${TINTE}"/><circle cx="35.5" cy="31" r="1.7" fill="${TINTE}"/></g>
+    <circle cx="26" cy="35" r="2.2" fill="${ROSA}" opacity=".8"/><circle cx="38" cy="35" r="2.2" fill="${ROSA}" opacity=".8"/>
+    <path d="M29 36c1.5 1.6 4.5 1.6 6 0" stroke="${TINTE}" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M24 43h16l3 15H21z" fill="${ROT}"/>
+    <path d="M21 50h22" stroke="${GOLD}" stroke-width="3"/>
+    <path d="M24 58l-2 4 5-1zM40 58l2 4-5-1z" fill="${TANNE}"/>
+  </svg>`,
+
+  lebkuchenmann:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <circle cx="32" cy="17" r="11" fill="${LEB}"/>
+    <path d="M24 30h16l4 16-6 14h-4l1-11h-6l1 11h-4l-6-14z" fill="${LEB}"/>
+    <path d="M24 32L8 38l2 5 15-5zM40 32l16 6-2 5-15-5z" fill="${LEB}"/>
+    <g class="zw"><circle cx="28" cy="15" r="1.9" fill="${CREME}"/><circle cx="36" cy="15" r="1.9" fill="${CREME}"/></g>
+    <path d="M27 21c2.5 2.5 7.5 2.5 10 0" stroke="${CREME}" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="32" cy="38" r="2.2" fill="${ROT}" class="funkel"/>
+    <circle cx="32" cy="45" r="2.2" fill="${ROSA}" class="funkel b"/>
+    <path d="M25 30h14" stroke="${CREME}" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  zuckerstange:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M22 58V26a12 12 0 0 1 24 0" stroke="${CREME}" stroke-width="13" stroke-linecap="round"/>
+    <path d="M22 58V26a12 12 0 0 1 24 0" stroke="${ROT}" stroke-width="13" stroke-linecap="round"
+          stroke-dasharray="6 8"/>
+    <path d="M22 58V26a12 12 0 0 1 24 0" stroke="${ROSA}" stroke-width="3" stroke-linecap="round"
+          stroke-dasharray="2 12" opacity=".9"/>
+  </svg>`,
+
+  zimtstern:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M32 8l6 14 15 1-11 10 3 15-13-8-13 8 3-15L11 23l15-1z" fill="${LEB}"/>
+    <path d="M32 15l4 10 10 .7-7.5 6.8 2 10.5-8.5-5.3-8.5 5.3 2-10.5L18 25.7l10-.7z" fill="${CREME}"/>
+    <circle cx="32" cy="28" r="2" fill="${ROT}" class="funkel"/>
+  </svg>`,
+
+  bratapfel:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path class="dampf" d="M27 15c0-4 4-4 4-8" stroke="${ROSA}" stroke-width="2.4" stroke-linecap="round"/>
+    <path class="dampf b" d="M36 14c0-4 4-4 4-8" stroke="${ROSA}" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M32 22c-11 0-16 8-16 17s7 17 16 17 16-8 16-17-5-17-16-17z" fill="${ROT}"/>
+    <path d="M22 30c-2 4-2 9 0 13" stroke="${CREME}" stroke-width="2.5" stroke-linecap="round" opacity=".55"/>
+    <path d="M32 22c0-5 3-7 7-8" stroke="${LEB}" stroke-width="3" stroke-linecap="round"/>
+    <path d="M33 17c4-3 8-2 9 1-3 2-7 2-9-1z" fill="${TANNE}"/>
+    <path d="M20 34c4 3 8 3 12 0s8-3 12 0" stroke="${CREME}" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+  </svg>`,
+
+  wuerstel:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <ellipse cx="32" cy="42" rx="26" ry="13" fill="${CREME}" stroke="${ROSA}" stroke-width="2"/>
+    <ellipse cx="32" cy="40" rx="21" ry="9" fill="${GOLDH}"/>
+    <path d="M14 38c6-5 12-5 18 0" stroke="${ROT}" stroke-width="7" stroke-linecap="round"/>
+    <path d="M34 42c6-5 12-5 17 0" stroke="${ROT}" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="24" cy="44" r="2" fill="${TANNE}"/>
+    <circle cx="40" cy="46" r="2" fill="${TANNE}"/>
+    <path class="dampf" d="M26 20c0-4 4-4 4-8" stroke="${ROSA}" stroke-width="2.4" stroke-linecap="round"/>
+    <path class="dampf c" d="M38 22c0-4 3-4 3-7" stroke="${ROSA}" stroke-width="2.4" stroke-linecap="round"/>
+  </svg>`,
+
+  socke:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M22 14h20v22c0 6 12 8 12 16 0 6-5 10-11 10H26c-6 0-10-4-10-10 0-9 6-11 6-18z" fill="${ROT}"/>
+    <rect x="19" y="8" width="26" height="10" rx="5" fill="${CREME}"/>
+    <circle cx="34" cy="46" r="3" fill="${GOLD}" class="funkel"/>
+    <circle cx="44" cy="50" r="2.4" fill="${ROSA}" class="funkel b"/>
+    <path d="M20 40h6" stroke="${CREME}" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+  </svg>`,
+
+  schlitten:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M12 44h34a8 8 0 0 0 8-8V26H20a8 8 0 0 0-8 8z" fill="${ROT}"/>
+    <path d="M8 52h44c4 0 6-3 6-6" stroke="${LEB}" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M14 44v8M40 44v8" stroke="${LEB}" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M20 26l6-10h16l-4 10z" fill="${GOLD}"/>
+    <circle cx="30" cy="20" r="2.4" fill="${CREME}" class="funkel"/>
+  </svg>`,
+
+  schneekugel:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <circle cx="32" cy="28" r="20" fill="${CREME}" stroke="${ROSA}" stroke-width="2.5"/>
+    <path d="M32 16l7 12H25z" fill="${TANNE}"/><path d="M32 22l9 12H23z" fill="${TANNE}"/>
+    <rect x="30" y="34" width="4" height="5" fill="${LEB}"/>
+    <circle cx="22" cy="20" r="1.8" fill="${ROSA}" class="funkel"/>
+    <circle cx="42" cy="24" r="1.8" fill="${GOLD}" class="funkel b"/>
+    <circle cx="26" cy="34" r="1.6" fill="${ROSA}" class="funkel c"/>
+    <path d="M14 48h36l-4 10H18z" fill="${LEB}"/>
+  </svg>`,
+
+  kletzenbrot:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M8 26h48v18a6 6 0 0 1-6 6H14a6 6 0 0 1-6-6z" fill="${LEB}"/>
+    <ellipse cx="32" cy="26" rx="24" ry="7" fill="${LEBH}"/>
+    <circle cx="20" cy="36" r="3" fill="${TINTE}" opacity=".65"/>
+    <circle cx="32" cy="41" r="2.6" fill="${TINTE}" opacity=".65"/>
+    <circle cx="43" cy="35" r="3.2" fill="${TINTE}" opacity=".65"/>
+    <circle cx="27" cy="30" r="2.2" fill="${ROT}" opacity=".7"/>
+    <path d="M14 46h36" stroke="${CREME}" stroke-width="2" opacity=".35" stroke-linecap="round"/>
+  </svg>`,
+
+  kranz:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <circle cx="32" cy="34" r="20" stroke="${TANNE}" stroke-width="11" fill="none"/>
+    <circle cx="18" cy="26" r="3" fill="${ROT}" class="flimmer"/>
+    <circle cx="46" cy="28" r="3" fill="${ROT}" class="flimmer b"/>
+    <circle cx="24" cy="50" r="3" fill="${GOLD}" class="flimmer c"/>
+    <path d="M32 6c3 4 4 6 4 8a4 4 0 1 1-8 0c0-2 1-4 4-8z" fill="${GOLD}" class="flamme"/>
+  </svg>`,
+  schneemann:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <ellipse cx="32" cy="49" rx="15" ry="12" fill="${CREME}" stroke="${ROSA}" stroke-width="1.6"/>
+    <ellipse cx="32" cy="33" rx="11" ry="9.5" fill="${CREME}" stroke="${ROSA}" stroke-width="1.6"/>
+    <circle cx="32" cy="19" r="8.5" fill="${CREME}" stroke="${ROSA}" stroke-width="1.6"/>
+    <path d="M22 12h20l-2-6H24z" fill="${TINTE}"/><path d="M22 12h20" stroke="${ROT}" stroke-width="3"/>
+    <g class="zw"><circle cx="29" cy="18" r="1.5" fill="${TINTE}"/><circle cx="35" cy="18" r="1.5" fill="${TINTE}"/></g>
+    <path d="M32 21l7 2.5-7 2z" fill="${GOLD}"/>
+    <circle cx="32" cy="31" r="1.9" fill="${TINTE}"/><circle cx="32" cy="37" r="1.9" fill="${TINTE}"/>
+    <path class="schaukel" d="M21 32L8 26M43 32l13-6" stroke="${LEB}" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M12 28l-4-2M12 28l-1-4M52 28l4-2M52 28l1-4" stroke="${LEB}" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  schneefrau:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <ellipse cx="32" cy="49" rx="15" ry="12" fill="${CREME}" stroke="${ROSA}" stroke-width="1.6"/>
+    <ellipse cx="32" cy="33" rx="11" ry="9.5" fill="${CREME}" stroke="${ROSA}" stroke-width="1.6"/>
+    <circle cx="32" cy="19" r="8.5" fill="${CREME}" stroke="${ROSA}" stroke-width="1.6"/>
+    <path d="M23 13c0-6 4-9 9-9s9 3 9 9z" fill="${ROSA}"/>
+    <path d="M20 14h24" stroke="${ROT}" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="43" cy="12" r="3" fill="${ROT}"/><circle cx="43" cy="12" r="1.2" fill="${GOLD}"/>
+    <g class="zw"><circle cx="29" cy="19" r="1.5" fill="${TINTE}"/><circle cx="35" cy="19" r="1.5" fill="${TINTE}"/></g>
+    <path d="M32 22l6 2.5-6 2z" fill="${GOLD}"/>
+    <path d="M28 27c2.5 2 5.5 2 8 0" stroke="${TINTE}" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M22 30c6 3 14 3 20 0" stroke="${ROSA}" stroke-width="4" stroke-linecap="round"/>
+    <path class="schaukel" d="M21 34L8 30M43 34l13-4" stroke="${LEB}" stroke-width="2.6" stroke-linecap="round"/>
+  </svg>`,
+
+  rentier:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M20 14l-6-8M20 14l-8 1M20 14l-3-7M44 14l6-8M44 14l8 1M44 14l3-7"
+          stroke="${LEB}" stroke-width="2.6" stroke-linecap="round"/>
+    <ellipse cx="32" cy="30" rx="13" ry="15" fill="${LEBH}"/>
+    <ellipse cx="32" cy="40" rx="8" ry="8" fill="${CREME}"/>
+    <g class="zw"><circle cx="27" cy="26" r="2" fill="${TINTE}"/><circle cx="37" cy="26" r="2" fill="${TINTE}"/></g>
+    <circle cx="32" cy="40" r="4.4" fill="${ROT}" class="funkel"/>
+    <path d="M19 20c-3 1-5 3-5 6M45 20c3 1 5 3 5 6" stroke="${LEB}" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M24 52c2 4 14 4 16 0" stroke="${TANNE}" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="24" cy="52" r="2.4" fill="${GOLD}"/><circle cx="40" cy="52" r="2.4" fill="${GOLD}"/>
+  </svg>`,
+
+  gespann:`<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M6 42h26a7 7 0 0 0 7-7v-8H13a7 7 0 0 0-7 7z" fill="${ROT}"/>
+    <path d="M2 48h34" stroke="${LEB}" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M39 30c6-2 10-6 12-11" stroke="${GOLD}" stroke-width="2" stroke-linecap="round"/>
+    <ellipse cx="53" cy="24" rx="7" ry="8" fill="${LEBH}"/>
+    <path d="M48 14l-4-6M48 14l-6 1M58 14l4-6M58 14l6 1" stroke="${LEB}" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="53" cy="30" r="3" fill="${ROT}" class="funkel"/>
+    <circle cx="20" cy="34" r="3" fill="${GOLD}" class="flimmer"/>
+    <circle cx="29" cy="34" r="3" fill="${CREME}" class="flimmer b"/>
+  </svg>`
+};
+
+/* ---------------- Die 24 Tage ---------------- */
+const tage=[
+ {t:1,art:"Anzünden",bild:"kerze",titel:"Die erste Kerze",
+  text:"Der Adventkranz kommt auf den Tisch, und eine von vier Kerzen darf brennen. Nicht zwei. Das ist der ganze Reiz daran.",
+  katze:"Snoopy findet Kerzen interessant. Deshalb steht der Kranz heuer in der Mitte."},
+ {t:2,art:"Backen",bild:"keks",titel:"Vanillekipferl",
+  text:"Der Teig muss kalt sein, die Hände auch, und geformt wird von Hand. Der Puderzucker kommt drauf, solange sie noch warm sind — dann bleibt er hängen.",
+  katze:"Butterteig auf Augenhöhe ist keine gute Idee. Erfahrungswert."},
+ {t:3,art:"Faulenzen",bild:"karton",titel:"Der Karton",
+  text:"Das erste Paket des Advents kommt an. Der Karton wird nicht weggeräumt, sondern in die Ecke beim Heizkörper gestellt.",
+  katze:"Sie war schneller drin, als das Paket ausgepackt war."},
+ {t:4,art:"Draußen",bild:"berg",titel:"Barbarazweige",
+  text:"Ein paar Kirschzweige schneiden und ins Wasser stellen. Wenn es gut geht, blühen sie am Heiligen Abend.",
+  katze:"Zweige in einer Vase sind laut Snoopy ein Spielangebot."},
+ {t:5,art:"Krampus",bild:"glocke",titel:"Die Nacht der Glocken",
+  text:"Heute ziehen sie durchs Dorf. Man hört sie lange, bevor man sie sieht — die Schellen sind das Beste daran.",
+  katze:"Sie verschwindet um 17 Uhr unters Bett und kommt um 21 Uhr wieder."},
+ {t:6,art:"Nikolaus",bild:"geschenk",titel:"Der Nikolaus",
+  text:"Mandarinen, Nüsse, Schokolade. Nichts Großes — das Große kommt später, und genau das macht den Nikolaus aus.",
+  katze:"Nussschalen über den Boden schieben ist ein anerkannter Sport."},
+ {t:7,art:"Draußen",bild:"schnee",titel:"Erster Schnee",
+  text:"Rausgehen, sobald die ersten Flocken liegen bleiben. Die erste unberührte Fläche im Garten gehört dir.",
+  katze:"Eine Pfote raus, kurz überlegt, wieder rein."},
+ {t:8,art:"Trinken",bild:"punsch",titel:"Punsch, selbst gemacht",
+  text:"Apfelsaft, eine Orange, Zimt, Nelken, ein Stern Anis. Ziehen lassen, nicht kochen — sonst wird er bitter.",
+  katze:"Der Dampf über der Tasse ist ihr Lieblingsfernsehen."},
+ {t:9,art:"Aussuchen",bild:"stern",titel:"Die Kugeln",
+  text:"Die Schachtel vom Dachboden holen und durchschauen. Jedes Jahr geht eine kaputt, jedes Jahr kommt eine dazu.",
+  katze:"Die kaputte war nicht immer ein Unfall."},
+ {t:10,art:"Aufhängen",bild:"licht",titel:"Lichterkette",
+  text:"Am Geländer entlang, nicht kreuz und quer. Warmweiß. Nicht blinkend. Über blinkend reden wir gar nicht.",
+  katze:"Kabel gelten als Schnur, Schnur gilt als Spielzeug."},
+ {t:11,art:"Backen",bild:"keks",titel:"Lebkuchenhaus",
+  text:"Es wird schief. Es wird immer schief. Der Zuckerguss hält es zusammen, und niemand schaut sich das Dach genau an.",
+  katze:"Sie beaufsichtigt vom Küchenkasten aus."},
+ {t:12,art:"Hausregel",bild:"katze",titel:"Kein Lametta — Snoopys Tag",
+  text:"Die wichtigste Regel des Hauses. Lametta ist dünn, glänzend und wird verschluckt — und dann wird es teuer und traurig.",
+  katze:"Sie ist anderer Meinung, aber sie darf nicht abstimmen."},
+ {t:13,art:"Licht",bild:"kerze",titel:"Luzia",
+  text:"Der kürzeste Nachmittag fühlt sich heute am längsten an. Alle Kerzen im Haus anzünden, die man findet.",
+  katze:"Warme Plätze werden lückenlos erfasst und belegt."},
+ {t:14,art:"Schreiben",bild:"stern",titel:"Brief ans Christkind",
+  text:"Auf Papier, mit der Hand. Drei Wünsche reichen. Der Brief kommt aufs Fensterbrett, nicht in den Briefkasten.",
+  katze:"Ein Blatt Papier auf dem Tisch ist ein Bett."},
+ {t:15,art:"Draußen",bild:"licht",titel:"Weihnachtsmarkt",
+  text:"Einmal ganz herum, ohne etwas zu kaufen. Beim zweiten Mal weiß man, wo der gute Punsch steht.",
+  katze:"Bleibt daheim. Bekommt dafür später etwas mit."},
+ {t:16,art:"Einpacken",bild:"geschenk",titel:"Papier und Schere",
+  text:"Alles auf den Boden, Rolle, Schere, Band. Und die Tür zu, damit niemand hereinschaut.",
+  katze:"Die Tür war nicht zu. Sie sitzt jetzt mitten im Papier."},
+ {t:17,art:"Musik",bild:"glocke",titel:"Die alten Lieder",
+  text:"Stille Nacht ist aus Oberndorf, nicht aus Hollywood. Einmal am Stück hören, ohne nebenbei etwas anderes zu tun.",
+  katze:"Bei hohen Tönen dreht sie ein Ohr."},
+ {t:18,art:"Draußen",bild:"berg",titel:"Rodeln",
+  text:"Hinaufgehen dauert dreimal so lang wie hinunterfahren. Genau deshalb macht man es.",
+  katze:"Wartet am Fenster und beobachtet."},
+ {t:19,art:"Holen",bild:"tanne",titel:"Der Baum",
+  text:"Nordmanntanne, weil sie nicht nadelt. Lieber eine Handbreit zu klein als eine zu groß — die Decke gewinnt immer.",
+  katze:"Ein Baum im Wohnzimmer. Für sie ist Weihnachten damit erklärt."},
+ {t:20,art:"Schmücken",bild:"tanne",titel:"Aufputzen",
+  text:"Lichter zuerst, dann die Kugeln, zuletzt der Stern. Und der Baum wird oben an der Wand befestigt.",
+  katze:"Die unteren dreißig Zentimeter bleiben leer. Aus Erfahrung."},
+ {t:21,art:"Nacht",bild:"stern",titel:"Die längste Nacht",
+  text:"Wintersonnenwende. Ab morgen werden die Tage wieder länger, auch wenn man drei Wochen lang nichts davon merkt.",
+  katze:"Snoopy schläft laut Messung sechzehn Stunden. Wie an jedem anderen Tag auch."},
+ {t:22,art:"Verschenken",bild:"keks",titel:"Kekse austragen",
+  text:"Die schönsten in eine Dose, die schiefen bleiben daheim. Bei den Nachbarn klingeln und nicht lange bleiben.",
+  katze:"Die Dose riecht gut. Die Dose wird bewacht."},
+ {t:23,art:"Ruhe",bild:"punsch",titel:"Nichts tun",
+  text:"Der Tag vor dem Tag. Nicht mehr einkaufen, nicht mehr putzen. Vorfreude braucht Platz, und Platz macht man, indem man aufhört.",
+  katze:"Sie hat für heute nichts geplant. Wie an allen anderen Tagen auch."},
+ {t:24,art:"Heiliger Abend",bild:"glocke",titel:"Das Glöckchen",
+  text:"Am Nachmittag wird die Tür zum Wohnzimmer zugemacht. Dann ist es lange still. Und dann läutet es.",
+  katze:"Snoopy sitzt schon seit einer Stunde vor der Tür. Sie weiß Bescheid."}
+];
+
+
+/* ---------------- Der Zauber des Tages ---------------- */
+const zauberliste = {
+ 1:{name:"Kerzenschein",   was:"Funken steigen auf",             art:"steigen", teile:["kerze","stern"],                  anz:16, gr:[18,34], sek:[7,13]},
+ 2:{name:"Kipferlregen",   was:"Kekse purzeln herunter",         art:"fallen",  teile:["keks","zimtstern"],               anz:22, gr:[24,46], sek:[8,15]},
+ 3:{name:"Snoopys Runde",  was:"Snoopy spaziert durchs Bild",    art:"laufen",  teile:["katze"],                          anz:1,  gr:[88,88], sek:[19,19]},
+ 4:{name:"Zweige im Wind", was:"Schneekugeln schweben",          art:"schweben",teile:["schneekugel"],                    anz:11, gr:[30,54], sek:[13,22]},
+ 5:{name:"Glockenläuten",  was:"Glocken schaukeln herab",        art:"wippen",  teile:["glocke"],                         anz:14, gr:[26,48], sek:[8,14]},
+ 6:{name:"Nikolaussack",   was:"Geschenke und Socken fallen",    art:"fallen",  teile:["geschenk","socke"],               anz:16, gr:[28,52], sek:[9,15]},
+ 7:{name:"Erster Schnee",  was:"Flocken, dicht und langsam",     art:"fallen",  teile:["schnee"],                         anz:30, gr:[16,36], sek:[11,20]},
+ 8:{name:"Punschdampf",    was:"Warmes steigt auf",              art:"steigen", teile:["punsch","bratapfel"],             anz:12, gr:[26,46], sek:[9,16]},
+ 9:{name:"Kugelglanz",     was:"Sterne und Schneekugeln",        art:"wippen",  teile:["stern","schneekugel"],            anz:16, gr:[22,42], sek:[9,16]},
+10:{name:"Lichterkette",   was:"Lichter schweben durchs Bild",   art:"schweben",teile:["licht","stern"],                  anz:13, gr:[28,50], sek:[12,20]},
+11:{name:"Lebkuchenhaus",  was:"Lebkuchenmänner fallen",         art:"fallen",  teile:["lebkuchenmann","keks"],           anz:18, gr:[28,52], sek:[9,15]},
+12:{name:"Snoopys Tag",    was:"Snoopy geht wieder durch",       art:"laufen",  teile:["katze"],                          anz:1,  gr:[98,98], sek:[16,16]},
+13:{name:"Luziakerzen",    was:"Kerzen und Kränze steigen auf",  art:"steigen", teile:["kerze","kranz"],                  anz:15, gr:[20,40], sek:[8,14]},
+14:{name:"Sternenpost",    was:"Sterne segeln herunter",         art:"schweben",teile:["stern"],                          anz:15, gr:[20,44], sek:[11,19]},
+15:{name:"Markttrubel",    was:"Lichter, Punsch und Zuckerzeug", art:"fallen",  teile:["licht","punsch","zuckerstange"],  anz:18, gr:[26,48], sek:[9,16]},
+16:{name:"Packpapier",     was:"Geschenke mit Schleifen",        art:"wippen",  teile:["geschenk"],                       anz:17, gr:[26,50], sek:[8,14]},
+17:{name:"Schneemannwetter", was:"Schneemann und Schneefrau",    art:"schweben",teile:["schneemann","schneefrau"],        anz:12, gr:[34,60], sek:[12,20]},
+18:{name:"Rodelbahn",      was:"Schlitten sausen herab",         art:"fallen",  teile:["schlitten","schnee"],             anz:16, gr:[28,54], sek:[7,12]},
+19:{name:"Waldgang",       was:"Tannen und Berge ziehen vorbei", art:"schweben",teile:["tanne","berg"],                   anz:12, gr:[30,56], sek:[13,21]},
+20:{name:"Aufputzen",      was:"Sterne, Zuckerstangen, Tannen",  art:"fallen",  teile:["stern","zuckerstange","tanne"],   anz:20, gr:[24,46], sek:[9,15]},
+21:{name:"Längste Nacht",  was:"Sternenstaub steigt auf",        art:"steigen", teile:["stern","schnee"],                 anz:22, gr:[14,30], sek:[10,18]},
+22:{name:"Keksdosen",      was:"Alle Sorten auf einmal",         art:"fallen",  teile:["keks","zimtstern","lebkuchenmann","kletzenbrot"], anz:22, gr:[24,48], sek:[8,14]},
+23:{name:"Das Gespann",    was:"Rentiere ziehen vorbei",         art:"laufen",  teile:["rentier"],                        anz:1,  gr:[104,104], sek:[15,15]},
+24:{name:"Bescherung",     was:"Alles auf einmal",               art:"fallen",  teile:["geschenk","stern","glocke","zuckerstange","socke","elf","gespann"], anz:32, gr:[24,56], sek:[7,13]}
+};
+
+const zauberschicht = document.getElementById("zauber");
+const ruhig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let zauberTag = 0;
+function zufall(a,b){ return a + Math.random()*(b-a); }
+
+function zauberSetzen(n){
+  if (ruhig || zauberTag === n) return;
+  zauberTag = n;
+  const z = zauberliste[n];
+  zauberschicht.innerHTML = "";
+
+  for (let i = 0; i < z.anz; i++){
+    const e = document.createElement("div");
+    const teil = z.teile[i % z.teile.length];
+    const gr = zufall(z.gr[0], z.gr[1]);
+    e.className = "z-teil z-" + z.art;
+    e.style.width = gr + "px";
+    e.style.height = gr + "px";
+    e.style.setProperty("--dauer", zufall(z.sek[0], z.sek[1]).toFixed(2) + "s");
+    e.style.setProperty("--warten", (-Math.random() * z.sek[1]).toFixed(2) + "s");
+    e.style.setProperty("--deck", (0.55 + Math.random() * 0.4).toFixed(2));
+
+    if (z.art === "laufen"){
+      e.style.left = "0";
+      e.style.top = "auto";
+      e.style.bottom = zufall(4, 11).toFixed(1) + "vh";
+      e.style.width = z.gr[0] + "px";
+      e.style.height = z.gr[0] + "px";
+      e.style.setProperty("--deck", "1");
+      e.innerHTML = '<div class="z-huepf" style="width:100%;height:100%">' + bild[teil] + '</div>';
+    } else {
+      e.style.left = zufall(-2, 97).toFixed(2) + "vw";
+      e.style.setProperty("--drift", zufall(-14, 14).toFixed(1) + "vw");
+      e.style.setProperty("--dreh", Math.round(zufall(-540, 540)) + "deg");
+      e.innerHTML = bild[teil];
+    }
+    zauberschicht.appendChild(e);
+  }
+
+  const nameEl = document.getElementById("zauber-name");
+  if (nameEl){
+    nameEl.textContent = z.name;
+    document.getElementById("zauber-was").textContent = "Zauber am " + n + ". Dezember";
+    document.getElementById("zauber-rest").textContent =
+      z.was + ". Öffne ein anderes Türchen — der ganze Bildschirm wechselt mit.";
+  }
+}
+
+/* ---------------- Zähler ---------------- */
+function ziel(){
+  const j=new Date(); let z=new Date(j.getFullYear(),11,24,18,0,0);
+  if(j>z) z=new Date(j.getFullYear()+1,11,24,18,0,0);
+  return z;
+}
+function start(z){ return new Date(z.getFullYear()-1,11,24,18,0,0); }
+const zEl={d:document.getElementById("d"),h:document.getElementById("h"),
+           m:document.getElementById("m"),s:document.getElementById("s")};
+
+function ticken(){
+  const z=ziel(),a=start(z),jetzt=new Date();
+  let rest=Math.max(0,z-jetzt); const tag=864e5;
+  const d=Math.floor(rest/tag); rest-=d*tag;
+  const h=Math.floor(rest/36e5); rest-=h*36e5;
+  const m=Math.floor(rest/6e4); rest-=m*6e4;
+  const s=Math.floor(rest/1000);
+  zEl.d.textContent=d;
+  zEl.h.textContent=String(h).padStart(2,"0");
+  zEl.m.textContent=String(m).padStart(2,"0");
+  zEl.s.textContent=String(s).padStart(2,"0");
+  const anteil=Math.min(100,Math.max(0,((jetzt-a)/(z-a))*100));
+  document.getElementById("fuellung").style.width=anteil.toFixed(2)+"%";
+  document.getElementById("anteil").textContent=anteil.toFixed(1)+" %";
+  document.getElementById("ziel-datum").textContent="24. Dezember "+z.getFullYear()+", 18:00";
+  document.getElementById("fuss-jahr").textContent="Heiliger Abend "+z.getFullYear();
+}
+ticken(); setInterval(ticken,1000);
+
+/* ---------------- Türchen ---------------- */
+const reihenfolge=[7,19,2,14,23,9, 16,4,11,21,1,13, 6,24,18,3,10,20, 12,5,22,8,17,15];
+const gitter=document.getElementById("gitter");
+const jetzt=new Date();
+const imDezember=jetzt.getMonth()===11;
+const heuteTag=imDezember?Math.min(24,jetzt.getDate()):null;
+
+let offen=new Set();
+try{ const roh=localStorage.getItem("nina-tueren"); if(roh) offen=new Set(JSON.parse(roh)); }catch(e){}
+function merken(){ try{ localStorage.setItem("nina-tueren",JSON.stringify([...offen])); }catch(e){} }
+function daten(n){ return tage.find(x=>x.t===n); }
+function stand(){ document.getElementById("stand").textContent=offen.size+" von 24 offen"; }
+
+reihenfolge.forEach(n=>{
+  const d=daten(n);
+  const b=document.createElement("button");
+  b.className="tuer"; b.dataset.tag=n;
+  b.setAttribute("aria-label","Türchen "+n+" öffnen");
+  if(n===heuteTag) b.classList.add("heute-tuer");
+  b.innerHTML='<span class="tuer-innen">'+bild[d.bild]+'</span>'+
+              '<span class="tuer-blatt"><span class="tuer-zahl">'+n+'</span></span>';
+  if(offen.has(n)) b.classList.add("auf");
+  b.addEventListener("click",()=>{
+    b.classList.add("auf"); offen.add(n); merken(); stand();
+    setTimeout(()=>zeigen(n),260);
+  });
+  gitter.appendChild(b);
+});
+stand();
+
+/* ---------------- Tafel ---------------- */
+const tafel=document.getElementById("tafel");
+let aktuell=1;
+function zeigen(n){
+  const d=daten(n); aktuell=n;
+  zauberSetzen(n);
+  document.getElementById("tafel-tag").textContent=n;
+  document.getElementById("tafel-datum").textContent=n+". Dezember";
+  document.getElementById("tafel-art").textContent=d.art;
+  document.getElementById("tafel-bild").innerHTML=bild[d.bild];
+  document.getElementById("tafel-titel").textContent=d.titel;
+  document.getElementById("tafel-text").textContent=d.text;
+  document.getElementById("tafel-katze").innerHTML="<b>Snoopy dazu<\/b>„"+d.katze+"“";
+  tafel.dataset.offen="ja";
+  document.getElementById("tafel-zu").focus();
+}
+function schliessen(){ tafel.dataset.offen="nein"; }
+document.getElementById("tafel-zu").addEventListener("click",schliessen);
+tafel.addEventListener("click",e=>{ if(e.target===tafel) schliessen(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") schliessen(); });
+document.getElementById("tafel-weiter").addEventListener("click",()=>{
+  const n=aktuell%24+1;
+  const b=gitter.querySelector('[data-tag="'+n+'"]');
+  if(b){ b.classList.add("auf"); offen.add(n); merken(); stand(); }
+  zeigen(n);
+});
+
+/* ---------------- Heute ---------------- */
+const heuteN=heuteTag||1;
+const hd=daten(heuteN);
+document.getElementById("heute-bild").innerHTML=bild[hd.bild];
+document.getElementById("heute-titel").textContent=hd.titel;
+document.getElementById("heute-text").textContent=hd.text;
+document.getElementById("heute-marke").textContent=
+  imDezember?(heuteN+". Dezember · "+hd.art):"Vorschau · "+hd.art;
+if(!imDezember){
+  const ersterDez=new Date(ziel().getFullYear(),11,1);
+  const bis=Math.ceil((ersterDez-jetzt)/864e5);
+  if(bis>0) document.getElementById("heute-hinweis").textContent=
+    "Noch "+bis+" Tage bis zum ersten Türchen. Solange steht hier der 1. Dezember als Vorgeschmack.";
+}
+document.getElementById("heute-knopf").addEventListener("click",()=>{
+  const b=gitter.querySelector('[data-tag="'+heuteN+'"]');
+  if(b){ b.classList.add("auf"); offen.add(heuteN); merken(); stand(); }
+  zeigen(heuteN);
+});
+document.getElementById("alle-auf").addEventListener("click",()=>{
+  gitter.querySelectorAll(".tuer").forEach((b,i)=>{
+    setTimeout(()=>{ b.classList.add("auf"); offen.add(+b.dataset.tag); merken(); stand(); }, i*45);
+  });
+});
+document.getElementById("alle-zu").addEventListener("click",()=>{
+  gitter.querySelectorAll(".tuer").forEach(b=>b.classList.remove("auf"));
+  offen.clear(); merken(); stand();
+});
+document.getElementById("zufall").addEventListener("click",()=>{
+  const n=1+Math.floor(Math.random()*24);
+  const b=gitter.querySelector('[data-tag="'+n+'"]');
+  if(b){ b.classList.add("auf"); offen.add(n); merken(); stand();
+         b.scrollIntoView({block:"center",behavior:"smooth"}); }
+  setTimeout(()=>zeigen(n),300);
+});
+document.getElementById("grosse-katze").innerHTML=
+  '<div style="width:190px;height:190px">'+bild.katze+'</div>';
+
+
+/* ---------------- Werkstatt ---------------- */
+const elfen=[
+ {name:"Fenna", amt:"Packt ein", bild:"geschenk",
+  text:"Schleifen mit der Schere gekräuselt, Kanten scharf gefaltet. Nimmt sich für jedes Päckchen zu viel Zeit."},
+ {name:"Bosco", amt:"Führt die Listen", bild:"socke",
+  text:"Wer was wünscht, wer schon was hat. Streicht ungern etwas durch, tut es aber gründlich."},
+ {name:"Mirl", amt:"Bäckt", bild:"lebkuchenmann",
+  text:"Sechs Sorten, keine mehr. Die siebte wäre Angeberei, sagt sie, und sie hat recht."},
+ {name:"Rune", amt:"Macht den Schnee", bild:"schneemann",
+  text:"Zuständig für die Menge, nicht für den Zeitpunkt. Den Zeitpunkt bestimmt der Berg."},
+ {name:"Snoopy", amt:"Prüft die Qualität", bild:"katze", katze:true,
+  text:"Setzt sich auf alles, was fertig ist. Was sie nicht geprüft hat, kommt nicht aus der Werkstatt."}
+];
+const elfenGitter=document.getElementById("elfen");
+elfen.forEach(e=>{
+  const d=document.createElement("div");
+  d.className="elf"+(e.katze?" katze-karte":"");
+  d.innerHTML='<div class="kopf">'+bild[e.bild]+'</div>'+
+              '<span class="amt">'+e.amt+'</span>'+
+              '<h3>'+e.name+'</h3><p>'+e.text+'</p>';
+  elfenGitter.appendChild(d);
+});
+
+/* ---------------- Tisch ---------------- */
+const speisen=[
+ {n:"Vanillekipferl", w:"ab 2. Dezember", b:"keks",
+  t:"Die erste Sorte, und die einzige, die sicher nicht bis zum 24. reicht."},
+ {n:"Zimtsterne", w:"ab 11. Dezember", b:"zimtstern",
+  t:"Die Glasur muss über Nacht trocknen. Wer drückt, bekommt Fingerabdrücke."},
+ {n:"Lebkuchen", w:"ab 11. Dezember", b:"lebkuchenmann",
+  t:"Weich werden sie erst nach ein paar Tagen in der Dose. Ein Apfelstück hilft nach."},
+ {n:"Kletzenbrot", w:"ab 15. Dezember", b:"kletzenbrot",
+  t:"Dörrbirnen, Feigen, Nüsse. Dünn schneiden, mit Butter essen, nicht darüber diskutieren."},
+ {n:"Kinderpunsch", w:"jeden Abend", b:"punsch",
+  t:"Apfelsaft, eine Orange, Zimt und Nelken. Ziehen lassen, nicht kochen."},
+ {n:"Bratapfel", w:"ab 21. Dezember", b:"bratapfel",
+  t:"Ausgehöhlt, mit Nüssen und Honig gefüllt, eine halbe Stunde ins Rohr. Vanillesauce dazu."},
+ {n:"Würstel mit Kartoffelsalat", w:"24. Dezember", b:"wuerstel",
+  t:"Der Klassiker am Heiligen Abend. Schnell fertig, damit der Abend dem Abend gehört."},
+ {n:"Der Rest der Kekse", w:"25. Dezember", b:"schneefrau",
+  t:"Was übrig ist, wird zum Frühstück gegessen. Das ist die einzige Regel, die an diesem Tag gilt."}
+];
+const speisenGitter=document.getElementById("speisen");
+speisen.forEach(x=>{
+  const d=document.createElement("div");
+  d.className="speise";
+  d.innerHTML='<div class="bild">'+bild[x.b]+'</div>'+
+              '<div><span class="wann">'+x.w+'</span><h3>'+x.n+'</h3><p>'+x.t+'</p></div>';
+  speisenGitter.appendChild(d);
+});
+
+/* Zauber des heutigen Tages beim Laden */
+zauberSetzen(heuteN);
+
+/* ---------------- Puderzucker ---------------- */
+(function(){
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c=document.getElementById("himmel"), x=c.getContext("2d");
+  let b,h,flocken=[];
+  const toene=["255,255,255","247,204,212","243,201,135"];
+  function masse(){
+    b=c.width=window.innerWidth; h=c.height=window.innerHeight;
+    flocken=Array.from({length:Math.round(b*h/24000)},()=>neu(true));
+  }
+  function neu(erst){
+    return {x:Math.random()*b, y:erst?Math.random()*h:-12,
+            r:Math.random()*2.4+.8, v:Math.random()*.5+.2,
+            d:Math.random()*.5-.25, o:Math.random()*.45+.35,
+            p:Math.random()*6.28, f:toene[Math.floor(Math.random()*toene.length)]};
+  }
+  let t=0;
+  function zeichnen(){
+    x.clearRect(0,0,b,h); t+=.016;
+    for(let i=0;i<flocken.length;i++){
+      const f=flocken[i];
+      f.y+=f.v; f.x+=f.d+Math.sin(t+f.p)*.3;
+      if(f.y>h+8) flocken[i]=neu(false);
+      x.globalAlpha=f.o;
+      x.fillStyle="rgba("+f.f+",1)";
+      x.shadowBlur=6; x.shadowColor="rgba(232,128,154,.5)";
+      x.beginPath(); x.arc(f.x,f.y,f.r,0,6.29); x.fill();
+    }
+    x.globalAlpha=1; x.shadowBlur=0;
+    requestAnimationFrame(zeichnen);
+  }
+  masse(); zeichnen();
+  window.addEventListener("resize",masse);
+})();
+</script>
+
+</body>
+</html>
