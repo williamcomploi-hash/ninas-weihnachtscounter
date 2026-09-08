@@ -393,13 +393,20 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   transform:translate(calc(var(--dx,0) * 100%), calc(var(--dy,0) * -100%))
             scale(var(--s,1)) scaleX(var(--flip,1))}
 .snoopy-koerper img.da{opacity:1}
+/* Innerhalb einer Bildfolge wird hart geschaltet. Blendet man Schritt gegen
+   Schritt, sind immer zwei Beinstellungen zugleich halb sichtbar — die Katze
+   erscheint doppelt. Überblendet wird nur beim Wechsel der Haltung. */
+.snoopy-koerper.folge img{transition:none}
 /* Beim Blick nach links kippt nur das Bild, nie die Sprechblase. */
 .snoopy-koerper[data-blick="links"] img{--flip:-1}
 
 
 /* Gang: kleines Auf und Ab, die Beine macht die Zeichnung */
 .snoopy-koerper.geht{animation:snoopyschritt .46s ease-in-out infinite}
-@keyframes snoopyschritt{0%,100%{translate:0 0}50%{translate:0 -3px}}
+/* Kein zusätzliches Wippen mehr: die fünf Schrittbilder tragen die Auf- und
+   Abbewegung bereits in sich. Zwei übereinandergelegte Bewegungen sahen
+   aus, als würde sie schweben. */
+@keyframes snoopyschritt{0%,100%{translate:0 0}}
 /* Sitzen und Dösen: ruhiges Atmen */
 .snoopy-koerper.atmet{animation:snoopyatem 3.4s ease-in-out infinite}
 @keyframes snoopyatem{0%,100%{scale:1 1}50%{scale:1.02 .985}}
@@ -1430,8 +1437,9 @@ document.getElementById("alle-zu").addEventListener("click",()=>{
   gitter.querySelectorAll(".tuer").forEach(b=>b.classList.remove("auf"));
   offen.clear(); merken(); stand();
 });
-document.getElementById("grosse-katze").innerHTML=
-  '<div style="width:190px;height:190px">'+bild.katze+'</div>';
+document.getElementById("grosse-katze").innerHTML =
+  '<img src="bilder/snoopy/sitzen.png" alt="Snoopy" ' +
+  'style="width:210px;height:210px;object-fit:contain;display:block">';
 
 
 /* ---------------- Werkstatt ---------------- */
@@ -1541,29 +1549,34 @@ const snoopyPfad = "bilder/snoopy/";
    dort ist es dieselbe Katze in derselben Einstellung, jeder Unterschied ist
    Rahmen und kein echter. Gemessene Streuung danach: 0,0 Prozent.
    ZWISCHEN den Haltungen wird gedämpft (Exponent 0,7) — eine sitzende Katze
-   darf höher sein als eine liegende. Streuung dort: 14,3 statt 68,8 Prozent. */
+   darf höher sein als eine liegende. Streuung dort: 14,3 statt 68,8 Prozent.
+
+   WICHTIG beim Versatz: innerhalb einer Bildfolge bekommen ALLE Bilder
+   denselben Versatz, nicht jedes seinen eigenen. Sonst wird der Körper
+   künstlich gehoben und gesenkt — beim Gehen ist der tiefste Punkt mal die
+   aufsetzende Pfote, mal eine angehobene, und die Katze hüpft. */
 const snoopyAusgleich = {
   fressen:[1.076, 0.1714, 0.0298],
   gaehnen:[0.823, -0.0262, -0.025],
   liegen:[1.124, 0.2214, 0.0143],
   putzen:[0.864, 0.0476, 0.0048],
-  schritt1:[0.917, 0.0381, 0.0143],
-  schritt2:[0.891, 0.069, 0.0179],
-  schritt3:[1.039, 0.1595, 0.0155],
-  schritt4:[1.035, 0.1381, 0.0369],
-  schritt5:[1.066, 0.1929, 0.0286],
+  schritt1:[0.917, 0.1195, 0.0226],
+  schritt2:[0.891, 0.1195, 0.0226],
+  schritt3:[1.039, 0.1195, 0.0226],
+  schritt4:[1.035, 0.1195, 0.0226],
+  schritt5:[1.066, 0.1195, 0.0226],
   sitzen:[0.844, -0.05, 0.0369],
-  spiel1:[1.059, 0.15, 0.025],
-  spiel2:[1.001, 0.0643, 0.0786],
-  spiel3:[0.867, 0.0857, -0.0071],
-  spiel4:[1.089, 0.1405, 0.0155],
+  spiel1:[1.059, 0.1101, 0.028],
+  spiel2:[1.001, 0.1101, 0.028],
+  spiel3:[0.867, 0.1101, 0.028],
+  spiel4:[1.089, 0.1101, 0.028],
   stehen:[1.009, 0.1095, 0.0167],
   strecken:[1.053, 0.0833, 0.0143],
-  trinken1:[1.015, 0.15, 0.0274],
-  trinken2:[1.059, 0.1738, 0.0464],
-  trinken3:[0.985, 0.1167, 0.0214],
-  trinken4:[0.722, 0.019, 0.0452],
-  trinken5:[0.958, 0.081, 0.044]
+  trinken1:[1.015, 0.1081, 0.0369],
+  trinken2:[1.059, 0.1081, 0.0369],
+  trinken3:[0.985, 0.1081, 0.0369],
+  trinken4:[0.722, 0.1081, 0.0369],
+  trinken5:[0.958, 0.1081, 0.0369]
 };
 /* Für jede Haltung eine Aufnahme. Das Gehen wechselt zwischen zwei Schritten. */
 /* Welche Aufnahmen zu welcher Haltung gehören. Mehrere Namen = Bildfolge. */
@@ -1629,20 +1642,25 @@ const snoopySprueche = {
     for (const reihe of Object.values(ebenen)) reihe.forEach(el => el.classList.remove("da"));
   }
 
-  let schrittZaehler = 0, schrittUhr = null;
+  let schrittZaehler = 0, schrittUhr = null, hartUhr = null;
   function zeichnen(h){
     const reihe = ebenen[h] || ebenen.sitzen;
+    koerper.classList.remove("folge");     /* erstes Bild weich einblenden */
     alleAus();
     schrittZaehler = 0;
     reihe[0].classList.add("da");
 
     clearInterval(schrittUhr); schrittUhr = null;
+    clearTimeout(hartUhr);
     if (reihe.length > 1){
+      /* Nach dem Einblenden hart weiterschalten, sonst überlagern sich zwei
+         Beinstellungen und die Katze sieht doppelt aus. */
+      hartUhr = setTimeout(() => koerper.classList.add("folge"), 140);
       schrittUhr = setInterval(() => {
         reihe[schrittZaehler].classList.remove("da");
         schrittZaehler = (schrittZaehler + 1) % reihe.length;
         reihe[schrittZaehler].classList.add("da");
-      }, h === "gehen" ? 200 : 320);
+      }, h === "gehen" ? 200 : 340);
     }
   }
   function sagen(wort){
