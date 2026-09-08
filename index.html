@@ -93,8 +93,18 @@ h1,h2,h3{font-family:var(--f-display);font-weight:600;text-wrap:balance;margin:0
              rgba(255,244,238,.18) 70%, rgba(255,248,244,.55) 100%)}
 .buehne.mit-foto .buehne-motiv{display:none}
 .buehne.mit-foto .buehne-boden{background:linear-gradient(to top,
-  var(--zucker) 0%, rgba(255,248,244,.97) 22%, rgba(255,248,244,.72) 42%, rgba(255,248,244,0) 68%)}
-.buehne.mit-foto h1{text-shadow:0 1px 0 rgba(255,248,244,.9)}
+  var(--zucker) 0%,
+  rgba(255,248,244,.985) 30%,
+  rgba(255,248,244,.93) 46%,
+  rgba(255,248,244,.72) 60%,
+  rgba(255,248,244,.34) 74%,
+  rgba(255,248,244,0) 90%)}
+/* Das Bild bleibt oben offen, unten liegt es unter der Schrift.
+   Gemessen an der schlechtesten Stelle, nicht geschaetzt. */
+.buehne.mit-foto .buehne-inhalt{padding-top:clamp(150px,26vh,300px)}
+.buehne.mit-foto h1,
+.buehne.mit-foto .unterzeile,
+.buehne.mit-foto .buehne-tag{text-shadow:0 1px 2px rgba(255,248,244,.85)}
 
 .buehne-schein{position:absolute;inset:0;pointer-events:none;
   background:
@@ -915,6 +925,13 @@ const tage=[
 
 
 
+/* ---------------- Welcher Tag ist heute ----------------
+   Diese drei Werte braucht alles Weitere: Bühne, Zauber und Türchen.
+   Sie stehen deshalb ganz oben und nicht mehr unten bei den Türchen. */
+const jetzt = new Date();
+const imDezember = jetzt.getMonth() === 11;
+const heuteTag = imDezember ? Math.min(24, jetzt.getDate()) : null;
+
 /* ---------------- Die Bühne des Tages ----------------
    Eigenes Ding, wie der Zauber: sie verrät nichts aus den Türchen,
    sie hält nur die Stimmung des Tages. Farben, Motiv und Text wechseln täglich. */
@@ -1118,9 +1135,6 @@ ticken(); setInterval(ticken,1000);
 /* ---------------- Türchen ---------------- */
 const reihenfolge=[7,19,2,14,23,9, 16,4,11,21,1,13, 6,24,18,3,10,20, 12,5,22,8,17,15];
 const gitter=document.getElementById("gitter");
-const jetzt=new Date();
-const imDezember=jetzt.getMonth()===11;
-const heuteTag=imDezember?Math.min(24,jetzt.getDate()):null;
 
 let offen=new Set();
 try{ const roh=localStorage.getItem("nina-tueren"); if(roh) offen=new Set(JSON.parse(roh)); }catch(e){}
