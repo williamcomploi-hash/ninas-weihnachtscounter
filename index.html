@@ -619,6 +619,29 @@ body.verwaltet .buch-weg{display:block}
   color:var(--rot);display:block;margin-bottom:5px}
 .speise p{margin:0;font-size:13.5px;color:var(--tinte-matt);line-height:1.45}
 
+/* ---------------- Der Zwischenruf ----------------
+   Wenn der Zeiger nach rechts oben verschwindet — dorthin, wo das Kreuz zum
+   Schliessen sitzt —, meldet sich Snoopy noch einmal. Einmal am Tag, nie auf
+   Geraeten ohne Maus, und immer mit einem Weg heraus. */
+.halt{position:fixed;inset:0;z-index:80;display:none;place-items:center;
+  padding:20px;background:rgba(74,42,36,.42);backdrop-filter:blur(3px)}
+.halt.da{display:grid}
+.halt-inhalt{position:relative;width:min(460px,100%);background:#fff;
+  border:1px solid var(--linie);border-radius:26px;padding:30px 28px 26px;
+  text-align:center;box-shadow:0 30px 70px -30px rgba(74,42,36,.6);
+  animation:halthuepft .42s cubic-bezier(.2,1.4,.4,1)}
+@keyframes halthuepft{from{transform:translateY(18px) scale(.94);opacity:0}}
+.halt-bild{width:132px;height:132px;margin:0 auto 12px;display:block;object-fit:contain}
+.halt h3{font-family:var(--f-display);font-weight:800;font-size:clamp(21px,3.4vw,27px);
+  line-height:1.2;color:var(--rot-tief);margin:0 0 8px}
+.halt p{margin:0 0 20px;font-size:16px;color:var(--tinte-matt);line-height:1.5}
+.halt p b{color:var(--rot);font-style:normal}
+.halt-knoepfe{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.halt-weiter{background:none;border:0;padding:6px;margin-top:12px;cursor:pointer;
+  font-family:var(--f-zahl);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--tinte-matt);text-decoration:underline;text-underline-offset:3px}
+.halt-weiter:hover{color:var(--rot)}
+
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}
   #zauber{display:none}
   #snoopy{display:none}}
@@ -853,6 +876,19 @@ body.verwaltet .buch-weg{display:block}
       <p class="katzenwort" id="tafel-katze">—</p>
       <button class="knopf" id="tafel-weiter">Nächstes Türchen</button>
     </div>
+  </div>
+</div>
+
+<div class="halt" id="halt" role="dialog" aria-modal="true" aria-labelledby="halt-titel">
+  <div class="halt-inhalt">
+    <img class="halt-bild" src="bilder/snoopy/sitzen.png" alt="Snoopy sitzt und schaut" width="132" height="132">
+    <h3 id="halt-titel">Hast du heute schon mal auf einen Keks geklickt?!</h3>
+    <p>UND was ist mit Snoopy — <b>die verhungert</b>. JA!</p>
+    <div class="halt-knoepfe">
+      <button class="knopf stark" id="halt-keks">Zum Keks</button>
+      <button class="knopf" id="halt-futter">Snoopy füttern</button>
+    </div>
+    <button class="halt-weiter" id="halt-zu">Ich muss wirklich weg</button>
   </div>
 </div>
 
@@ -2379,6 +2415,66 @@ const KEKS_WEG = "/api/keks";
   }
   masse(); zeichnen();
   window.addEventListener("resize",masse);
+})();
+
+
+/* ---------------- Der Zwischenruf ----------------
+   Ausgeloest, wenn der Zeiger oben rechts aus dem Fenster faehrt — der Weg
+   zum Schliessen. Bedingungen, damit es eine nette Erinnerung bleibt und
+   keine Belaestigung: nur mit echter Maus, nur einmal am Tag, und erst nach
+   einer halben Minute auf der Seite. */
+(function(){
+  const kasten = document.getElementById("halt");
+  if (!kasten) return;
+
+  const heuteSchluessel = "nina-halt-" + new Date().toDateString();
+  if (localStorage.getItem(heuteSchluessel) === "ja") return;
+  if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+  let bereit = false;
+  setTimeout(() => { bereit = true; }, 30000);
+  let offen = false;
+
+  function merken(){
+    try { localStorage.setItem(heuteSchluessel, "ja"); } catch (e) {}
+  }
+  function zeigen(){
+    if (offen || !bereit) return;
+    offen = true;
+    merken();
+    kasten.classList.add("da");
+    document.getElementById("halt-zu").focus();
+  }
+  function schliessen(){
+    offen = false;
+    kasten.classList.remove("da");
+  }
+
+  document.addEventListener("mouseout", (e) => {
+    if (e.relatedTarget || e.buttons) return;          /* nur echtes Verlassen */
+    if (e.clientY > 4) return;                          /* nur ueber die Oberkante */
+    if (e.clientX < window.innerWidth * 0.4) return;    /* und nur rechts, Richtung Kreuz */
+    zeigen();
+  });
+
+  document.getElementById("halt-zu").addEventListener("click", schliessen);
+  kasten.addEventListener("click", (e) => { if (e.target === kasten) schliessen(); });
+  document.addEventListener("keydown", (e) => { if (offen && e.key === "Escape") schliessen(); });
+
+  document.getElementById("halt-keks").addEventListener("click", () => {
+    schliessen();
+    const ziel = document.getElementById("keks-knopf");
+    if (ziel) { ziel.scrollIntoView({behavior:"smooth", block:"center"}); setTimeout(() => ziel.focus(), 600); }
+  });
+
+  document.getElementById("halt-futter").addEventListener("click", () => {
+    schliessen();
+    const futter = document.querySelector('[data-befehl="fressen"]');
+    if (futter) {
+      futter.scrollIntoView({behavior:"smooth", block:"center"});
+      setTimeout(() => futter.click(), 700);
+    }
+  });
 })();
 </script>
 
