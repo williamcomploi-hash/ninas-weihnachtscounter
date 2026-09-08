@@ -1537,30 +1537,33 @@ const snoopyPfad = "bilder/snoopy/";
    hoch im Rahmen; ohne Ausgleich wächst und springt sie beim Haltungswechsel.
    Für jede Aufnahme wurde die bedeckte Fläche und die Fußlinie gemessen
    (scratchpad/messen.mjs). Daraus: Faktor, Höhenversatz, Seitenversatz.
-   Der Faktor ist gedämpft (Exponent 0,7) — der Rahmenunterschied verschwindet,
-   der echte Unterschied zwischen sitzen und liegen bleibt erhalten. */
+   INNERHALB einer Bildfolge (gehen, trinken, spielen) wird VOLL ausgeglichen:
+   dort ist es dieselbe Katze in derselben Einstellung, jeder Unterschied ist
+   Rahmen und kein echter. Gemessene Streuung danach: 0,0 Prozent.
+   ZWISCHEN den Haltungen wird gedämpft (Exponent 0,7) — eine sitzende Katze
+   darf höher sein als eine liegende. Streuung dort: 14,3 statt 68,8 Prozent. */
 const snoopyAusgleich = {
   fressen:[1.076, 0.1714, 0.0298],
   gaehnen:[0.823, -0.0262, -0.025],
   liegen:[1.124, 0.2214, 0.0143],
   putzen:[0.864, 0.0476, 0.0048],
-  schritt1:[0.937, 0.0381, 0.0143],
-  schritt2:[0.918, 0.069, 0.0179],
-  schritt3:[1.022, 0.1595, 0.0155],
-  schritt4:[1.02, 0.1381, 0.0369],
-  schritt5:[1.041, 0.1929, 0.0286],
+  schritt1:[0.917, 0.0381, 0.0143],
+  schritt2:[0.891, 0.069, 0.0179],
+  schritt3:[1.039, 0.1595, 0.0155],
+  schritt4:[1.035, 0.1381, 0.0369],
+  schritt5:[1.066, 0.1929, 0.0286],
   sitzen:[0.844, -0.05, 0.0369],
-  spiel1:[1.04, 0.15, 0.025],
-  spiel2:[1.0, 0.0643, 0.0786],
-  spiel3:[0.904, 0.0857, -0.0071],
-  spiel4:[1.061, 0.1405, 0.0155],
+  spiel1:[1.059, 0.15, 0.025],
+  spiel2:[1.001, 0.0643, 0.0786],
+  spiel3:[0.867, 0.0857, -0.0071],
+  spiel4:[1.089, 0.1405, 0.0155],
   stehen:[1.009, 0.1095, 0.0167],
   strecken:[1.053, 0.0833, 0.0143],
-  trinken1:[0.989, 0.15, 0.0274],
-  trinken2:[1.019, 0.1738, 0.0464],
-  trinken3:[0.969, 0.1167, 0.0214],
-  trinken4:[0.779, 0.019, 0.0452],
-  trinken5:[0.949, 0.081, 0.044]
+  trinken1:[1.015, 0.15, 0.0274],
+  trinken2:[1.059, 0.1738, 0.0464],
+  trinken3:[0.985, 0.1167, 0.0214],
+  trinken4:[0.722, 0.019, 0.0452],
+  trinken5:[0.958, 0.081, 0.044]
 };
 /* Für jede Haltung eine Aufnahme. Das Gehen wechselt zwischen zwei Schritten. */
 /* Welche Aufnahmen zu welcher Haltung gehören. Mehrere Namen = Bildfolge. */
