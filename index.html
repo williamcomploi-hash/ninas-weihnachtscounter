@@ -1092,7 +1092,10 @@ function fotoSetzen(pfad){
   probe.src = pfad;
 }
 
-fotoSetzen(fotoFuer());
+/* Läuft der Film, ist sein eigenes Standbild der Grund — kein Jahreszeitenbild,
+   das eine Sekunde später weggeblendet würde. Ohne Film (Telefon, Sparmodus,
+   wenig Bewegung) bleibt es beim Bild des Tages. */
+fotoSetzen(filmMoeglich() ? "bilder/stube-poster.jpg" : fotoFuer());
 
 
 /* ---------------- Der Film der Stube ----------------
@@ -1110,15 +1113,19 @@ fotoSetzen(fotoFuer());
 const filmEl = document.getElementById("buehne-film");
 let filmLaeuft = false;
 
-function filmStarten(){
-  if (filmLaeuft) return;
-  if (window.innerWidth < 820) return;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-  /* Sparsamer Modus oder langsame Verbindung: dann bleibt das Bild stehen. */
+/* Kann der Film hier überhaupt laufen? Das muss VOR dem ersten Bild feststehen,
+   sonst steht erst ein Jahreszeitenbild da und springt eine Sekunde später auf
+   die Stube um. Wo der Film läuft, gehört ihm auch das Standbild. */
+function filmMoeglich(){
+  if (window.innerWidth < 820) return false;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
   const netz = navigator.connection;
-  if (netz && (netz.saveData || /2g/.test(netz.effectiveType || ""))) return;
+  if (netz && (netz.saveData || /2g/.test(netz.effectiveType || ""))) return false;
+  return true;
+}
 
+function filmStarten(){
+  if (filmLaeuft || !filmMoeglich()) return;
   filmLaeuft = true;
   const webm = document.createElement("source");
   webm.src = "bilder/stube.webm"; webm.type = "video/webm";
@@ -1497,7 +1504,7 @@ document.getElementById("zauber-heute").addEventListener("click",()=>{
   zauberZeiger = zauberHeute;
   zauberSetzen(zauberHeute);
   buehneSetzen(imDezember ? buehneHeute : 0);
-  fotoSetzen(fotoFuer());
+  fotoSetzen(filmMoeglich() ? "bilder/stube-poster.jpg" : fotoFuer());
   if (filmLaeuft){ filmEl.classList.add("da");
     document.getElementById("buehne").classList.add("mit-film");
     filmEl.play().catch(() => {}); }
