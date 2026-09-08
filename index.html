@@ -1764,7 +1764,7 @@ const snoopySprueche = {
   /* ---- Rufen ----
      Sie hört meistens, aber nicht immer. Eine Katze, die jedes Mal gehorcht,
      ist keine Katze — und ein Knopf, der nie überrascht, wird nach dreimal
-     langweilig. Zwei von zehn Malen macht sie etwas anderes. */
+     langweilig. Drei von zehn Malen macht sie etwas anderes. */
   const antwortEl = document.getElementById("rufen-antwort");
   const gehorcht = {
     fressen: ["Sie kommt sofort.", "Dafür lässt sie alles stehen.", "Das musst du nicht zweimal sagen."],
@@ -1784,7 +1784,7 @@ const snoopySprueche = {
   document.querySelectorAll("[data-befehl]").forEach(knopf => {
     knopf.addEventListener("click", () => {
       const befehl = knopf.dataset.befehl;
-      const hoert = Math.random() > 0.2;
+      const hoert = Math.random() > 0.3;   /* sieben von zehn */
 
       if (hoert){
         wechsle(befehl, dauer[befehl]() + 3000, snoopySprueche[befehl]);
