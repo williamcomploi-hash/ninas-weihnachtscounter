@@ -1584,7 +1584,7 @@ const snoopySprueche = {
         const jetztBild = koerper.querySelector("img");
         if (jetztBild) jetztBild.remove();
         koerper.insertAdjacentHTML("afterbegin", reihe[schrittZaehler]);
-      }, 160);
+      }, 200);
     }
   }
   function sagen(wort){
@@ -1649,7 +1649,11 @@ const snoopySprueche = {
     zuletzt = jetztMs;
 
     if (haltung === "gehen"){
-      x += richtung * dt * 0.045;
+      /* Tempo und Bildwechsel müssen zusammenpassen, sonst tritt sie auf der
+         Stelle: fünf Bilder à 200 ms sind ein Zyklus von einer Sekunde, und in
+         dieser Sekunde soll sie etwa eine Körperlänge weit kommen (rund 130 px).
+         Daher 0,13 px je Millisekunde statt 0,045. */
+      x += richtung * dt * 0.13;
       const breite = window.innerWidth - koerper.offsetWidth - 16;
       if (x < 0){ x = 0; richtung = 1; }
       if (x > breite){ x = breite; richtung = -1; }
