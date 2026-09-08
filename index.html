@@ -1357,12 +1357,15 @@ function mischen(a, b, teil){
   return "#" + m(r1,r2) + m(g1,g2) + m(b1,b2);
 }
 
-function buehneSetzen(n){
+/* Vom 1. bis 24. Dezember liegt der Ton fest — jeder Tag hat seinen eigenen,
+   und der bleibt Jahr fuer Jahr derselbe. `ton` ueberschreibt ihn und wird nur
+   ausserhalb des Dezembers benutzt, wo nichts festgelegt sein muss. */
+function buehneSetzen(n, ton){
   const h = buehnen[n] || buehnen[0];
   const w = document.getElementById("buehne");
   /* Der oberste Ton bleibt der des Tages, die beiden unteren ziehen zur
      Stimmung — sonst staende eine rosa Buehne ueber einer gruenen Seite. */
-  const g = stimmungen[h.s] || stimmungen.rosa;
+  const g = stimmungen[ton] || stimmungen[h.s] || stimmungen.rosa;
   w.style.setProperty("--h-a", h.a);
   w.style.setProperty("--h-b", mischen(g.glasur, "#ffffff", .35));
   w.style.setProperty("--h-c", mischen(g.pastell, "#ffffff", .55));
@@ -1370,7 +1373,7 @@ function buehneSetzen(n){
 
   /* Der Ton gilt fuer die ganze Seite, nicht nur fuer die Buehne — sonst
      stuende ein gruener Kopf ueber einem rosa Rest. */
-  const f = stimmungen[h.s] || stimmungen.rosa;
+  const f = stimmungen[ton] || stimmungen[h.s] || stimmungen.rosa;
   const r = document.documentElement.style;
   r.setProperty("--rot", f.rot);
   r.setProperty("--rot-tief", f.tief);
@@ -1401,7 +1404,14 @@ function buehneSetzen(n){
    sie richtet sich nach dem Tag im Jahr, damit sie nie zwei Tage gleich aussieht. */
 const buehneHeute = imDezember ? heuteTag
   : (Math.floor((jetzt - new Date(jetzt.getFullYear(),0,0)) / 864e5) % 24) + 1;
-buehneSetzen(imDezember ? buehneHeute : 0);
+/* Ausserhalb des Dezembers wechselt der Ton taeglich durch alle acht —
+   der Text bleibt der der Vorfreude, nur die Farbe ist jeden Tag eine andere.
+   Im Dezember ruehrt das hier nichts an. */
+const toene = Object.keys(stimmungen);
+const tagImJahr = Math.floor((jetzt - new Date(jetzt.getFullYear(), 0, 0)) / 864e5);
+const tonAusserhalb = toene[tagImJahr % toene.length];
+
+buehneSetzen(imDezember ? buehneHeute : 0, imDezember ? null : tonAusserhalb);
 
 
 /* ---------------- Das Bild des Tages ----------------
@@ -1863,7 +1873,7 @@ document.getElementById("zauber-weiter").addEventListener("click",()=>{
 document.getElementById("zauber-heute").addEventListener("click",()=>{
   zauberZeiger = zauberHeute;
   zauberSetzen(zauberHeute);
-  buehneSetzen(imDezember ? buehneHeute : 0);
+  buehneSetzen(imDezember ? buehneHeute : 0, imDezember ? null : tonAusserhalb);
   fotoSetzen(filmMoeglich() ? "bilder/stube-poster.jpg" : fotoFuer());
   if (filmLaeuft){ filmEl.classList.add("da");
     document.getElementById("buehne").classList.add("mit-film");
