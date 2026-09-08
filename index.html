@@ -510,6 +510,21 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 .keks-knopf:focus-visible{outline:3px solid var(--rot);outline-offset:6px;border-radius:50%}
 .keks-knopf svg{width:100%;height:100%;display:block}
 
+/* Die Sprechwolke über dem Keks. Sie wackelt, bis jemand geklickt hat —
+   danach ist sie weg und kommt auch beim nächsten Besuch nicht wieder. */
+.keks-wolke{position:absolute;left:50%;top:-14px;translate:-50% -100%;z-index:3;
+  font-family:var(--f-display);font-weight:600;font-size:clamp(17px,2.2vw,22px);
+  color:var(--rot);background:#fff;border:2px solid var(--rot);border-radius:99px;
+  padding:9px 20px;white-space:nowrap;pointer-events:none;
+  box-shadow:0 10px 20px -14px rgba(192,48,63,.8);
+  animation:wolkewippt 1.9s ease-in-out infinite;transition:opacity .3s, scale .3s}
+.keks-wolke::after{content:"";position:absolute;left:50%;bottom:-9px;translate:-50% 0;
+  width:15px;height:15px;background:#fff;border-right:2px solid var(--rot);
+  border-bottom:2px solid var(--rot);rotate:45deg;border-radius:0 0 4px 0}
+@keyframes wolkewippt{0%,100%{translate:-50% -100%;rotate:-2.5deg}
+  50%{translate:-50% calc(-100% - 8px);rotate:2.5deg}}
+.keks-wolke.weg{opacity:0;scale:.6}
+
 .krumen{position:absolute;inset:0;pointer-events:none;overflow:visible}
 .krume{position:absolute;left:50%;top:50%;width:11px;height:11px;border-radius:40% 60% 55% 45%;
   background:var(--lebkuchen);animation:kruemeln .72s ease-out forwards}
@@ -736,11 +751,14 @@ body.verwaltet .buch-weg{display:block}
     </div>
 
     <div class="kekstafel">
+      <div style="position:relative">
+      <span class="keks-wolke" id="keks-wolke" aria-hidden="true">Click me!</span>
       <button class="keks-knopf" id="keks-knopf" aria-describedby="keks-zahl">
         <span class="krumen" id="krumen" aria-hidden="true"></span>
         <span id="keks-bild" aria-hidden="true"></span>
         <span class="sr-nur">Keks knabbern</span>
       </button>
+      </div>
       <div>
         <span class="keks-zahl" id="keks-zahl" aria-live="polite">0</span>
         <p class="keks-wort" id="keks-wort">Kekse geknabbert</p>
@@ -2103,8 +2121,21 @@ const KEKS_WEG = "/api/keks";
     } catch(e){ offen += wieviel; }   /* nicht durchgekommen: beim nächsten Mal mit */
   }
 
+  /* Die Wolke verschwindet beim ersten Klick — und bleibt weg. Wer schon
+     weiß, dass man klicken kann, braucht die Aufforderung nicht mehr. */
+  const wolke = document.getElementById("keks-wolke");
+  let schonGeklickt = false;
+  try { schonGeklickt = localStorage.getItem("nina-keks-gewusst") === "ja"; } catch(e){}
+  if (schonGeklickt && wolke) wolke.remove();
+
   knopf.addEventListener("click", () => {
     if (!darfKlicken()) return;
+    if (wolke && !schonGeklickt){
+      schonGeklickt = true;
+      wolke.classList.add("weg");
+      setTimeout(() => wolke.remove(), 400);
+      try { localStorage.setItem("nina-keks-gewusst", "ja"); } catch(e){}
+    }
     kruemel();
     zahlZeigen(stand + 1);
     eigene++; eigeneZeigen();
