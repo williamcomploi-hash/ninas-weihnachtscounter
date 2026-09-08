@@ -462,6 +462,12 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 .zauber-leiste .name{font-family:var(--f-display);font-weight:600;font-size:19px}
 .zauber-leiste .rest{color:var(--tinte-matt);font-size:14.5px;flex:1;min-width:180px}
 .zauber-leiste .knopf{padding:9px 16px}
+/* Auf schmalen Fenstern bricht die Leiste in mehrere Zeilen um. Aus der Pille
+   wird dann ein hoher Block, und 99 px Radius runden ihn zur Kapsel. */
+@media(max-width:720px){
+  .zauber-leiste{border-radius:20px;align-items:flex-start;padding:18px 20px}
+  .zauber-leiste .rest{min-width:0}
+}
 
 /* ---------- Elfen ---------- */
 .werkstatt{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
@@ -479,6 +485,16 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   color:var(--gold);display:block;margin-bottom:8px}
 .elf p{margin:0;font-size:14px;color:var(--tinte-matt);line-height:1.5}
 .elf.katze-karte{background:linear-gradient(170deg,#fff6ee 0%,#ffe2e7 100%);border-color:rgba(232,128,154,.5)}
+
+/* ---------- Snoopy rufen ---------- */
+.rufen{margin-top:22px;padding-top:20px;border-top:1px dashed rgba(232,128,154,.5)}
+.rufen-zeile{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.rufen-schrift{font-family:var(--f-zahl);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--tinte-matt);margin:0 6px 0 0}
+.rufen .knopf{background:#fff}
+.rufen .knopf:disabled{opacity:.45;cursor:default;border-color:var(--linie);color:var(--tinte-matt)}
+.rufen-antwort{font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.1em;
+  color:var(--rot);min-height:16px;margin:12px 0 0}
 
 /* ---------- Tisch ---------- */
 .tisch{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
@@ -621,6 +637,17 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
       <p>Kein Lametta, keine Glaskugeln in Bodennähe, und der Christbaum wird oben an der Wand
          angebunden — Snoopy hat sich das nicht ausgedacht, aber sie ist der Grund dafür. Wer schon einmal einen umgelegten Baum am 24. um halb sechs wieder aufgestellt
          hat, weiß warum. Dafür gehört der leere Geschenkkarton ab dem 25. offiziell ihr.</p>
+
+      <div class="rufen">
+        <div class="rufen-zeile">
+          <span class="rufen-schrift">Ruf sie</span>
+          <button class="knopf" data-befehl="fressen">Füttern</button>
+          <button class="knopf" data-befehl="spielen">Spielen</button>
+          <button class="knopf" data-befehl="liegen">Platz</button>
+          <button class="knopf" data-befehl="sitzen">Sitz</button>
+        </div>
+        <p class="rufen-antwort" id="rufen-antwort">Sie läuft irgendwo herum. Ruf sie, wenn du magst.</p>
+      </div>
     </div>
   </section>
 
@@ -1732,6 +1759,49 @@ const snoopySprueche = {
 
   koerper.addEventListener("click", () => {
     wechsle("sitzen", 4000, snoopySprueche.hallo);
+  });
+
+  /* ---- Rufen ----
+     Sie hört meistens, aber nicht immer. Eine Katze, die jedes Mal gehorcht,
+     ist keine Katze — und ein Knopf, der nie überrascht, wird nach dreimal
+     langweilig. Zwei von zehn Malen macht sie etwas anderes. */
+  const antwortEl = document.getElementById("rufen-antwort");
+  const gehorcht = {
+    fressen: ["Sie kommt sofort.", "Dafür lässt sie alles stehen.", "Das musst du nicht zweimal sagen."],
+    spielen: ["Sie ist schon dabei.", "Das Knäuel hat verloren.", "Augen weit, Hinterteil wackelt."],
+    liegen:  ["Sie legt sich hin.", "Sie hat sich einen warmen Platz gesucht.", "Na gut, aber nur kurz."],
+    sitzen:  ["Sie setzt sich hin und schaut.", "Sie sitzt. Für den Moment.", "Sie schaut dich an."]
+  };
+  const ignoriert = [
+    "Sie hat dich gehört. Sie tut nur nichts.",
+    "Sie schaut kurz her und dann weg.",
+    "Später vielleicht.",
+    "Sie putzt sich erst fertig.",
+    "Das war ein Nein."
+  ];
+  const zufaellig = liste => liste[Math.floor(Math.random() * liste.length)];
+
+  document.querySelectorAll("[data-befehl]").forEach(knopf => {
+    knopf.addEventListener("click", () => {
+      const befehl = knopf.dataset.befehl;
+      const hoert = Math.random() > 0.2;
+
+      if (hoert){
+        wechsle(befehl, dauer[befehl]() + 3000, snoopySprueche[befehl]);
+        antwortEl.textContent = zufaellig(gehorcht[befehl]);
+      } else {
+        /* Sie macht das, was ihr gerade lieber ist. */
+        const trotz = zufaellig(["putzen", "gaehnen", "liegen", "gehen"]);
+        if (trotz === "gehen") neuesZiel();
+        wechsle(trotz, dauer[trotz](), snoopySprueche[trotz]);
+        antwortEl.textContent = zufaellig(ignoriert);
+      }
+
+      /* Kurz sperren, damit man sie nicht durch die Haltungen jagt. */
+      document.querySelectorAll("[data-befehl]").forEach(k => k.disabled = true);
+      setTimeout(() => document.querySelectorAll("[data-befehl]")
+        .forEach(k => k.disabled = false), 1400);
+    });
   });
 
   let zuletzt = performance.now();
