@@ -389,14 +389,14 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 .snoopy-koerper img{position:absolute;inset:0;width:100%;height:100%;display:block;
   object-fit:contain;object-position:bottom;
   opacity:0;transition:opacity .11s linear;
-  transform-origin:50% 100%;
-  transform:translate(calc(var(--dx,0) * 100%), calc(var(--dy,0) * -100%))
+  transform-origin:calc(var(--sx,.5) * 100%) calc(var(--sy,.5) * 100%);
+  transform:translate(calc(var(--dx,0) * 100%), calc(var(--dy,0) * 100%))
             scale(var(--s,1)) scaleX(var(--flip,1))}
 .snoopy-koerper img.da{opacity:1}
-/* Innerhalb einer Bildfolge wird hart geschaltet. Blendet man Schritt gegen
-   Schritt, sind immer zwei Beinstellungen zugleich halb sichtbar — die Katze
-   erscheint doppelt. Überblendet wird nur beim Wechsel der Haltung. */
-.snoopy-koerper.folge img{transition:none}
+/* Auch innerhalb einer Bildfolge wird weich überblendet, nur kürzer.
+   Das Doppelbild von vorher kam nicht vom Blenden, sondern davon, dass die
+   Schrittbilder auf verschiedener Höhe lagen — das ist jetzt ausgeglichen. */
+.snoopy-koerper.folge img{transition-duration:.07s}
 /* Beim Blick nach links kippt nur das Bild, nie die Sprechblase. */
 .snoopy-koerper[data-blick="links"] img{--flip:-1}
 
@@ -1551,32 +1551,38 @@ const snoopyPfad = "bilder/snoopy/";
    ZWISCHEN den Haltungen wird gedämpft (Exponent 0,7) — eine sitzende Katze
    darf höher sein als eine liegende. Streuung dort: 14,3 statt 68,8 Prozent.
 
-   WICHTIG beim Versatz: innerhalb einer Bildfolge bekommen ALLE Bilder
-   denselben Versatz, nicht jedes seinen eigenen. Sonst wird der Körper
-   künstlich gehoben und gesenkt — beim Gehen ist der tiefste Punkt mal die
-   aufsetzende Pfote, mal eine angehobene, und die Katze hüpft. */
+   AUSGERICHTET WIRD AM SCHWERPUNKT, nicht an der Pfote. Beim Gehen wandert
+   die tiefste Pfote um 15,5 Prozentpunkte (mal setzt sie auf, mal ist sie in
+   der Luft), der Schwerpunkt des Körpers nur um 6,2. Richtet man an der Pfote
+   aus, hebt und senkt sich die Katze sichtbar. Am Schwerpunkt ausgerichtet
+   bleibt sie ruhig: gemessene Streuung 0,00 Prozentpunkte.
+
+   Skaliert wird ebenfalls UM den Schwerpunkt (transform-origin), damit die
+   Größenkorrektur ihn nicht wieder verschiebt.
+
+   Je Eintrag: Faktor, Höhenversatz, Seitenversatz, Schwerpunkt X, Schwerpunkt Y. */
 const snoopyAusgleich = {
-  fressen:[1.076, 0.1714, 0.0298],
-  gaehnen:[0.823, -0.0262, -0.025],
-  liegen:[1.124, 0.2214, 0.0143],
-  putzen:[0.864, 0.0476, 0.0048],
-  schritt1:[0.917, 0.1195, 0.0226],
-  schritt2:[0.891, 0.1195, 0.0226],
-  schritt3:[1.039, 0.1195, 0.0226],
-  schritt4:[1.035, 0.1195, 0.0226],
-  schritt5:[1.066, 0.1195, 0.0226],
-  sitzen:[0.844, -0.05, 0.0369],
-  spiel1:[1.059, 0.1101, 0.028],
-  spiel2:[1.001, 0.1101, 0.028],
-  spiel3:[0.867, 0.1101, 0.028],
-  spiel4:[1.089, 0.1101, 0.028],
-  stehen:[1.009, 0.1095, 0.0167],
-  strecken:[1.053, 0.0833, 0.0143],
-  trinken1:[1.015, 0.1081, 0.0369],
-  trinken2:[1.059, 0.1081, 0.0369],
-  trinken3:[0.985, 0.1081, 0.0369],
-  trinken4:[0.722, 0.1081, 0.0369],
-  trinken5:[0.958, 0.1081, 0.0369]
+  fressen:[1.076, 0.1585, -0.0317, 0.5317, 0.5586],
+  gaehnen:[0.823, 0.0371, 0.0051, 0.4949, 0.5687],
+  liegen:[1.124, 0.2031, -0.076, 0.576, 0.5306],
+  putzen:[0.864, 0.0875, -0.0273, 0.5273, 0.5593],
+  schritt1:[0.917, 0.0918, 0.0168, 0.4832, 0.552],
+  schritt2:[0.891, 0.1004, 0.0376, 0.4624, 0.5434],
+  schritt3:[1.039, 0.1363, -0.0506, 0.5506, 0.5075],
+  schritt4:[1.035, 0.1397, -0.0022, 0.5022, 0.5041],
+  schritt5:[1.066, 0.1538, -0.0276, 0.5276, 0.49],
+  sitzen:[0.844, 0.0105, 0.0285, 0.4715, 0.5631],
+  spiel1:[1.059, 0.1194, 0.0217, 0.4783, 0.5309],
+  spiel2:[1.001, 0.1053, 0.0076, 0.4924, 0.545],
+  spiel3:[0.867, 0.0933, 0.0211, 0.4789, 0.557],
+  spiel4:[1.089, 0.1227, -0.0056, 0.5056, 0.5276],
+  stehen:[1.009, 0.1071, -0.0552, 0.5552, 0.5398],
+  strecken:[1.053, 0.0716, 0.0174, 0.4826, 0.5965],
+  trinken1:[1.015, 0.1534, 0.0127, 0.4873, 0.4969],
+  trinken2:[1.059, 0.162, 0.0224, 0.4776, 0.4883],
+  trinken3:[0.985, 0.1006, 0.0171, 0.4829, 0.5497],
+  trinken4:[0.722, 0.0955, 0.1118, 0.3882, 0.5548],
+  trinken5:[0.958, 0.1177, -0.0225, 0.5225, 0.5326]
 };
 /* Für jede Haltung eine Aufnahme. Das Gehen wechselt zwischen zwei Schritten. */
 /* Welche Aufnahmen zu welcher Haltung gehören. Mehrere Namen = Bildfolge. */
@@ -1633,7 +1639,9 @@ const snoopySprueche = {
       const a = snoopyAusgleich[name];
       if (a){ el.style.setProperty("--s", a[0]);
               el.style.setProperty("--dy", a[1]);
-              el.style.setProperty("--dx", a[2]); }
+              el.style.setProperty("--dx", a[2]);
+              el.style.setProperty("--sx", a[3]);
+              el.style.setProperty("--sy", a[4]); }
       koerper.appendChild(el);
       return el;
     });
