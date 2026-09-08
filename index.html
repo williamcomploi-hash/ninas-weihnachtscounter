@@ -79,8 +79,61 @@ h1,h2,h3{font-family:var(--f-display);font-weight:600;text-wrap:balance;margin:0
 @keyframes drehen{to{transform:rotate(360deg)}}
 #himmel{position:fixed;inset:0;z-index:0;pointer-events:none}
 
+/* ---------- Bühne über die ganze Breite ---------- */
+.buehne{position:relative;z-index:2;width:100vw;margin-left:calc(50% - 50vw);
+  min-height:min(84dvh,820px);display:flex;align-items:flex-end;overflow:hidden;
+  border-radius:0 0 clamp(24px,4vw,48px) clamp(24px,4vw,48px);
+  background:linear-gradient(168deg,var(--h-a) 0%,var(--h-b) 58%,var(--h-c) 100%);
+  transition:background .9s ease}
+.buehne-foto{position:absolute;inset:0;background-size:cover;background-position:center 42%;
+  opacity:0;transition:opacity 1.1s ease}
+.buehne-foto.da{opacity:1}
+.buehne-foto::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg, rgba(255,248,244,.28) 0%, rgba(255,240,236,.06) 34%,
+             rgba(255,244,238,.18) 70%, rgba(255,248,244,.55) 100%)}
+.buehne.mit-foto .buehne-motiv{display:none}
+.buehne.mit-foto .buehne-boden{background:linear-gradient(to top,
+  var(--zucker) 0%, rgba(255,248,244,.97) 22%, rgba(255,248,244,.72) 42%, rgba(255,248,244,0) 68%)}
+.buehne.mit-foto h1{text-shadow:0 1px 0 rgba(255,248,244,.9)}
+
+.buehne-schein{position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(46% 40% at 78% 26%, var(--h-licht) 0%, transparent 66%),
+    radial-gradient(38% 34% at 14% 18%, rgba(255,255,255,.72) 0%, transparent 64%);
+  transition:background .9s ease}
+.buehne-boden{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top, var(--zucker) 0%, rgba(255,248,244,.92) 18%,
+    rgba(255,248,244,.55) 38%, rgba(255,248,244,0) 62%)}
+
+.buehne-motiv{position:absolute;right:clamp(-40px,2vw,80px);bottom:clamp(90px,14vh,190px);
+  width:clamp(210px,32vw,420px);height:clamp(210px,32vw,420px);
+  filter:drop-shadow(0 24px 40px rgba(169,102,47,.28));
+  animation:motivschweben 7s ease-in-out infinite}
+.buehne-motiv svg{width:100%;height:100%}
+@keyframes motivschweben{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-16px) rotate(1.5deg)}}
+.buehne-motiv.klein2{position:absolute;right:auto;left:clamp(-30px,4vw,90px);bottom:clamp(220px,32vh,360px);
+  width:clamp(90px,12vw,160px);height:clamp(90px,12vw,160px);animation-duration:9s;animation-delay:-3s;opacity:.85}
+@media(max-width:760px){.buehne-motiv{width:clamp(160px,44vw,240px);height:clamp(160px,44vw,240px);
+  right:-14px;bottom:clamp(180px,26vh,260px);opacity:.9}
+  .buehne-motiv.klein2{display:none}}
+
+.buehne-inhalt{position:relative;z-index:3;width:100%;max-width:var(--breite);
+  margin:0 auto;padding:clamp(120px,18vh,220px) 28px clamp(34px,5vw,58px)}
+.buehne-tag{font-family:var(--f-zahl);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--rot);display:block;margin-bottom:14px}
+.buehne h1{font-size:clamp(42px,8.6vw,92px);line-height:.98;letter-spacing:-.025em;
+  max-width:15ch;font-variation-settings:"SOFT" 60,"WONK" 1;font-weight:800}
+.buehne h1 em{font-style:normal;display:block;
+  background:linear-gradient(96deg,var(--rot) 0%,var(--rosa-satt) 46%,var(--gold) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.buehne .unterzeile{color:var(--tinte);max-width:46ch;margin-top:22px;font-size:clamp(16.5px,1.9vw,19px)}
+
+.kopfleiste{position:absolute;top:0;left:0;right:0;z-index:4;
+  max-width:var(--breite);margin:0 auto;padding:clamp(20px,3vw,32px) 28px;
+  display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap}
+
 /* ---------- Kopf ---------- */
-header{position:relative;z-index:2;padding:clamp(34px,6vw,64px) 0 0}
+header{position:relative;z-index:2;padding:0}
 .kopfzeile{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;
   padding-bottom:16px;border-bottom:1px solid var(--linie)}
 
@@ -88,8 +141,7 @@ header{position:relative;z-index:2;padding:clamp(34px,6vw,64px) 0 0}
   display:grid;grid-template-columns:minmax(0,1fr) auto;gap:34px;align-items:end}
 @media(max-width:820px){.titelblock{grid-template-columns:1fr;align-items:start}}
 
-h1{font-size:clamp(40px,8.2vw,84px);line-height:1;letter-spacing:-.02em;
-  font-variation-settings:"SOFT" 60,"WONK" 1;font-weight:800}
+h1{font-variation-settings:"SOFT" 60,"WONK" 1;font-weight:800}
 h1 em{font-style:normal;display:block;
   background:linear-gradient(96deg,var(--rot) 0%,var(--rosa-satt) 42%,var(--gold) 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent}
@@ -185,6 +237,29 @@ h1 em{font-style:normal;display:block;
 .tuer-zahl{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,3.4vw,36px);
   color:#fff8f4;text-shadow:0 2px 0 rgba(120,66,26,.55)}
 .tuer.heute-tuer .tuer-blatt{border-color:var(--rot);box-shadow:0 0 0 3px var(--gold), 0 12px 26px -16px rgba(192,48,63,.8)}
+
+/* Noch nicht dran: das Türchen bleibt zu */
+.tuer.verschlossen{cursor:not-allowed}
+.tuer.verschlossen .tuer-blatt{
+  background:linear-gradient(148deg,#e9d9c8 0%,#d3bda6 100%);
+  border-color:rgba(169,102,47,.28)}
+.tuer.verschlossen .tuer-blatt::after{border-style:solid;border-color:rgba(255,248,244,.5)}
+.tuer.verschlossen .tuer-zahl{color:rgba(255,248,244,.82);text-shadow:0 1px 0 rgba(120,66,26,.4)}
+.tuer.verschlossen:hover .tuer-blatt{box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 10px 22px -16px rgba(74,42,36,.7)}
+.tuer .siegel{position:absolute;right:8px;bottom:8px;width:16px;height:16px;opacity:.85}
+.tuer:not(.verschlossen) .siegel{display:none}
+.tuer.ruettelt .tuer-blatt{animation:ruetteln .42s ease-in-out}
+@keyframes ruetteln{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-5px)}45%{transform:translateX(5px)}
+  70%{transform:translateX(-3px)}88%{transform:translateX(2px)}}
+
+.schloss-hinweis{margin-top:16px;min-height:22px;font-size:15px;color:var(--rot-tief)}
+.schloss-hinweis b{font-family:var(--f-zahl);font-size:12px;letter-spacing:.08em}
+
+/* Verschlossene Vorschau in der Heute-Karte */
+.heute-karte.zugedeckt{background:linear-gradient(120deg,#fff 0%,#f7ece3 60%,#f2e2d4 100%);
+  border-color:var(--linie)}
 
 .tuer-innen{position:absolute;inset:0;border-radius:16px;display:flex;align-items:center;justify-content:center;
   background:radial-gradient(circle at 50% 40%, #fff 0%, var(--glasur) 46%, var(--rosa) 100%);
@@ -298,6 +373,7 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   text-transform:uppercase;color:var(--gold)}
 .zauber-leiste .name{font-family:var(--f-display);font-weight:600;font-size:19px}
 .zauber-leiste .rest{color:var(--tinte-matt);font-size:14.5px;flex:1;min-width:180px}
+.zauber-leiste .knopf{padding:9px 16px}
 
 /* ---------- Elfen ---------- */
 .werkstatt{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
@@ -338,25 +414,24 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 <div id="zauber" aria-hidden="true"></div>
 
 <header>
-  <div class="huelle">
-    <div class="kopfzeile">
+  <section class="buehne" id="buehne">
+    <div class="buehne-foto" id="buehne-foto"></div>
+    <div class="buehne-schein"></div>
+    <div class="buehne-motiv" id="buehne-motiv"></div>
+    <div class="buehne-motiv klein2" id="buehne-motiv2"></div>
+    <div class="buehne-boden"></div>
+
+    <div class="kopfleiste">
       <span class="marke">Ninas Weihnachtscounter</span>
       <span class="ort">Bei uns · 24. Dezember, nicht der 25.</span>
     </div>
 
-    <div class="titelblock">
-      <div>
-        <h1>Noch ein bisschen<em>Geduld, Nina.</em></h1>
-        <p class="unterzeile">Bei uns kommt das Christkind am Heiligen Abend — und bis dahin gibt es
-          jeden Tag etwas zu backen, zu holen oder einfach mit Snoopy auszusitzen.</p>
-      </div>
-      <div class="kerze-halter">
-        <div class="flamme"></div>
-        <div class="kerze-koerper"></div>
-        <span class="kerze-schrift">brennt seit heute</span>
-      </div>
+    <div class="buehne-inhalt">
+      <span class="buehne-tag" id="buehne-tag">Vorfreude</span>
+      <h1 id="buehne-titel">Noch ein bisschen<em>Geduld, Nina.</em></h1>
+      <p class="unterzeile" id="buehne-unter">Bei uns kommt das Christkind am Heiligen Abend.</p>
     </div>
-  </div>
+  </section>
 </header>
 
 <main class="huelle">
@@ -404,15 +479,15 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
       <div>
         <h2 id="k-titel">Vierundzwanzig Türchen</h2>
         <p>Durcheinander angeordnet, wie sich das für einen ordentlichen Kalender gehört.
-           Vorschauen ist erlaubt — wir verraten dich nicht.</p>
+           Jedes Türchen geht erst an seinem Tag auf — vorher hält es dicht.</p>
       </div>
       <span class="ort" id="stand">0 von 24 offen</span>
     </div>
     <div class="gitter" id="gitter"></div>
+    <p class="schloss-hinweis" id="schloss-hinweis"></p>
     <div class="werkzeuge">
-      <button class="knopf" id="alle-auf">Alle öffnen</button>
-      <button class="knopf" id="alle-zu">Alle schließen</button>
-      <button class="knopf" id="zufall">Zufälliges Türchen</button>
+      <button class="knopf" id="alle-auf">Alles Offene zeigen</button>
+      <button class="knopf" id="alle-zu">Wieder zumachen</button>
     </div>
   </section>
 
@@ -420,7 +495,9 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   <div class="zauber-leiste" id="zauber-leiste">
     <span class="was" id="zauber-was">Zauber am 1. Dezember</span>
     <span class="name" id="zauber-name">Kerzenschein</span>
-    <span class="rest" id="zauber-rest">Funken steigen auf. Öffne ein anderes Türchen — der ganze Bildschirm wechselt mit.</span>
+    <span class="rest" id="zauber-rest">Funken steigen auf.</span>
+    <button class="knopf" id="zauber-weiter">Anderer Zauber</button>
+    <button class="knopf" id="zauber-heute">Zauber von heute</button>
   </div>
 
   <section class="werkstatt" aria-labelledby="w-titel">
@@ -837,6 +914,102 @@ const tage=[
 ];
 
 
+
+/* ---------------- Die Bühne des Tages ----------------
+   Eigenes Ding, wie der Zauber: sie verrät nichts aus den Türchen,
+   sie hält nur die Stimmung des Tages. Farben, Motiv und Text wechseln täglich. */
+const buehnen = {
+ 1:{tag:"Der erste Advent-Tag", t:["Es fängt","heute an."], u:"Vier Kerzen, eine brennt. Der Rest der Geschichte kommt von selbst.", m:"kranz", m2:"kerze", a:"#fff4ef", b:"#ffe6e9", c:"#ffeadb", l:"rgba(221,148,51,.34)"},
+ 2:{tag:"Es riecht nach Ofen", t:["Die Küche","gehört uns."], u:"Ab heute ist Mehl auf der Arbeitsplatte, und das bleibt drei Wochen so.", m:"keks", m2:"zimtstern", a:"#fff6ee", b:"#ffeadd", c:"#ffe3d2", l:"rgba(221,148,51,.4)"},
+ 3:{tag:"Ein ruhiger Tag", t:["Snoopy hat","entschieden."], u:"Der beste Platz im Haus ist heute besetzt. Diskussion zwecklos.", m:"katze", m2:"karton", a:"#fff7f2", b:"#ffeee5", c:"#ffe8e2", l:"rgba(232,128,154,.34)"},
+ 4:{tag:"Barbaratag", t:["Etwas,","das wartet."], u:"Manches muss man drei Wochen stehen lassen, damit es am richtigen Tag da ist.", m:"schneekugel", m2:"tanne", a:"#f6fbff", b:"#ffeef2", c:"#fff0e6", l:"rgba(232,128,154,.3)"},
+ 5:{tag:"Die Nacht davor", t:["Hörst du","die Schellen?"], u:"Heute wird es laut im Dorf. Wer die Glocken hört, weiß, wer unterwegs ist.", m:"glocke", m2:"stern", a:"#fff2f2", b:"#ffe4e6", c:"#f9e6dc", l:"rgba(192,48,63,.26)"},
+ 6:{tag:"Nikolaus", t:["Kleines","zuerst."], u:"Mandarinen, Nüsse, Schokolade. Das Große kommt später — deshalb zählt das Kleine heute.", m:"socke", m2:"geschenk", a:"#fff4ee", b:"#ffe8dc", c:"#ffe0e4", l:"rgba(221,148,51,.42)"},
+ 7:{tag:"Weiß geworden", t:["Draußen","liegt was."], u:"Die erste unberührte Fläche im Garten gehört dem, der zuerst hinausgeht.", m:"schneemann", m2:"schnee", a:"#f7fbff", b:"#fff2f4", c:"#fff3ea", l:"rgba(255,255,255,.85)"},
+ 8:{tag:"Dampf am Fenster", t:["Es wird","warm."], u:"Draußen kalt, drinnen Zimt. So gehört sich das im Dezember.", m:"punsch", m2:"bratapfel", a:"#fff3ea", b:"#ffe6e0", c:"#ffdfd6", l:"rgba(192,48,63,.28)"},
+ 9:{tag:"Kisten vom Dachboden", t:["Alles","wieder da."], u:"Jedes Jahr geht eine kaputt, jedes Jahr kommt eine dazu. So bleibt die Schachtel voll.", m:"stern", m2:"schneekugel", a:"#fffaf0", b:"#ffeeea", c:"#ffe9f0", l:"rgba(221,148,51,.46)"},
+10:{tag:"Es wird hell", t:["Licht","ins Dunkle."], u:"Warmweiß. Am Geländer entlang. Über blinkend reden wir gar nicht.", m:"licht", m2:"kerze", a:"#fff8ee", b:"#ffece2", c:"#ffe6ec", l:"rgba(221,148,51,.5)"},
+11:{tag:"Baustelle Küche", t:["Es wird","schief."], u:"Und genau deshalb wird es gut. Zuckerguss verzeiht fast alles.", m:"lebkuchenmann", m2:"keks", a:"#fff3e8", b:"#ffe7d8", c:"#ffdfd4", l:"rgba(169,102,47,.3)"},
+12:{tag:"Snoopys Tag", t:["Eine Regel","gilt immer."], u:"Sie hat sie nicht gemacht. Sie ist der Grund dafür.", m:"katze", m2:"tanne", a:"#fff6f4", b:"#ffe9ee", c:"#ffe4e0", l:"rgba(232,128,154,.4)"},
+13:{tag:"Luzia", t:["Der kürzeste","Nachmittag."], u:"Heute wird jede Kerze angezündet, die im Haus zu finden ist.", m:"kerze", m2:"kranz", a:"#fff9ec", b:"#ffeee0", c:"#ffe6e8", l:"rgba(221,148,51,.55)"},
+14:{tag:"Post geht raus", t:["Drei Wünsche","reichen."], u:"Auf Papier, mit der Hand. Der Rest ist Sache des Christkinds.", m:"stern", m2:"socke", a:"#fdf6ff", b:"#ffeef2", c:"#fff0e4", l:"rgba(232,128,154,.36)"},
+15:{tag:"Unter Leuten", t:["Einmal","ganz herum."], u:"Beim zweiten Mal weiß man, wo der gute Punsch steht. Das ist der ganze Trick.", m:"licht", m2:"punsch", a:"#fff4ec", b:"#ffe6e4", c:"#ffdee8", l:"rgba(192,48,63,.3)"},
+16:{tag:"Türe zu", t:["Nicht","hereinschauen."], u:"Heute wird auf dem Boden gearbeitet. Papier, Schere, Band — und niemand darf gucken.", m:"geschenk", m2:"katze", a:"#fff2f5", b:"#ffe4ea", c:"#ffe8db", l:"rgba(232,128,154,.42)"},
+17:{tag:"Wetterlage", t:["Draußen","steht wer."], u:"Zwei Karotten, ein Zylinder, ein Ohrring. Mehr braucht es nicht.", m:"schneemann", m2:"schneefrau", a:"#f6fbff", b:"#fff0f2", c:"#fff4ea", l:"rgba(255,255,255,.9)"},
+18:{tag:"Auf den Berg", t:["Hinauf","dauert länger."], u:"Dreimal so lang wie hinunter. Genau deshalb macht man es.", m:"schlitten", m2:"berg", a:"#f8fbff", b:"#ffeef0", c:"#ffeee2", l:"rgba(63,110,86,.2)"},
+19:{tag:"Er kommt herein", t:["Ein Baum","im Wohnzimmer."], u:"Lieber eine Handbreit zu klein als eine zu groß. Die Decke gewinnt immer.", m:"tanne", m2:"berg", a:"#f5fbf6", b:"#ffeff0", c:"#fff1e4", l:"rgba(63,110,86,.26)"},
+20:{tag:"Aufputzen", t:["Lichter,","dann Kugeln."], u:"Zuletzt der Stern. Und die unteren dreißig Zentimeter bleiben leer.", m:"tanne", m2:"zuckerstange", a:"#fff8ef", b:"#ffece6", c:"#ffe4ee", l:"rgba(221,148,51,.5)"},
+21:{tag:"Sonnenwende", t:["Die längste","Nacht."], u:"Ab morgen werden die Tage wieder länger. Man merkt es drei Wochen lang nicht.", m:"stern", m2:"schneekugel", a:"#fdf5ff", b:"#ffedf3", c:"#fff0e8", l:"rgba(232,128,154,.34)"},
+22:{tag:"Austragen", t:["Die schönen","kommen weg."], u:"Die schiefen bleiben daheim. So war es immer, so bleibt es.", m:"kletzenbrot", m2:"keks", a:"#fff5ea", b:"#ffe8dc", c:"#ffe2d6", l:"rgba(169,102,47,.32)"},
+23:{tag:"Der Tag davor", t:["Heute","nichts."], u:"Nicht mehr einkaufen, nicht mehr putzen. Vorfreude braucht Platz.", m:"rentier", m2:"gespann", a:"#fffaf3", b:"#fff0ea", c:"#ffeae6", l:"rgba(221,148,51,.3)"},
+24:{tag:"Heiliger Abend", t:["Jetzt","ist es soweit."], u:"Am Nachmittag geht die Tür zu. Dann ist es lange still. Und dann läutet es.", m:"glocke", m2:"gespann", a:"#fff6ea", b:"#ffe4e6", c:"#ffd9dd", l:"rgba(221,148,51,.62)"},
+ 0:{tag:"Noch weit weg", t:["Noch ein bisschen","Geduld, Nina."], u:"Bei uns kommt das Christkind am Heiligen Abend. Bis dahin zählt der Zähler, und Snoopy schläft.", m:"schneekugel", m2:"katze", a:"#fff7f3", b:"#ffedf0", c:"#fff0e6", l:"rgba(232,128,154,.3)"}
+};
+
+function buehneSetzen(n){
+  const h = buehnen[n] || buehnen[0];
+  const w = document.getElementById("buehne");
+  w.style.setProperty("--h-a", h.a);
+  w.style.setProperty("--h-b", h.b);
+  w.style.setProperty("--h-c", h.c);
+  w.style.setProperty("--h-licht", h.l);
+  document.getElementById("buehne-tag").textContent = h.tag;
+  document.getElementById("buehne-titel").innerHTML = h.t[0] + "<em>" + h.t[1] + "</em>";
+  document.getElementById("buehne-unter").textContent = h.u;
+  document.getElementById("buehne-motiv").innerHTML = bild[h.m];
+  document.getElementById("buehne-motiv2").innerHTML = bild[h.m2];
+}
+
+/* Im Dezember der Tag selbst. Davor wechselt sie trotzdem täglich —
+   sie richtet sich nach dem Tag im Jahr, damit sie nie zwei Tage gleich aussieht. */
+const buehneHeute = imDezember ? heuteTag
+  : (Math.floor((jetzt - new Date(jetzt.getFullYear(),0,0)) / 864e5) % 24) + 1;
+buehneSetzen(imDezember ? buehneHeute : 0);
+
+
+/* ---------------- Das Bild des Tages ----------------
+   Im Dezember das Bild des jeweiligen Tages, sonst eines aus dem Vorrat der
+   Jahreszeit. Es wechselt täglich und wiederholt sich erst nach Wochen.
+   Fehlt die Datei (etwa im Artefakt, wo keine Bilder mitgeliefert werden),
+   bleibt der Farbverlauf stehen — die Bühne funktioniert auch ohne. */
+const dezemberBilder = [1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,22,23,24];
+const jahresVorrat = {
+  0:[9,10], 1:[10,11], 2:[11], 3:[11,12], 4:[11,12], 5:[12],
+  6:[12], 7:[12,1], 8:[1,2], 9:[3,4,7,8], 10:[5,6,4,8], 11:[]
+};
+
+function zweistellig(n){ return (n<10?"0":"") + n; }
+
+function fotoFuer(){
+  const m = jetzt.getMonth(), t = jetzt.getDate();
+  if (m === 11){
+    if (t <= 24 && dezemberBilder.includes(t)) return "bilder/tag-" + zweistellig(t) + ".jpg";
+    return "bilder/tag-24.jpg";           /* zwischen Weihnachten und Silvester */
+  }
+  const vorrat = jahresVorrat[m];
+  if (!vorrat || !vorrat.length) return null;
+  return "bilder/jahr-" + zweistellig(vorrat[(t - 1) % vorrat.length]) + ".jpg";
+}
+
+function fotoSetzen(pfad){
+  const schicht = document.getElementById("buehne-foto");
+  const w = document.getElementById("buehne");
+  if (!pfad){ schicht.classList.remove("da"); w.classList.remove("mit-foto"); return; }
+  const probe = new Image();
+  probe.onload = () => {
+    schicht.style.backgroundImage = "url('" + pfad + "')";
+    schicht.classList.add("da");
+    w.classList.add("mit-foto");
+  };
+  probe.onerror = () => { schicht.classList.remove("da"); w.classList.remove("mit-foto"); };
+  probe.src = pfad;
+}
+
+fotoSetzen(fotoFuer());
+
+/* Zum Durchblättern, wie beim Zauber */
+let buehneZeiger = imDezember ? buehneHeute : 0;
+
 /* ---------------- Der Zauber des Tages ---------------- */
 const zauberliste = {
  1:{name:"Kerzenschein",   was:"Funken steigen auf",             art:"steigen", teile:["kerze","stern"],                  anz:16, gr:[18,34], sek:[7,13]},
@@ -955,16 +1128,50 @@ function merken(){ try{ localStorage.setItem("nina-tueren",JSON.stringify([...of
 function daten(n){ return tage.find(x=>x.t===n); }
 function stand(){ document.getElementById("stand").textContent=offen.size+" von 24 offen"; }
 
+/* Ein Türchen geht erst an seinem Tag auf — vorher hält es dicht. */
+function darfAuf(n){ return imDezember && n <= heuteTag; }
+
+/* Was aus einem früheren Jahr gemerkt wurde, gilt heuer nur, wenn der Tag da ist. */
+[...offen].forEach(n=>{ if(!darfAuf(n)) offen.delete(n); });
+merken();
+
+const hinweis=document.getElementById("schloss-hinweis");
+function tageBis(n){
+  const j=ziel().getFullYear();
+  let tag=new Date(j,11,n);
+  if(jetzt>tag) tag=new Date(j+1,11,n);
+  return Math.ceil((tag-jetzt)/864e5);
+}
+function nochNicht(n){
+  const t=tageBis(n);
+  hinweis.innerHTML="Türchen "+n+" macht am <b>"+n+". Dezember</b> auf — "+
+    (t===1?"also morgen.":"noch "+t+" Tage.");
+}
+
+const siegel='<svg class="siegel" viewBox="0 0 24 24" fill="none" aria-hidden="true">'+
+  '<rect x="4" y="10" width="16" height="11" rx="2.5" fill="#fff8f4" opacity=".9"/>'+
+  '<path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff8f4" stroke-width="2.4" opacity=".9"/>'+
+  '<circle cx="12" cy="15.5" r="1.8" fill="#a9662f"/></svg>';
+
 reihenfolge.forEach(n=>{
   const d=daten(n);
   const b=document.createElement("button");
   b.className="tuer"; b.dataset.tag=n;
-  b.setAttribute("aria-label","Türchen "+n+" öffnen");
+  const frei=darfAuf(n);
+  if(!frei) b.classList.add("verschlossen");
   if(n===heuteTag) b.classList.add("heute-tuer");
+  b.setAttribute("aria-label", frei ? "Türchen "+n+" öffnen"
+                                    : "Türchen "+n+" — öffnet erst am "+n+". Dezember");
   b.innerHTML='<span class="tuer-innen">'+bild[d.bild]+'</span>'+
-              '<span class="tuer-blatt"><span class="tuer-zahl">'+n+'</span></span>';
+              '<span class="tuer-blatt"><span class="tuer-zahl">'+n+'</span>'+(frei?'':siegel)+'</span>';
   if(offen.has(n)) b.classList.add("auf");
   b.addEventListener("click",()=>{
+    if(!darfAuf(n)){
+      nochNicht(n);
+      b.classList.remove("ruettelt"); void b.offsetWidth; b.classList.add("ruettelt");
+      return;
+    }
+    hinweis.textContent="";
     b.classList.add("auf"); offen.add(n); merken(); stand();
     setTimeout(()=>zeigen(n),260);
   });
@@ -972,12 +1179,16 @@ reihenfolge.forEach(n=>{
 });
 stand();
 
+if(!imDezember){
+  const bis=tageBis(1);
+  hinweis.innerHTML="Noch alle vierundzwanzig zu. Das erste öffnet am <b>1. Dezember</b> — in "+bis+" Tagen.";
+}
+
 /* ---------------- Tafel ---------------- */
 const tafel=document.getElementById("tafel");
 let aktuell=1;
 function zeigen(n){
   const d=daten(n); aktuell=n;
-  zauberSetzen(n);
   document.getElementById("tafel-tag").textContent=n;
   document.getElementById("tafel-datum").textContent=n+". Dezember";
   document.getElementById("tafel-art").textContent=d.art;
@@ -993,7 +1204,13 @@ document.getElementById("tafel-zu").addEventListener("click",schliessen);
 tafel.addEventListener("click",e=>{ if(e.target===tafel) schliessen(); });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") schliessen(); });
 document.getElementById("tafel-weiter").addEventListener("click",()=>{
-  const n=aktuell%24+1;
+  /* Nur zu einem Türchen weiter, das schon dran war. */
+  let n=aktuell;
+  for(let i=0;i<24;i++){
+    n=n%24+1;
+    if(darfAuf(n)) break;
+  }
+  if(!darfAuf(n)){ schliessen(); return; }
   const b=gitter.querySelector('[data-tag="'+n+'"]');
   if(b){ b.classList.add("auf"); offen.add(n); merken(); stand(); }
   zeigen(n);
@@ -1002,37 +1219,50 @@ document.getElementById("tafel-weiter").addEventListener("click",()=>{
 /* ---------------- Heute ---------------- */
 const heuteN=heuteTag||1;
 const hd=daten(heuteN);
-document.getElementById("heute-bild").innerHTML=bild[hd.bild];
-document.getElementById("heute-titel").textContent=hd.titel;
-document.getElementById("heute-text").textContent=hd.text;
-document.getElementById("heute-marke").textContent=
-  imDezember?(heuteN+". Dezember · "+hd.art):"Vorschau · "+hd.art;
-if(!imDezember){
+const heuteKnopf=document.getElementById("heute-knopf");
+
+if(imDezember){
+  document.getElementById("heute-bild").innerHTML=bild[hd.bild];
+  document.getElementById("heute-titel").textContent=hd.titel;
+  document.getElementById("heute-text").textContent=hd.text;
+  document.getElementById("heute-marke").textContent=heuteN+". Dezember · "+hd.art;
+  heuteKnopf.addEventListener("click",()=>{
+    const b=gitter.querySelector('[data-tag="'+heuteN+'"]');
+    if(b){ b.classList.add("auf"); offen.add(heuteN); merken(); stand(); }
+    zeigen(heuteN);
+  });
+}else{
+  /* Vor dem Dezember wird nichts verraten — auch nicht der erste Tag. */
   const ersterDez=new Date(ziel().getFullYear(),11,1);
   const bis=Math.ceil((ersterDez-jetzt)/864e5);
-  if(bis>0) document.getElementById("heute-hinweis").textContent=
-    "Noch "+bis+" Tage bis zum ersten Türchen. Solange steht hier der 1. Dezember als Vorgeschmack.";
+  document.querySelector(".heute-karte").classList.add("zugedeckt");
+  document.getElementById("heute-bild").innerHTML=bild.socke;
+  document.getElementById("heute-marke").textContent="Noch verschlossen";
+  document.getElementById("heute-titel").textContent="Am 1. Dezember geht das erste auf";
+  document.getElementById("heute-text").textContent=
+    "Bis dahin steht hier nichts. Vierundzwanzig Türchen warten, jedes an seinem Tag — "+
+    "und der Zauber unten läuft schon, der hält sich an keinen Kalender.";
+  document.getElementById("heute-hinweis").textContent=
+    "Noch "+bis+" Tage. Der Countdown oben zählt weiter, das Türchen wartet.";
+  heuteKnopf.textContent="Noch "+bis+" Tage";
+  heuteKnopf.disabled=true;
+  heuteKnopf.style.opacity=".5";
+  heuteKnopf.style.cursor="not-allowed";
 }
-document.getElementById("heute-knopf").addEventListener("click",()=>{
-  const b=gitter.querySelector('[data-tag="'+heuteN+'"]');
-  if(b){ b.classList.add("auf"); offen.add(heuteN); merken(); stand(); }
-  zeigen(heuteN);
-});
+
 document.getElementById("alle-auf").addEventListener("click",()=>{
-  gitter.querySelectorAll(".tuer").forEach((b,i)=>{
-    setTimeout(()=>{ b.classList.add("auf"); offen.add(+b.dataset.tag); merken(); stand(); }, i*45);
+  let i=0;
+  gitter.querySelectorAll(".tuer").forEach(b=>{
+    const n=+b.dataset.tag;
+    if(!darfAuf(n)) return;
+    setTimeout(()=>{ b.classList.add("auf"); offen.add(n); merken(); stand(); }, i*45);
+    i++;
   });
+  if(i===0) hinweis.innerHTML="Es ist noch keines dran. Das erste öffnet am <b>1. Dezember</b>.";
 });
 document.getElementById("alle-zu").addEventListener("click",()=>{
   gitter.querySelectorAll(".tuer").forEach(b=>b.classList.remove("auf"));
   offen.clear(); merken(); stand();
-});
-document.getElementById("zufall").addEventListener("click",()=>{
-  const n=1+Math.floor(Math.random()*24);
-  const b=gitter.querySelector('[data-tag="'+n+'"]');
-  if(b){ b.classList.add("auf"); offen.add(n); merken(); stand();
-         b.scrollIntoView({block:"center",behavior:"smooth"}); }
-  setTimeout(()=>zeigen(n),300);
 });
 document.getElementById("grosse-katze").innerHTML=
   '<div style="width:190px;height:190px">'+bild.katze+'</div>';
@@ -1089,8 +1319,33 @@ speisen.forEach(x=>{
   speisenGitter.appendChild(d);
 });
 
-/* Zauber des heutigen Tages beim Laden */
-zauberSetzen(heuteN);
+/* ---------------- Der Zauber läuft für sich ----------------
+   Er hängt nicht an den Türchen: er zeigt den Zauber des heutigen Tages,
+   und man kann sich alle vierundzwanzig ansehen, ohne dass ein Türchen aufgeht.
+   Der Kalender hütet die Inhalte, der Zauber ist nur Wetter. */
+const zauberHeute = imDezember ? heuteTag : 7;   /* vor dem Dezember: erster Schnee */
+let zauberZeiger = zauberHeute;
+
+zauberSetzen(zauberHeute);
+if(!imDezember){
+  document.getElementById("zauber-was").textContent="Zauber der Vorfreude";
+}
+
+document.getElementById("zauber-weiter").addEventListener("click",()=>{
+  zauberZeiger = zauberZeiger % 24 + 1;
+  zauberSetzen(zauberZeiger);
+  buehneSetzen(zauberZeiger);
+  fotoSetzen(dezemberBilder.includes(zauberZeiger)
+    ? "bilder/tag-" + zweistellig(zauberZeiger) + ".jpg" : null);
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+document.getElementById("zauber-heute").addEventListener("click",()=>{
+  zauberZeiger = zauberHeute;
+  zauberSetzen(zauberHeute);
+  buehneSetzen(imDezember ? buehneHeute : 0);
+  fotoSetzen(fotoFuer());
+  if(!imDezember) document.getElementById("zauber-was").textContent="Zauber der Vorfreude";
+});
 
 /* ---------------- Puderzucker ---------------- */
 (function(){
