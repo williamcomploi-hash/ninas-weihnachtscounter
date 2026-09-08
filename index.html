@@ -102,20 +102,22 @@ h1,h2,h3{font-family:var(--f-display);font-weight:600;text-wrap:balance;margin:0
    der Schleier deckt nur noch das Textband — sonst sieht man vom Film nichts. */
 .buehne.mit-film .buehne-boden{background:linear-gradient(to top,
   var(--zucker) 0%,
-  rgba(255,248,244,.99) 24%,
-  rgba(255,248,244,.94) 36%,
-  rgba(255,248,244,.66) 47%,
-  rgba(255,248,244,.22) 58%,
-  rgba(255,248,244,0) 70%)}
-.buehne.mit-film .buehne-schein{opacity:.28}
+  rgba(255,248,244,.97) 15%,
+  rgba(255,248,244,.86) 25%,
+  rgba(255,248,244,.5) 35%,
+  rgba(255,248,244,.16) 45%,
+  rgba(255,248,244,0) 56%)}
+.buehne.mit-film .buehne-schein{opacity:.16}
 /* Die Kopfzeile steht beim Film auf dunklem Bild — dort wird sie hell,
    mit einem kurzen Verlauf darunter, damit sie nicht im Zweig verschwindet. */
-.buehne.mit-film .kopfleiste{background:linear-gradient(to bottom,
-  rgba(40,22,18,.42) 0%, rgba(40,22,18,0) 100%);max-width:none;padding-left:0;padding-right:0}
-.buehne.mit-film .kopfleiste > *{max-width:var(--breite);width:100%}
+/* Der Verlauf geht über die ganze Breite, die Schrift behält ihren Einzug —
+   sonst klebt die Marke am linken Rand und wird angeschnitten. */
+.buehne.mit-film::before{content:"";position:absolute;top:0;left:0;right:0;height:140px;z-index:3;
+  background:linear-gradient(to bottom, rgba(40,22,18,.45) 0%, rgba(40,22,18,0) 100%);
+  pointer-events:none}
 .buehne.mit-film .kopfleiste .marke{color:#ffd9a8;text-shadow:0 1px 3px rgba(40,22,18,.8)}
 .buehne.mit-film .kopfleiste .ort{color:rgba(255,248,244,.9);text-shadow:0 1px 3px rgba(40,22,18,.8)}
-.buehne.mit-film .buehne-inhalt{padding-top:clamp(230px,44vh,520px)}
+.buehne.mit-film .buehne-inhalt{padding-top:clamp(300px,56vh,640px)}
 .buehne.mit-film{min-height:min(88dvh,900px)}
 .buehne.mit-film h1,
 .buehne.mit-film .unterzeile,
@@ -380,16 +382,18 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
    Sie lebt in einer eigenen Schicht am unteren Rand. Die Figur ist austauschbar:
    sobald echte Bilder da sind, wird nur `snoopyBilder` ersetzt, das Verhalten bleibt. */
 #snoopy{position:fixed;left:0;bottom:0;width:100%;height:0;z-index:6;pointer-events:none}
-.snoopy-koerper{position:absolute;bottom:14px;left:0;width:104px;height:104px;
+.snoopy-koerper{position:absolute;bottom:10px;left:0;width:132px;height:132px;
   transform-origin:50% 100%;pointer-events:auto;cursor:pointer;
   filter:drop-shadow(0 8px 10px rgba(74,42,36,.22));
   transition:transform .25s ease}
-.snoopy-koerper svg{width:100%;height:100%;display:block}
+.snoopy-koerper svg,
+.snoopy-koerper img{width:100%;height:100%;display:block;object-fit:contain;object-position:bottom}
+.snoopy-koerper img{image-rendering:auto}
 .snoopy-koerper.blickt-links{transform:scaleX(-1)}
 
 /* Gang: kleines Auf und Ab, die Beine macht die Zeichnung */
 .snoopy-koerper.geht{animation:snoopyschritt .46s ease-in-out infinite}
-@keyframes snoopyschritt{0%,100%{translate:0 0;rotate:-1.2deg}50%{translate:0 -5px;rotate:1.2deg}}
+@keyframes snoopyschritt{0%,100%{translate:0 0}50%{translate:0 -3px}}
 /* Sitzen und Dösen: ruhiges Atmen */
 .snoopy-koerper.atmet{animation:snoopyatem 3.4s ease-in-out infinite}
 @keyframes snoopyatem{0%,100%{scale:1 1}50%{scale:1.02 .985}}
@@ -403,7 +407,7 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   padding:6px 12px;opacity:0;transition:opacity .3s;box-shadow:0 6px 14px -10px rgba(74,42,36,.5)}
 .snoopy-blase.da{opacity:1}
 
-@media(max-width:640px){.snoopy-koerper{width:74px;height:74px}}
+@media(max-width:640px){.snoopy-koerper{width:92px;height:92px}}
 
 /* ---------- Zauberschicht ---------- */
 #zauber{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
@@ -1509,22 +1513,29 @@ document.getElementById("zauber-heute").addEventListener("click",()=>{
    AUSTAUSCHBAR: `snoopyBilder` hält für jede Haltung eine Zeichnung. Sobald
    echte Fotos von Snoopy da sind, werden hier freigestellte Einzelbilder
    eingesetzt — am Verhalten darunter ändert sich nichts. */
+const snoopyPfad = "bilder/snoopy/";
+function snoopyBild(name){
+  return '<img src="' + snoopyPfad + name + '.png" alt="" draggable="false">';
+}
+/* Für jede Haltung eine Aufnahme. Das Gehen wechselt zwischen zwei Schritten. */
 const snoopyBilder = {
-  gehen:  bild.katze,
-  sitzen: bild.katze,
-  liegen: bild.katze,
-  gaehnen:bild.katze,
-  fressen:bild.katze,
-  putzen: bild.katze
+  gehen:   [snoopyBild("schritt1"), snoopyBild("schritt2")],
+  stehen:  [snoopyBild("stehen")],
+  sitzen:  [snoopyBild("sitzen")],
+  liegen:  [snoopyBild("liegen")],
+  gaehnen: [snoopyBild("gaehnen")],
+  fressen: [snoopyBild("fressen")],
+  putzen:  [snoopyBild("putzen")],
+  strecken:[snoopyBild("strecken")]
 };
 
 const snoopySprueche = {
-  gaehnen:"gähnt",
-  fressen:"frisst was",
-  putzen: "putzt sich",
-  liegen: "macht Pause",
-  sitzen: "schaut",
-  hallo:  "miau"
+  gaehnen: "gähnt",
+  fressen: "frisst was",
+  putzen:  "putzt sich",
+  liegen:  "macht Pause",
+  strecken:"streckt sich",
+  hallo:   "miau"
 };
 
 (function(){
@@ -1544,10 +1555,23 @@ const snoopySprueche = {
   let bisWann = 0;
   let ziel = x;
 
+  let schrittZaehler = 0, schrittUhr = null;
   function zeichnen(h){
-    const alt = koerper.querySelector("svg");
+    const alt = koerper.querySelector("svg, img");
     if (alt) alt.remove();
-    koerper.insertAdjacentHTML("afterbegin", snoopyBilder[h] || snoopyBilder.sitzen);
+    const reihe = snoopyBilder[h] || snoopyBilder.sitzen;
+    koerper.insertAdjacentHTML("afterbegin", reihe[0]);
+
+    /* Beim Gehen wechseln die zwei Schrittbilder — das ist der Gangzyklus. */
+    clearInterval(schrittUhr); schrittUhr = null;
+    if (reihe.length > 1){
+      schrittUhr = setInterval(() => {
+        schrittZaehler = (schrittZaehler + 1) % reihe.length;
+        const jetztBild = koerper.querySelector("img");
+        if (jetztBild) jetztBild.remove();
+        koerper.insertAdjacentHTML("afterbegin", reihe[schrittZaehler]);
+      }, 300);
+    }
   }
   function sagen(wort){
     if (!wort) { blase.classList.remove("da"); return; }
@@ -1560,20 +1584,22 @@ const snoopySprueche = {
     bisWann = performance.now() + dauerMs;
     koerper.classList.remove("geht","atmet","streckt");
     if (h === "gehen") koerper.classList.add("geht");
-    else if (h === "liegen" || h === "sitzen") koerper.classList.add("atmet");
-    else if (h === "gaehnen") koerper.classList.add("streckt");
+    else if (h === "liegen" || h === "sitzen" || h === "stehen") koerper.classList.add("atmet");
+    else if (h === "strecken") koerper.classList.add("streckt");
     zeichnen(h);
     if (wort) sagen(wort);
   }
 
   /* Was nach was kommt. Nicht ganz zufällig — Katzen haben Gewohnheiten. */
   const folgt = {
-    gehen:  [["sitzen",3],["gehen",2],["fressen",1],["liegen",1]],
-    sitzen: [["gehen",4],["putzen",2],["gaehnen",1]],
-    liegen: [["gaehnen",3],["liegen",2],["sitzen",1]],
-    gaehnen:[["liegen",3],["gehen",2],["sitzen",1]],
-    fressen:[["putzen",4],["sitzen",1]],
-    putzen: [["gehen",3],["liegen",2],["sitzen",1]]
+    gehen:   [["stehen",3],["gehen",2],["fressen",1],["sitzen",2]],
+    stehen:  [["gehen",4],["sitzen",2],["strecken",1]],
+    sitzen:  [["gehen",3],["putzen",2],["gaehnen",1],["liegen",2]],
+    liegen:  [["liegen",3],["gaehnen",2],["strecken",1],["sitzen",1]],
+    gaehnen: [["liegen",3],["strecken",2],["sitzen",1]],
+    strecken:[["gehen",3],["sitzen",2]],
+    fressen: [["putzen",4],["stehen",1]],
+    putzen:  [["gehen",3],["liegen",2],["sitzen",1]]
   };
   function naechste(){
     const liste = folgt[haltung] || folgt.sitzen;
@@ -1583,12 +1609,14 @@ const snoopySprueche = {
     return liste[0][0];
   }
   const dauer = {
-    gehen:  () => 4000 + Math.random() * 6000,
-    sitzen: () => 3000 + Math.random() * 5000,
-    liegen: () => 8000 + Math.random() * 14000,
-    gaehnen:() => 1600,
-    fressen:() => 4000 + Math.random() * 3000,
-    putzen: () => 3500 + Math.random() * 4000
+    gehen:   () => 5000 + Math.random() * 7000,
+    stehen:  () => 2000 + Math.random() * 3000,
+    sitzen:  () => 4000 + Math.random() * 6000,
+    liegen:  () => 10000 + Math.random() * 16000,
+    gaehnen: () => 2200,
+    strecken:() => 1800,
+    fressen: () => 5000 + Math.random() * 4000,
+    putzen:  () => 4000 + Math.random() * 5000
   };
 
   function neuesZiel(){
