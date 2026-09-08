@@ -2428,19 +2428,34 @@ const KEKS_WEG = "/api/keks";
   if (!kasten) return;
 
   const heuteSchluessel = "nina-halt2-" + new Date().toDateString();
-  if (localStorage.getItem(heuteSchluessel) === "ja") return;
+  const HOECHSTENS   = 3;        /* so oft am Tag hoechstens */
+  const ABSTAND_MIN  = 4;        /* und nie zweimal kurz hintereinander */
+
   if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+  /* Gezaehlt wird pro Tag; der Eintrag von gestern faellt beim ersten Lesen
+     weg, weil das Datum im Schluessel steckt. */
+  function stand(){
+    try { return Number(localStorage.getItem(heuteSchluessel)) || 0; }
+    catch (e) { return 0; }
+  }
+  if (stand() >= HOECHSTENS) return;
+
+  let zuletzt = 0;
 
   let bereit = false;
   setTimeout(() => { bereit = true; }, 12000);
   let offen = false;
 
   function merken(){
-    try { localStorage.setItem(heuteSchluessel, "ja"); } catch (e) {}
+    try { localStorage.setItem(heuteSchluessel, String(stand() + 1)); } catch (e) {}
   }
   function zeigen(){
     if (offen || !bereit) return;
+    if (stand() >= HOECHSTENS) return;
+    if (Date.now() - zuletzt < ABSTAND_MIN * 60000) return;
     offen = true;
+    zuletzt = Date.now();
     merken();
     kasten.classList.add("da");
     document.getElementById("halt-zu").focus();
