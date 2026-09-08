@@ -50,7 +50,30 @@ export default async function handler(req, res) {
       return antworte(res, 200, { stand: Number(zeile?.stand) || 0 });
     }
 
-    res.setHeader("Allow", "GET, POST");
+    /* ---------------- zurücksetzen ----------------
+       Mit demselben Passwort wie das Löschen im Gästebuch. Gebraucht, wenn
+       jemand den Zähler zum Ausprobieren hochgeklickt hat und er wieder bei
+       null anfangen soll. */
+    if (req.method === "DELETE") {
+      const erwartet = process.env.ADMIN_PASSWORT || "";
+      if (!erwartet) return antworte(res, 503, { fehler: "Es ist kein Passwort hinterlegt." });
+
+      const wer = kurz(herkunft(req));
+      if (!(await bremse(`keksnull:${wer}`, 5, 300))) {
+        return antworte(res, 429, { fehler: "Zu viele Versuche. In fünf Minuten wieder." });
+      }
+
+      const roh = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+      if (String(roh.name || "") !== "admin" || String(roh.passwort || "") !== erwartet) {
+        return antworte(res, 401, { fehler: "Name oder Passwort stimmt nicht." });
+      }
+
+      const [zeile] = await sql`
+        update keks set stand = 0 where name = 'gesamt' returning stand`;
+      return antworte(res, 200, { stand: Number(zeile?.stand) || 0 });
+    }
+
+    res.setHeader("Allow", "GET, POST, DELETE");
     return antworte(res, 405, { fehler: "So nicht." });
   } catch (e) {
     return antworte(res, 500, { fehler: "Der Zähler ist gerade nicht erreichbar." });
