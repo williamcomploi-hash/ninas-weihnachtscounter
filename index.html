@@ -382,14 +382,20 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
    Sie lebt in einer eigenen Schicht am unteren Rand. Die Figur ist austauschbar:
    sobald echte Bilder da sind, wird nur `snoopyBilder` ersetzt, das Verhalten bleibt. */
 #snoopy{position:fixed;left:0;bottom:0;width:100%;height:0;z-index:6;pointer-events:none}
-.snoopy-koerper{position:absolute;bottom:10px;left:0;width:132px;height:132px;
+.snoopy-koerper{position:absolute;bottom:10px;left:0;width:165px;height:165px;
   transform-origin:50% 100%;pointer-events:auto;cursor:pointer;
   filter:drop-shadow(0 8px 10px rgba(74,42,36,.22));
   transition:transform .25s ease}
-.snoopy-koerper svg,
-.snoopy-koerper img{width:100%;height:100%;display:block;object-fit:contain;object-position:bottom}
-.snoopy-koerper img{image-rendering:auto}
-.snoopy-koerper[data-blick="links"] img{transform:scaleX(-1)}
+.snoopy-koerper img{position:absolute;inset:0;width:100%;height:100%;display:block;
+  object-fit:contain;object-position:bottom;
+  opacity:0;transition:opacity .11s linear;
+  transform-origin:50% 100%;
+  transform:translate(calc(var(--dx,0) * 100%), calc(var(--dy,0) * -100%))
+            scale(var(--s,1)) scaleX(var(--flip,1))}
+.snoopy-koerper img.da{opacity:1}
+/* Beim Blick nach links kippt nur das Bild, nie die Sprechblase. */
+.snoopy-koerper[data-blick="links"] img{--flip:-1}
+
 
 /* Gang: kleines Auf und Ab, die Beine macht die Zeichnung */
 .snoopy-koerper.geht{animation:snoopyschritt .46s ease-in-out infinite}
@@ -407,7 +413,7 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   padding:6px 12px;opacity:0;transition:opacity .3s;box-shadow:0 6px 14px -10px rgba(74,42,36,.5)}
 .snoopy-blase.da{opacity:1}
 
-@media(max-width:640px){.snoopy-koerper{width:92px;height:92px}}
+@media(max-width:640px){.snoopy-koerper{width:115px;height:115px}}
 
 /* ---------- Zauberschicht ---------- */
 #zauber{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
@@ -1525,27 +1531,57 @@ document.getElementById("zauber-heute").addEventListener("click",()=>{
    echte Fotos von Snoopy da sind, werden hier freigestellte Einzelbilder
    eingesetzt — am Verhalten darunter ändert sich nichts. */
 const snoopyPfad = "bilder/snoopy/";
-function snoopyBild(name){
-  return '<img src="' + snoopyPfad + name + '.png" alt="" draggable="false">';
-}
+
+/* AUSGLEICH — gemessen, nicht geschätzt.
+   Die erzeugten Aufnahmen zeigen Snoopy unterschiedlich groß und unterschiedlich
+   hoch im Rahmen; ohne Ausgleich wächst und springt sie beim Haltungswechsel.
+   Für jede Aufnahme wurde die bedeckte Fläche und die Fußlinie gemessen
+   (scratchpad/messen.mjs). Daraus: Faktor, Höhenversatz, Seitenversatz.
+   Der Faktor ist gedämpft (Exponent 0,7) — der Rahmenunterschied verschwindet,
+   der echte Unterschied zwischen sitzen und liegen bleibt erhalten. */
+const snoopyAusgleich = {
+  fressen:[1.076, 0.1714, 0.0298],
+  gaehnen:[0.823, -0.0262, -0.025],
+  liegen:[1.124, 0.2214, 0.0143],
+  putzen:[0.864, 0.0476, 0.0048],
+  schritt1:[0.937, 0.0381, 0.0143],
+  schritt2:[0.918, 0.069, 0.0179],
+  schritt3:[1.022, 0.1595, 0.0155],
+  schritt4:[1.02, 0.1381, 0.0369],
+  schritt5:[1.041, 0.1929, 0.0286],
+  sitzen:[0.844, -0.05, 0.0369],
+  spiel1:[1.04, 0.15, 0.025],
+  spiel2:[1.0, 0.0643, 0.0786],
+  spiel3:[0.904, 0.0857, -0.0071],
+  spiel4:[1.061, 0.1405, 0.0155],
+  stehen:[1.009, 0.1095, 0.0167],
+  strecken:[1.053, 0.0833, 0.0143],
+  trinken1:[0.989, 0.15, 0.0274],
+  trinken2:[1.019, 0.1738, 0.0464],
+  trinken3:[0.969, 0.1167, 0.0214],
+  trinken4:[0.779, 0.019, 0.0452],
+  trinken5:[0.949, 0.081, 0.044]
+};
 /* Für jede Haltung eine Aufnahme. Das Gehen wechselt zwischen zwei Schritten. */
-const snoopyBilder = {
-  /* Fünf Bilder ergeben den Gangzyklus: Aufsetzen, Durchschwingen,
-     Ausgreifen und zurück. Bei zwei Bildern sah es aus wie Hüpfen. */
-  gehen:   [snoopyBild("schritt1"), snoopyBild("schritt3"), snoopyBild("schritt2"),
-            snoopyBild("schritt5"), snoopyBild("schritt4")],
-  stehen:  [snoopyBild("stehen")],
-  sitzen:  [snoopyBild("sitzen")],
-  liegen:  [snoopyBild("liegen")],
-  gaehnen: [snoopyBild("gaehnen")],
-  fressen: [snoopyBild("fressen")],
-  putzen:  [snoopyBild("putzen")],
-  strecken:[snoopyBild("strecken")]
+/* Welche Aufnahmen zu welcher Haltung gehören. Mehrere Namen = Bildfolge. */
+const snoopyHaltungen = {
+  gehen:   ["schritt1","schritt3","schritt2","schritt5","schritt4"],
+  stehen:  ["stehen"],
+  sitzen:  ["sitzen"],
+  liegen:  ["liegen"],
+  gaehnen: ["gaehnen"],
+  strecken:["strecken"],
+  fressen: ["fressen"],
+  trinken: ["trinken1","trinken2","trinken3","trinken4","trinken5"],
+  spielen: ["spiel1","spiel2","spiel3","spiel4"],
+  putzen:  ["putzen"]
 };
 
 const snoopySprueche = {
   gaehnen: "gähnt",
   fressen: "frisst was",
+  trinken: "trinkt",
+  spielen: "spielt",
   putzen:  "putzt sich",
   liegen:  "macht Pause",
   strecken:"streckt sich",
@@ -1569,22 +1605,41 @@ const snoopySprueche = {
   let bisWann = 0;
   let ziel = x;
 
+  /* Alle Aufnahmen liegen von Anfang an übereinander und werden nur ein- und
+     ausgeblendet. Vorher wurde das alte Bild entfernt und das neue eingesetzt —
+     dazwischen war einen Bildaufbau lang nichts da, und das blitzte. */
+  const ebenen = {};
+  for (const [haltung, namen] of Object.entries(snoopyHaltungen)){
+    ebenen[haltung] = namen.map(name => {
+      const el = document.createElement("img");
+      el.src = snoopyPfad + name + ".png";
+      el.alt = ""; el.draggable = false;
+      const a = snoopyAusgleich[name];
+      if (a){ el.style.setProperty("--s", a[0]);
+              el.style.setProperty("--dy", a[1]);
+              el.style.setProperty("--dx", a[2]); }
+      koerper.appendChild(el);
+      return el;
+    });
+  }
+  function alleAus(){
+    for (const reihe of Object.values(ebenen)) reihe.forEach(el => el.classList.remove("da"));
+  }
+
   let schrittZaehler = 0, schrittUhr = null;
   function zeichnen(h){
-    const alt = koerper.querySelector("svg, img");
-    if (alt) alt.remove();
-    const reihe = snoopyBilder[h] || snoopyBilder.sitzen;
-    koerper.insertAdjacentHTML("afterbegin", reihe[0]);
+    const reihe = ebenen[h] || ebenen.sitzen;
+    alleAus();
+    schrittZaehler = 0;
+    reihe[0].classList.add("da");
 
-    /* Beim Gehen wechseln die zwei Schrittbilder — das ist der Gangzyklus. */
     clearInterval(schrittUhr); schrittUhr = null;
     if (reihe.length > 1){
       schrittUhr = setInterval(() => {
+        reihe[schrittZaehler].classList.remove("da");
         schrittZaehler = (schrittZaehler + 1) % reihe.length;
-        const jetztBild = koerper.querySelector("img");
-        if (jetztBild) jetztBild.remove();
-        koerper.insertAdjacentHTML("afterbegin", reihe[schrittZaehler]);
-      }, 200);
+        reihe[schrittZaehler].classList.add("da");
+      }, h === "gehen" ? 200 : 320);
     }
   }
   function sagen(wort){
@@ -1598,21 +1653,26 @@ const snoopySprueche = {
     bisWann = performance.now() + dauerMs;
     koerper.classList.remove("geht","atmet","streckt");
     if (h === "gehen") koerper.classList.add("geht");
-    else if (h === "liegen" || h === "sitzen" || h === "stehen") koerper.classList.add("atmet");
+    else if (h === "liegen" || h === "sitzen" || h === "stehen" || h === "trinken")
+      koerper.classList.add("atmet");
     else if (h === "strecken") koerper.classList.add("streckt");
     zeichnen(h);
     if (wort) sagen(wort);
   }
 
   /* Was nach was kommt. Nicht ganz zufällig — Katzen haben Gewohnheiten. */
+  /* Was auf was folgt. Katzen haben Gewohnheiten: nach dem Fressen wird
+     getrunken, danach geputzt; nach dem Schlafen wird gestreckt. */
   const folgt = {
-    gehen:   [["stehen",3],["gehen",2],["fressen",1],["sitzen",2]],
-    stehen:  [["gehen",4],["sitzen",2],["strecken",1]],
-    sitzen:  [["gehen",3],["putzen",2],["gaehnen",1],["liegen",2]],
+    gehen:   [["stehen",3],["gehen",2],["fressen",1],["spielen",2],["sitzen",2]],
+    stehen:  [["gehen",4],["sitzen",2],["strecken",1],["spielen",1]],
+    sitzen:  [["gehen",3],["putzen",2],["gaehnen",1],["liegen",2],["spielen",1]],
     liegen:  [["liegen",3],["gaehnen",2],["strecken",1],["sitzen",1]],
     gaehnen: [["liegen",3],["strecken",2],["sitzen",1]],
-    strecken:[["gehen",3],["sitzen",2]],
-    fressen: [["putzen",4],["stehen",1]],
+    strecken:[["gehen",3],["sitzen",2],["spielen",1]],
+    fressen: [["trinken",4],["putzen",2]],
+    trinken: [["putzen",4],["stehen",2],["liegen",1]],
+    spielen: [["spielen",2],["gehen",3],["putzen",2],["liegen",1]],
     putzen:  [["gehen",3],["liegen",2],["sitzen",1]]
   };
   function naechste(){
@@ -1630,6 +1690,8 @@ const snoopySprueche = {
     gaehnen: () => 2200,
     strecken:() => 1800,
     fressen: () => 5000 + Math.random() * 4000,
+    trinken: () => 5000 + Math.random() * 4000,
+    spielen: () => 6000 + Math.random() * 6000,
     putzen:  () => 4000 + Math.random() * 5000
   };
 
