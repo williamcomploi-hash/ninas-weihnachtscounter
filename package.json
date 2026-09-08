@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Adventkalender mit Countdown bis zum Heiligen Abend am 24. Dezember",
+  "dependencies": {
+    "redis": "^4.7.0"
+  },
   "engines": {
     "node": ">=20"
   }

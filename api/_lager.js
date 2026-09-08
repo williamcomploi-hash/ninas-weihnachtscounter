@@ -1,34 +1,51 @@
 /* Der gemeinsame Speicher.
  *
- * Dahinter liegt Redis bei Upstash, das Vercel unter Storage anlegt. Angebunden
- * über die REST-Schnittstelle — damit braucht es keine Abhängigkeit, keinen
- * Verbindungsaufbau und keinen offenen Anschluss, was für Funktionen, die nur
- * Sekundenbruchteile leben, der richtige Weg ist.
+ * Dahinter liegt das Redis, das Vercel unter Storage angelegt hat. Angebunden
+ * über `KV_REDIS_URL` — eine gewöhnliche Redis-Verbindung, kein REST-Zugang.
  *
- * Die Zugangsdaten kommen aus den Umgebungsvariablen, die Vercel beim Anlegen
- * selbst setzt. Je nach Weg heißen sie unterschiedlich, deshalb beide Namen.
+ * VERBINDUNG WIRD WIEDERVERWENDET: Eine Funktion bei Vercel lebt nur
+ * Sekundenbruchteile, aber der Prozess dahinter überlebt mehrere Aufrufe. Der
+ * Client wird deshalb einmal aufgebaut und danach behalten. Ohne das käme bei
+ * jedem Klick ein neuer Verbindungsaufbau dazu — und die freie Stufe hat eine
+ * Obergrenze an gleichzeitigen Verbindungen.
  */
 
-const URL_    = process.env.KV_REST_API_URL   || process.env.UPSTASH_REDIS_REST_URL   || "";
-const SCHLUES = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
+import { createClient } from "redis";
 
-export const lagerDa = Boolean(URL_ && SCHLUES);
+const URL_ = process.env.KV_REDIS_URL || process.env.REDIS_URL || "";
 
-/** Ein Redis-Befehl. Gibt `result` zurück oder wirft. */
-export async function befehl(...teile) {
+export const lagerDa = Boolean(URL_);
+
+let klient = null;
+let verbindet = null;
+
+async function hol() {
   if (!lagerDa) throw new Error("Kein Speicher angebunden");
-  const antwort = await fetch(URL_, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${SCHLUES}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(teile.map(String)),
-  });
-  if (!antwort.ok) throw new Error(`Speicher antwortet mit ${antwort.status}`);
-  const d = await antwort.json();
-  if (d.error) throw new Error(d.error);
-  return d.result;
+
+  if (klient && klient.isOpen) return klient;
+
+  if (!verbindet) {
+    klient = createClient({
+      url: URL_,
+      socket: {
+        connectTimeout: 5000,
+        /* Ein paar Versuche, dann aufgeben — eine Funktion darf nicht ewig warten. */
+        reconnectStrategy: versuch => (versuch > 3 ? false : Math.min(versuch * 200, 800)),
+      },
+    });
+    /* Ohne Zuhörer wirft ein Verbindungsfehler den ganzen Prozess um. */
+    klient.on("error", () => {});
+    verbindet = klient.connect().finally(() => { verbindet = null; });
+  }
+
+  await verbindet;
+  return klient;
+}
+
+/** Ein Redis-Befehl, roh. Gibt die Antwort zurück oder wirft. */
+export async function befehl(...teile) {
+  const k = await hol();
+  return k.sendCommand(teile.map(String));
 }
 
 /** Die Adresse des Aufrufers — nur für die Bremse, wird nirgends gespeichert. */
