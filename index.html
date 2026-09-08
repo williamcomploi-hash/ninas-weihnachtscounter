@@ -353,6 +353,8 @@ h1 em{font-style:normal;display:block;
 .katzenband h2{font-size:clamp(22px,3vw,30px);margin-bottom:10px}
 .katzenband p{margin:0;color:var(--tinte-matt);max-width:54ch}
 
+.sr-nur{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;border:0}
 footer .studio{color:var(--rot);letter-spacing:.16em;text-decoration:none;
   border-bottom:1px solid rgba(192,48,63,.35);padding-bottom:2px;transition:.2s}
 footer .studio:hover{color:var(--rot-tief);border-color:var(--rot)}
@@ -485,6 +487,46 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   color:var(--gold);display:block;margin-bottom:8px}
 .elf p{margin:0;font-size:14px;color:var(--tinte-matt);line-height:1.5}
 .elf.katze-karte{background:linear-gradient(170deg,#fff6ee 0%,#ffe2e7 100%);border-color:rgba(232,128,154,.5)}
+
+/* ---------- Der Keks ---------- */
+.keksstube{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
+.kekstafel{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);
+  gap:clamp(24px,4vw,52px);align-items:center;padding:clamp(24px,3.4vw,40px);
+  border-radius:26px;border:1px solid rgba(232,128,154,.5);
+  background:linear-gradient(120deg,#fff 0%,#fff2ea 55%,#ffeef1 100%);
+  box-shadow:var(--schein)}
+@media(max-width:720px){.kekstafel{grid-template-columns:1fr;text-align:center;justify-items:center}}
+
+.keks-knopf{position:relative;width:100%;max-width:240px;aspect-ratio:1;border:0;padding:0;
+  background:none;cursor:pointer;touch-action:manipulation;
+  filter:drop-shadow(0 14px 20px rgba(169,102,47,.3));
+  transition:transform .1s cubic-bezier(.34,1.5,.5,1)}
+.keks-knopf:hover{transform:scale(1.04) rotate(-2deg)}
+.keks-knopf:active{transform:scale(.9) rotate(3deg)}
+.keks-knopf:focus-visible{outline:3px solid var(--rot);outline-offset:6px;border-radius:50%}
+.keks-knopf svg{width:100%;height:100%;display:block}
+
+.krumen{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.krume{position:absolute;left:50%;top:50%;width:11px;height:11px;border-radius:40% 60% 55% 45%;
+  background:var(--lebkuchen);animation:kruemeln .72s ease-out forwards}
+@keyframes kruemeln{
+  from{transform:translate(-50%,-50%) rotate(0deg) scale(1);opacity:1}
+  to{transform:translate(calc(-50% + var(--kx)), calc(-50% + var(--ky))) rotate(var(--kr)) scale(.3);opacity:0}}
+
+.keks-zahl{font-family:var(--f-zahl);font-weight:700;font-variant-numeric:tabular-nums;
+  font-size:clamp(44px,8vw,86px);line-height:1;color:var(--rot-tief);display:block;
+  transition:transform .12s ease}
+.keks-zahl.hoch{transform:scale(1.07)}
+.keks-wort{font-family:var(--f-display);font-weight:600;font-size:clamp(20px,2.6vw,26px);
+  margin:10px 0 0}
+.keks-dazu{color:var(--tinte-matt);margin:12px 0 0;max-width:46ch}
+.keks-lage{font-family:var(--f-zahl);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  margin-top:16px;display:inline-flex;align-items:center;gap:8px;
+  padding:6px 12px;border-radius:99px;background:rgba(63,110,86,.12);color:var(--tanne)}
+.keks-lage[data-lage="allein"]{background:rgba(169,102,47,.14);color:var(--lebkuchen)}
+.keks-lage::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.keks-eigene{font-family:var(--f-zahl);font-size:11px;letter-spacing:.1em;color:var(--tinte-matt);
+  margin-top:10px}
 
 /* ---------- Snoopy rufen ---------- */
 .rufen{margin-top:22px;padding-top:20px;border-top:1px dashed rgba(232,128,154,.5)}
@@ -640,6 +682,33 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
       <span class="ort">Vom 1. bis zum 25.</span>
     </div>
     <div class="speisen" id="speisen"></div>
+  </section>
+
+  <section class="keksstube" aria-labelledby="keks-titel">
+    <div class="abschnittskopf">
+      <div>
+        <h2 id="keks-titel">Der Keks</h2>
+        <p>Einer für alle. Jeder Klick zählt zum selben Teller — auch der von jemandem,
+           der die Seite gerade woanders offen hat.</p>
+      </div>
+      <span class="ort">Zum Draufklopfen</span>
+    </div>
+
+    <div class="kekstafel">
+      <button class="keks-knopf" id="keks-knopf" aria-describedby="keks-zahl">
+        <span class="krumen" id="krumen" aria-hidden="true"></span>
+        <span id="keks-bild" aria-hidden="true"></span>
+        <span class="sr-nur">Keks knabbern</span>
+      </button>
+      <div>
+        <span class="keks-zahl" id="keks-zahl" aria-live="polite">0</span>
+        <p class="keks-wort" id="keks-wort">Kekse geknabbert</p>
+        <p class="keks-dazu">Nicht deine allein — die von allen zusammen. Wer die Seite offen
+           lässt, sieht die Zahl weiterlaufen, ohne neu zu laden.</p>
+        <span class="keks-lage" id="keks-lage" data-lage="allein">wird verbunden</span>
+        <p class="keks-eigene" id="keks-eigene"></p>
+      </div>
+    </div>
   </section>
 
   <section class="katzenband">
@@ -1863,6 +1932,189 @@ const snoopySprueche = {
     const breite = window.innerWidth - koerper.offsetWidth - 16;
     if (x > breite) x = Math.max(0, breite);
   });
+})();
+
+
+/* ---------------- Der Keks ----------------
+   Ein Zähler für alle. Die Zahl liegt bei Supabase, und Änderungen kommen von
+   dort zurück, ohne dass die Seite nachfragen muss — wer sie offen lässt, sieht
+   sie weiterlaufen.
+
+   SOLANGE KEINE ZUGANGSDATEN EINGETRAGEN SIND, zählt er nur im eigenen Browser
+   und sagt das auch. Lieber ehrlich allein zählen als so tun, als wären andere
+   dabei. Sobald `keksKonfig` gefüllt ist, wird derselbe Zähler global — am
+   Verhalten hier ändert sich nichts. */
+const keksKonfig = {
+  url:    "",          /* https://xxxxx.supabase.co */
+  schluessel: ""       /* der öffentliche anon-Schlüssel */
+};
+
+(function(){
+  const knopf   = document.getElementById("keks-knopf");
+  const zahlEl  = document.getElementById("keks-zahl");
+  const wortEl  = document.getElementById("keks-wort");
+  const lageEl  = document.getElementById("keks-lage");
+  const eigenEl = document.getElementById("keks-eigene");
+  const krumen  = document.getElementById("krumen");
+  document.getElementById("keks-bild").innerHTML = bild.keks;
+
+  let stand = 0;
+  let eigene = 0;
+  try { eigene = Number(localStorage.getItem("nina-eigene-kekse") || 0) || 0; } catch(e){}
+
+  const global = Boolean(keksKonfig.url && keksKonfig.schluessel);
+
+  function zahlZeigen(n){
+    stand = n;
+    zahlEl.textContent = n.toLocaleString("de-AT");
+    wortEl.textContent = n === 1 ? "Keks geknabbert" : "Kekse geknabbert";
+    zahlEl.classList.add("hoch");
+    setTimeout(() => zahlEl.classList.remove("hoch"), 130);
+  }
+  function eigeneZeigen(){
+    eigenEl.textContent = eigene === 0 ? ""
+      : eigene === 1 ? "Einer davon war deiner." : "Davon " + eigene.toLocaleString("de-AT") + " von dir.";
+  }
+
+  /* Krümel fliegen weg — acht Stück, jeder in eine andere Richtung. */
+  function kruemel(){
+    for (let i = 0; i < 8; i++){
+      const k = document.createElement("span");
+      k.className = "krume";
+      const winkel = Math.random() * 6.28;
+      const weite  = 60 + Math.random() * 90;
+      k.style.setProperty("--kx", Math.cos(winkel) * weite + "px");
+      k.style.setProperty("--ky", Math.sin(winkel) * weite + "px");
+      k.style.setProperty("--kr", Math.round(Math.random() * 720 - 360) + "deg");
+      k.style.width = k.style.height = (7 + Math.random() * 8).toFixed(0) + "px";
+      k.style.background = ["#a9662f", "#d59a5f", "#c0303f"][i % 3];
+      k.style.animationDelay = (Math.random() * 60).toFixed(0) + "ms";
+      krumen.appendChild(k);
+      setTimeout(() => k.remove(), 900);
+    }
+  }
+
+  /* Eine Bremse: höchstens zwanzig Klicks in zehn Sekunden. Das reicht für
+     begeistertes Klopfen und bremst ein Programm, das im Sekundentakt drückt. */
+  const letzte = [];
+  function darfKlicken(){
+    const jetztMs = Date.now();
+    while (letzte.length && jetztMs - letzte[0] > 10000) letzte.shift();
+    if (letzte.length >= 20) return false;
+    letzte.push(jetztMs);
+    return true;
+  }
+
+  let offen = 0, sendeUhr = null;
+
+  async function senden(){
+    if (!global || !offen) return;
+    const wieviel = offen; offen = 0;
+    try {
+      await fetch(keksKonfig.url + "/rest/v1/rpc/keks_klicken", {
+        method: "POST",
+        headers: { "apikey": keksKonfig.schluessel,
+                   "Authorization": "Bearer " + keksKonfig.schluessel,
+                   "Content-Type": "application/json" },
+        body: JSON.stringify({ anzahl: wieviel })
+      });
+    } catch(e){ offen += wieviel; }   /* nicht durchgekommen: beim nächsten Mal mit */
+  }
+
+  knopf.addEventListener("click", () => {
+    if (!darfKlicken()) return;
+    kruemel();
+    zahlZeigen(stand + 1);
+    eigene++; eigeneZeigen();
+    try { localStorage.setItem("nina-eigene-kekse", String(eigene)); } catch(e){}
+
+    if (global){
+      /* Klicks sammeln und gebündelt schicken — sonst wird bei schnellem
+         Klopfen für jeden einzelnen eine Anfrage aufgemacht. */
+      offen++;
+      clearTimeout(sendeUhr);
+      sendeUhr = setTimeout(senden, 600);
+    } else {
+      try { localStorage.setItem("nina-kekse-lokal", String(stand)); } catch(e){}
+    }
+  });
+
+  /* ---- Anlaufen ---- */
+  if (!global){
+    let lokal = 0;
+    try { lokal = Number(localStorage.getItem("nina-kekse-lokal") || 0) || 0; } catch(e){}
+    zahlZeigen(lokal);
+    eigeneZeigen();
+    lageEl.dataset.lage = "allein";
+    lageEl.textContent = "zählt nur in diesem Browser";
+    return;
+  }
+
+  lageEl.textContent = "wird verbunden";
+  fetch(keksKonfig.url + "/rest/v1/keks?name=eq.gesamt&select=stand", {
+    headers: { "apikey": keksKonfig.schluessel,
+               "Authorization": "Bearer " + keksKonfig.schluessel }
+  })
+    .then(a => a.json())
+    .then(reihen => {
+      zahlZeigen(Number(reihen?.[0]?.stand) || 0);
+      eigeneZeigen();
+      lageEl.dataset.lage = "gemeinsam";
+      lageEl.textContent = "zählt für alle mit";
+      horchen();
+    })
+    .catch(() => {
+      lageEl.dataset.lage = "allein";
+      lageEl.textContent = "gerade nicht erreichbar";
+      zahlZeigen(0);
+    });
+
+  /* Änderungen von anderen: erst über die Leitung, sonst alle 20 Sekunden fragen. */
+  function horchen(){
+    let leitung = null;
+    try {
+      leitung = new WebSocket(
+        keksKonfig.url.replace(/^http/, "ws") + "/realtime/v1/websocket?apikey=" +
+        keksKonfig.schluessel + "&vsn=1.0.0");
+    } catch(e){}
+
+    if (leitung){
+      leitung.addEventListener("open", () => {
+        leitung.send(JSON.stringify({
+          topic: "realtime:oeffentlich:keks", event: "phx_join",
+          payload: { config: { postgres_changes: [
+            { event: "UPDATE", schema: "public", table: "keks" } ] } }, ref: "1" }));
+        setInterval(() => leitung.readyState === 1 &&
+          leitung.send(JSON.stringify({ topic:"phoenix", event:"heartbeat", payload:{}, ref:"h" })), 25000);
+      });
+      leitung.addEventListener("message", e => {
+        try {
+          const n = JSON.parse(e.data);
+          const neu = Number(n?.payload?.data?.record?.stand);
+          if (Number.isFinite(neu) && neu !== stand) zahlZeigen(neu);
+        } catch(err){}
+      });
+      leitung.addEventListener("error", () => nachfragen());
+      leitung.addEventListener("close",  () => nachfragen());
+    } else {
+      nachfragen();
+    }
+  }
+
+  let fragUhr = null;
+  function nachfragen(){
+    if (fragUhr) return;
+    fragUhr = setInterval(() => {
+      if (document.hidden) return;      /* im Hintergrund nicht nachfragen */
+      fetch(keksKonfig.url + "/rest/v1/keks?name=eq.gesamt&select=stand", {
+        headers: { "apikey": keksKonfig.schluessel,
+                   "Authorization": "Bearer " + keksKonfig.schluessel }
+      })
+        .then(a => a.json())
+        .then(r => { const n = Number(r?.[0]?.stand); if (Number.isFinite(n) && n !== stand) zahlZeigen(n); })
+        .catch(() => {});
+    }, 20000);
+  }
 })();
 
 /* ---------------- Puderzucker ---------------- */
