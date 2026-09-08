@@ -718,7 +718,7 @@ body.verwaltet .buch-weg{display:block}
   <section class="kalender" aria-labelledby="k-titel">
     <div class="abschnittskopf">
       <div>
-        <h2 id="k-titel">Vierundzwanzig Türchen</h2>
+        <h2 id="k-titel">24 Türchen</h2>
         <p>Durcheinander angeordnet, wie sich das für einen ordentlichen Kalender gehört.
            Jedes Türchen geht erst an seinem Tag auf — vorher hält es dicht.</p>
       </div>
@@ -1232,10 +1232,10 @@ const tage=[
   katze:"Ein Baum im Wohnzimmer. Für sie ist Weihnachten damit erklärt."},
  {t:20,art:"Schmücken",bild:"tanne",titel:"Aufputzen",
   text:"Lichter zuerst, dann die Kugeln, zuletzt der Stern. Und der Baum wird oben an der Wand befestigt.",
-  katze:"Die unteren dreißig Zentimeter bleiben leer. Aus Erfahrung."},
+  katze:"Die unteren 30 Zentimeter bleiben leer. Aus Erfahrung."},
  {t:21,art:"Nacht",bild:"stern",titel:"Die längste Nacht",
   text:"Wintersonnenwende. Ab morgen werden die Tage wieder länger, auch wenn man drei Wochen lang nichts davon merkt.",
-  katze:"Snoopy schläft laut Messung sechzehn Stunden. Wie an jedem anderen Tag auch."},
+  katze:"Snoopy schläft laut Messung 16 Stunden. Wie an jedem anderen Tag auch."},
  {t:22,art:"Verschenken",bild:"keks",titel:"Kekse austragen",
   text:"Die schönsten in eine Dose, die schiefen bleiben daheim. Bei den Nachbarn klingeln und nicht lange bleiben.",
   katze:"Die Dose riecht gut. Die Dose wird bewacht."},
@@ -1291,7 +1291,7 @@ const buehnen = {
 17:{tag:"Wetterlage", t:["Draußen","steht wer."], u:"Zwei Karotten, ein Zylinder, ein Ohrring. Mehr braucht es nicht.", m:"schneemann", m2:"schneefrau", a:"#f6fbff", b:"#fff0f2", c:"#fff4ea", l:"rgba(255,255,255,.9)", s:"eis"},
 18:{tag:"Auf den Berg", t:["Hinauf","dauert länger."], u:"Dreimal so lang wie hinunter. Genau deshalb macht man es.", m:"schlitten", m2:"berg", a:"#f8fbff", b:"#ffeef0", c:"#ffeee2", l:"rgba(63,110,86,.2)", s:"tanne"},
 19:{tag:"Er kommt herein", t:["Ein Baum","im Wohnzimmer."], u:"Lieber eine Handbreit zu klein als eine zu groß. Die Decke gewinnt immer.", m:"tanne", m2:"berg", a:"#f5fbf6", b:"#ffeff0", c:"#fff1e4", l:"rgba(63,110,86,.26)", s:"tanne"},
-20:{tag:"Aufputzen", t:["Lichter,","dann Kugeln."], u:"Zuletzt der Stern. Und die unteren dreißig Zentimeter bleiben leer.", m:"tanne", m2:"zuckerstange", a:"#fff8ef", b:"#ffece6", c:"#ffe4ee", l:"rgba(221,148,51,.5)", s:"tanne"},
+20:{tag:"Aufputzen", t:["Lichter,","dann Kugeln."], u:"Zuletzt der Stern. Und die unteren 30 Zentimeter bleiben leer.", m:"tanne", m2:"zuckerstange", a:"#fff8ef", b:"#ffece6", c:"#ffe4ee", l:"rgba(221,148,51,.5)", s:"tanne"},
 21:{tag:"Sonnenwende", t:["Die längste","Nacht."], u:"Ab morgen werden die Tage wieder länger. Man merkt es drei Wochen lang nicht.", m:"stern", m2:"schneekugel", a:"#fdf5ff", b:"#ffedf3", c:"#fff0e8", l:"rgba(232,128,154,.34)", s:"eis"},
 22:{tag:"Austragen", t:["Die schönen","kommen weg."], u:"Die schiefen bleiben daheim. So war es immer, so bleibt es.", m:"kletzenbrot", m2:"keks", a:"#fff5ea", b:"#ffe8dc", c:"#ffe2d6", l:"rgba(169,102,47,.32)", s:"lebkuchen"},
 23:{tag:"Der Tag davor", t:["Heute","nichts."], u:"Nicht mehr einkaufen, nicht mehr putzen. Vorfreude braucht Platz.", m:"rentier", m2:"gespann", a:"#fffaf3", b:"#fff0ea", c:"#ffeae6", l:"rgba(221,148,51,.3)", s:"lebkuchen"},
@@ -1622,7 +1622,7 @@ stand();
 
 if(!imDezember){
   const bis=tageBis(1);
-  hinweis.innerHTML="Noch alle vierundzwanzig zu. Das erste öffnet am <b>1. Dezember</b> — in "+bis+" Tagen.";
+  hinweis.innerHTML="Noch alle 24 zu. Das erste öffnet am <b>1. Dezember</b> — in "+bis+" Tagen.";
 }
 
 /* ---------------- Tafel ---------------- */
@@ -1681,7 +1681,7 @@ if(imDezember){
   document.getElementById("heute-marke").textContent="Noch verschlossen";
   document.getElementById("heute-titel").textContent="Am 1. Dezember geht das erste auf";
   document.getElementById("heute-text").textContent=
-    "Bis dahin steht hier nichts. Vierundzwanzig Türchen warten, jedes an seinem Tag — "+
+    "Bis dahin steht hier nichts. 24 Türchen warten, jedes an seinem Tag — "+
     "und der Zauber unten läuft schon, der hält sich an keinen Kalender.";
   document.getElementById("heute-hinweis").textContent=
     "Noch "+bis+" Tage. Der Countdown oben zählt weiter, das Türchen wartet.";
