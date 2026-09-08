@@ -85,13 +85,41 @@ h1,h2,h3{font-family:var(--f-display);font-weight:600;text-wrap:balance;margin:0
   border-radius:0 0 clamp(24px,4vw,48px) clamp(24px,4vw,48px);
   background:linear-gradient(168deg,var(--h-a) 0%,var(--h-b) 58%,var(--h-c) 100%);
   transition:background .9s ease}
+.buehne-film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  object-position:center 46%;opacity:0;transition:opacity 1.2s ease;pointer-events:none}
+.buehne-film.da{opacity:1}
+.buehne.mit-film .buehne-foto{opacity:0}
+
 .buehne-foto{position:absolute;inset:0;background-size:cover;background-position:center 42%;
   opacity:0;transition:opacity 1.1s ease}
 .buehne-foto.da{opacity:1}
 .buehne-foto::after{content:"";position:absolute;inset:0;
   background:linear-gradient(180deg, rgba(255,248,244,.28) 0%, rgba(255,240,236,.06) 34%,
              rgba(255,244,238,.18) 70%, rgba(255,248,244,.55) 100%)}
-.buehne.mit-foto .buehne-motiv{display:none}
+.buehne.mit-foto .buehne-motiv,
+.buehne.mit-film .buehne-motiv{display:none}
+/* Beim Film gehört die obere Hälfte dem Bild. Der Text rückt nach unten,
+   der Schleier deckt nur noch das Textband — sonst sieht man vom Film nichts. */
+.buehne.mit-film .buehne-boden{background:linear-gradient(to top,
+  var(--zucker) 0%,
+  rgba(255,248,244,.99) 24%,
+  rgba(255,248,244,.94) 36%,
+  rgba(255,248,244,.66) 47%,
+  rgba(255,248,244,.22) 58%,
+  rgba(255,248,244,0) 70%)}
+.buehne.mit-film .buehne-schein{opacity:.28}
+/* Die Kopfzeile steht beim Film auf dunklem Bild — dort wird sie hell,
+   mit einem kurzen Verlauf darunter, damit sie nicht im Zweig verschwindet. */
+.buehne.mit-film .kopfleiste{background:linear-gradient(to bottom,
+  rgba(40,22,18,.42) 0%, rgba(40,22,18,0) 100%);max-width:none;padding-left:0;padding-right:0}
+.buehne.mit-film .kopfleiste > *{max-width:var(--breite);width:100%}
+.buehne.mit-film .kopfleiste .marke{color:#ffd9a8;text-shadow:0 1px 3px rgba(40,22,18,.8)}
+.buehne.mit-film .kopfleiste .ort{color:rgba(255,248,244,.9);text-shadow:0 1px 3px rgba(40,22,18,.8)}
+.buehne.mit-film .buehne-inhalt{padding-top:clamp(230px,44vh,520px)}
+.buehne.mit-film{min-height:min(88dvh,900px)}
+.buehne.mit-film h1,
+.buehne.mit-film .unterzeile,
+.buehne.mit-film .buehne-tag{text-shadow:0 1px 2px rgba(255,248,244,.85)}
 .buehne.mit-foto .buehne-boden{background:linear-gradient(to top,
   var(--zucker) 0%,
   rgba(255,248,244,.985) 30%,
@@ -323,6 +351,10 @@ h1 em{font-style:normal;display:block;
 .katzenband h2{font-size:clamp(22px,3vw,30px);margin-bottom:10px}
 .katzenband p{margin:0;color:var(--tinte-matt);max-width:54ch}
 
+footer .studio{color:var(--rot);letter-spacing:.16em;text-decoration:none;
+  border-bottom:1px solid rgba(192,48,63,.35);padding-bottom:2px;transition:.2s}
+footer .studio:hover{color:var(--rot-tief);border-color:var(--rot)}
+footer .studio:focus-visible{outline:2px solid var(--rot);outline-offset:3px}
 footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 0 48px;
   border-top:1px solid var(--linie);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
   font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tinte-matt)}
@@ -343,6 +375,35 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 .flimmer{animation:flimmern 1.9s ease-in-out infinite}
 .flimmer.b{animation-delay:.45s}.flimmer.c{animation-delay:.9s}.flimmer.d{animation-delay:1.35s}
 @keyframes flimmern{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* ---------- Snoopy, die durchs Bild geht ----------
+   Sie lebt in einer eigenen Schicht am unteren Rand. Die Figur ist austauschbar:
+   sobald echte Bilder da sind, wird nur `snoopyBilder` ersetzt, das Verhalten bleibt. */
+#snoopy{position:fixed;left:0;bottom:0;width:100%;height:0;z-index:6;pointer-events:none}
+.snoopy-koerper{position:absolute;bottom:14px;left:0;width:104px;height:104px;
+  transform-origin:50% 100%;pointer-events:auto;cursor:pointer;
+  filter:drop-shadow(0 8px 10px rgba(74,42,36,.22));
+  transition:transform .25s ease}
+.snoopy-koerper svg{width:100%;height:100%;display:block}
+.snoopy-koerper.blickt-links{transform:scaleX(-1)}
+
+/* Gang: kleines Auf und Ab, die Beine macht die Zeichnung */
+.snoopy-koerper.geht{animation:snoopyschritt .46s ease-in-out infinite}
+@keyframes snoopyschritt{0%,100%{translate:0 0;rotate:-1.2deg}50%{translate:0 -5px;rotate:1.2deg}}
+/* Sitzen und Dösen: ruhiges Atmen */
+.snoopy-koerper.atmet{animation:snoopyatem 3.4s ease-in-out infinite}
+@keyframes snoopyatem{0%,100%{scale:1 1}50%{scale:1.02 .985}}
+/* Gähnen und Strecken */
+.snoopy-koerper.streckt{animation:snoopystreck 1.6s ease-in-out}
+@keyframes snoopystreck{0%,100%{scale:1 1}40%{scale:1.14 .9}70%{scale:.96 1.05}}
+
+.snoopy-blase{position:absolute;bottom:112px;left:50%;translate:-50% 0;white-space:nowrap;
+  font-family:var(--f-zahl);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--rot);background:#fff;border:1px solid var(--linie);border-radius:99px;
+  padding:6px 12px;opacity:0;transition:opacity .3s;box-shadow:0 6px 14px -10px rgba(74,42,36,.5)}
+.snoopy-blase.da{opacity:1}
+
+@media(max-width:640px){.snoopy-koerper{width:74px;height:74px}}
 
 /* ---------- Zauberschicht ---------- */
 #zauber{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
@@ -415,16 +476,20 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 .speise p{margin:0;font-size:13.5px;color:var(--tinte-matt);line-height:1.45}
 
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}
-  #zauber{display:none}}
+  #zauber{display:none}
+  #snoopy{display:none}}
 </style>
 
 <div class="grund"></div>
 <div class="strahl"></div>
 <canvas id="himmel"></canvas>
 <div id="zauber" aria-hidden="true"></div>
+<div id="snoopy" aria-hidden="true"></div>
 
 <header>
   <section class="buehne" id="buehne">
+    <video class="buehne-film" id="buehne-film" muted loop playsinline preload="none"
+           poster="bilder/stube-poster.jpg" aria-hidden="true"></video>
     <div class="buehne-foto" id="buehne-foto"></div>
     <div class="buehne-schein"></div>
     <div class="buehne-motiv" id="buehne-motiv"></div>
@@ -544,6 +609,7 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 
   <footer>
     <span>Für Nina &amp; Snoopy</span>
+    <a class="studio" href="https://williamcomploi.tech/de" target="_blank" rel="noopener">Gebaut von Studio Comploi</a>
     <span id="fuss-jahr">Heiliger Abend</span>
   </footer>
 </main>
@@ -1024,6 +1090,75 @@ function fotoSetzen(pfad){
 
 fotoSetzen(fotoFuer());
 
+
+/* ---------------- Der Film der Stube ----------------
+   Fünfzehn Sekunden, drei Einstellungen. Er läuft stumm und in Schleife hinter
+   dem Text — aber NUR dort, wo er sich lohnt:
+
+   * Auf schmalen Fenstern (Telefon) bleibt es beim Bild. Vier Megabyte über
+     Mobilfunk für einen Hintergrund wären eine Zumutung.
+   * Wer wenig Bewegung eingestellt hat, bekommt ihn gar nicht.
+   * Solange er lädt, steht das Standbild da; erst wenn genug Bild da ist,
+     wird überblendet. Bricht das Laden ab, bleibt einfach das Bild.
+
+   Er ersetzt das Tagesbild nur auf der Startansicht. Blättert man die Bühnen
+   durch, kommen wieder die Tagesbilder — der Film gehört zum Haus, nicht zum Tag. */
+const filmEl = document.getElementById("buehne-film");
+let filmLaeuft = false;
+
+function filmStarten(){
+  if (filmLaeuft) return;
+  if (window.innerWidth < 820) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  /* Sparsamer Modus oder langsame Verbindung: dann bleibt das Bild stehen. */
+  const netz = navigator.connection;
+  if (netz && (netz.saveData || /2g/.test(netz.effectiveType || ""))) return;
+
+  filmLaeuft = true;
+  const webm = document.createElement("source");
+  webm.src = "bilder/stube.webm"; webm.type = "video/webm";
+  const mp4 = document.createElement("source");
+  mp4.src = "bilder/stube.mp4"; mp4.type = "video/mp4";
+  filmEl.appendChild(webm); filmEl.appendChild(mp4);
+  filmEl.preload = "auto";
+
+  filmEl.addEventListener("canplay", () => {
+    filmEl.classList.add("da");
+    document.getElementById("buehne").classList.add("mit-film");
+    filmEl.play().catch(() => {});
+  }, { once: true });
+
+  filmEl.addEventListener("error", () => {
+    filmLaeuft = false;
+    document.getElementById("buehne").classList.remove("mit-film");
+  }, { once: true });
+
+  filmEl.load();
+}
+
+function filmAnhalten(){
+  filmEl.classList.remove("da");
+  document.getElementById("buehne").classList.remove("mit-film");
+  filmEl.pause();
+}
+
+/* Erst laden, wenn die Seite steht — der Zähler und die Schrift sind wichtiger. */
+if (document.readyState === "complete") setTimeout(filmStarten, 400);
+else window.addEventListener("load", () => setTimeout(filmStarten, 400));
+
+/* Läuft die Bühne aus dem Blick, hält der Film an. Ein Film, den niemand
+   sieht, soll nicht rechnen. */
+if ("IntersectionObserver" in window){
+  new IntersectionObserver(eintraege => {
+    eintraege.forEach(e => {
+      if (!filmLaeuft) return;
+      if (e.isIntersecting) filmEl.play().catch(() => {});
+      else filmEl.pause();
+    });
+  }, { threshold: 0.05 }).observe(document.getElementById("buehne"));
+}
+
 /* Zum Durchblättern, wie beim Zauber */
 let buehneZeiger = imDezember ? buehneHeute : 0;
 
@@ -1349,6 +1484,7 @@ document.getElementById("zauber-weiter").addEventListener("click",()=>{
   zauberZeiger = zauberZeiger % 24 + 1;
   zauberSetzen(zauberZeiger);
   buehneSetzen(zauberZeiger);
+  filmAnhalten();
   fotoSetzen(dezemberBilder.includes(zauberZeiger)
     ? "bilder/tag-" + zweistellig(zauberZeiger) + ".jpg" : null);
   window.scrollTo({top:0, behavior:"smooth"});
@@ -1358,8 +1494,143 @@ document.getElementById("zauber-heute").addEventListener("click",()=>{
   zauberSetzen(zauberHeute);
   buehneSetzen(imDezember ? buehneHeute : 0);
   fotoSetzen(fotoFuer());
+  if (filmLaeuft){ filmEl.classList.add("da");
+    document.getElementById("buehne").classList.add("mit-film");
+    filmEl.play().catch(() => {}); }
   if(!imDezember) document.getElementById("zauber-was").textContent="Zauber der Vorfreude";
 });
+
+
+/* ---------------- Snoopy geht durchs Bild ----------------
+   Ein kleines Verhalten, keine Bahn: sie entscheidet selbst, was als Nächstes
+   kommt, und manches folgt aus dem, was davor war — nach dem Schlafen streckt
+   sie sich, nach dem Fressen putzt sie sich. Beim Anklicken schaut sie her.
+
+   AUSTAUSCHBAR: `snoopyBilder` hält für jede Haltung eine Zeichnung. Sobald
+   echte Fotos von Snoopy da sind, werden hier freigestellte Einzelbilder
+   eingesetzt — am Verhalten darunter ändert sich nichts. */
+const snoopyBilder = {
+  gehen:  bild.katze,
+  sitzen: bild.katze,
+  liegen: bild.katze,
+  gaehnen:bild.katze,
+  fressen:bild.katze,
+  putzen: bild.katze
+};
+
+const snoopySprueche = {
+  gaehnen:"gähnt",
+  fressen:"frisst was",
+  putzen: "putzt sich",
+  liegen: "macht Pause",
+  sitzen: "schaut",
+  hallo:  "miau"
+};
+
+(function(){
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const buehneEl = document.getElementById("snoopy");
+  const koerper = document.createElement("div");
+  koerper.className = "snoopy-koerper";
+  const blase = document.createElement("div");
+  blase.className = "snoopy-blase";
+  koerper.appendChild(blase);
+  buehneEl.appendChild(koerper);
+
+  let x = Math.random() * (window.innerWidth - 140);
+  let richtung = Math.random() < .5 ? 1 : -1;
+  let haltung = "sitzen";
+  let bisWann = 0;
+  let ziel = x;
+
+  function zeichnen(h){
+    const alt = koerper.querySelector("svg");
+    if (alt) alt.remove();
+    koerper.insertAdjacentHTML("afterbegin", snoopyBilder[h] || snoopyBilder.sitzen);
+  }
+  function sagen(wort){
+    if (!wort) { blase.classList.remove("da"); return; }
+    blase.textContent = wort;
+    blase.classList.add("da");
+    setTimeout(() => blase.classList.remove("da"), 2200);
+  }
+  function wechsle(h, dauerMs, wort){
+    haltung = h;
+    bisWann = performance.now() + dauerMs;
+    koerper.classList.remove("geht","atmet","streckt");
+    if (h === "gehen") koerper.classList.add("geht");
+    else if (h === "liegen" || h === "sitzen") koerper.classList.add("atmet");
+    else if (h === "gaehnen") koerper.classList.add("streckt");
+    zeichnen(h);
+    if (wort) sagen(wort);
+  }
+
+  /* Was nach was kommt. Nicht ganz zufällig — Katzen haben Gewohnheiten. */
+  const folgt = {
+    gehen:  [["sitzen",3],["gehen",2],["fressen",1],["liegen",1]],
+    sitzen: [["gehen",4],["putzen",2],["gaehnen",1]],
+    liegen: [["gaehnen",3],["liegen",2],["sitzen",1]],
+    gaehnen:[["liegen",3],["gehen",2],["sitzen",1]],
+    fressen:[["putzen",4],["sitzen",1]],
+    putzen: [["gehen",3],["liegen",2],["sitzen",1]]
+  };
+  function naechste(){
+    const liste = folgt[haltung] || folgt.sitzen;
+    let summe = 0; liste.forEach(e => summe += e[1]);
+    let w = Math.random() * summe;
+    for (const [name, gewicht] of liste){ w -= gewicht; if (w <= 0) return name; }
+    return liste[0][0];
+  }
+  const dauer = {
+    gehen:  () => 4000 + Math.random() * 6000,
+    sitzen: () => 3000 + Math.random() * 5000,
+    liegen: () => 8000 + Math.random() * 14000,
+    gaehnen:() => 1600,
+    fressen:() => 4000 + Math.random() * 3000,
+    putzen: () => 3500 + Math.random() * 4000
+  };
+
+  function neuesZiel(){
+    const breite = window.innerWidth - koerper.offsetWidth - 16;
+    ziel = Math.random() * breite;
+    richtung = ziel > x ? 1 : -1;
+  }
+
+  koerper.addEventListener("click", () => {
+    wechsle("sitzen", 4000, snoopySprueche.hallo);
+    koerper.classList.toggle("blickt-links", richtung < 0);
+  });
+
+  let zuletzt = performance.now();
+  function schritt(jetztMs){
+    const dt = Math.min(64, jetztMs - zuletzt);
+    zuletzt = jetztMs;
+
+    if (haltung === "gehen"){
+      x += richtung * dt * 0.045;
+      const breite = window.innerWidth - koerper.offsetWidth - 16;
+      if (x < 0){ x = 0; richtung = 1; }
+      if (x > breite){ x = breite; richtung = -1; }
+      if (Math.abs(x - ziel) < 6) bisWann = Math.min(bisWann, jetztMs + 200);
+    }
+    koerper.style.transform = "translateX(" + x.toFixed(1) + "px)" + (richtung < 0 ? " scaleX(-1)" : "");
+
+    if (jetztMs > bisWann){
+      const h = naechste();
+      if (h === "gehen") neuesZiel();
+      wechsle(h, dauer[h](), snoopySprueche[h]);
+    }
+    requestAnimationFrame(schritt);
+  }
+
+  wechsle("sitzen", 2500);
+  requestAnimationFrame(schritt);
+  window.addEventListener("resize", () => {
+    const breite = window.innerWidth - koerper.offsetWidth - 16;
+    if (x > breite) x = Math.max(0, breite);
+  });
+})();
 
 /* ---------------- Puderzucker ---------------- */
 (function(){
