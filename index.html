@@ -118,6 +118,10 @@ h1,h2,h3{font-family:var(--f-display);font-weight:600;text-wrap:balance;margin:0
 .buehne.mit-film .kopfleiste .marke{color:#ffd9a8;text-shadow:0 1px 3px rgba(40,22,18,.8)}
 .buehne.mit-film .kopfleiste .ort{color:rgba(255,248,244,.9);text-shadow:0 1px 3px rgba(40,22,18,.8)}
 .buehne.mit-film .buehne-inhalt{padding-top:clamp(340px,64vh,720px)}
+@media(max-width:820px){
+  .buehne.mit-film .buehne-inhalt{padding-top:clamp(280px,52vh,560px)}
+  .buehne-film{object-position:center 40%}
+}
 .buehne.mit-film{min-height:min(88dvh,900px)}
 .buehne.mit-film h1,
 .buehne.mit-film .unterzeile,
@@ -528,6 +532,43 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 .keks-eigene{font-family:var(--f-zahl);font-size:11px;letter-spacing:.1em;color:var(--tinte-matt);
   margin-top:10px}
 
+/* ---------- Gästebuch ---------- */
+.buch{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
+.buch-formular{display:grid;gap:14px;padding:clamp(20px,3vw,30px);border-radius:22px;
+  background:linear-gradient(120deg,#fff 0%,#fff4ee 100%);border:1px solid var(--linie-zart);
+  margin-bottom:26px}
+.buch-reihe{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:14px}
+@media(max-width:640px){.buch-reihe{grid-template-columns:1fr}}
+.buch-feld{font-family:var(--f-text);font-size:16px;color:var(--tinte);
+  padding:13px 16px;border-radius:14px;border:1px solid var(--linie);background:#fff;width:100%}
+.buch-feld:focus{outline:2px solid var(--rosa-satt);outline-offset:1px;border-color:transparent}
+textarea.buch-feld{min-height:104px;resize:vertical;line-height:1.55}
+.buch-fuss{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.buch-rest{font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.1em;color:var(--tinte-matt)}
+.buch-meldung{font-size:14.5px;margin:0;min-height:20px;color:var(--tinte-matt)}
+.buch-meldung.schlecht{color:var(--rot-tief)}
+.buch-meldung.gut{color:var(--tanne)}
+
+.buch-liste{display:grid;gap:14px}
+.buch-eintrag{position:relative;padding:18px 20px;border-radius:18px;background:#fff;
+  border:1px solid var(--linie-zart)}
+.buch-eintrag h3{font-size:17px;margin-bottom:2px}
+.buch-eintrag .wann{font-family:var(--f-zahl);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--tinte-matt);display:block;margin-bottom:8px}
+.buch-eintrag p{margin:0;color:var(--tinte);line-height:1.6;overflow-wrap:anywhere}
+.buch-leer{color:var(--tinte-matt);font-style:italic}
+.buch-weg{position:absolute;top:12px;right:12px;display:none;
+  font-family:var(--f-zahl);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 12px;border-radius:99px;border:1px solid var(--rot);background:#fff;
+  color:var(--rot);cursor:pointer}
+.buch-weg:hover{background:var(--rot);color:#fff}
+body.verwaltet .buch-weg{display:block}
+
+.buch-schluessel{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:20px;
+  padding-top:18px;border-top:1px dashed rgba(169,102,47,.3)}
+.buch-schluessel .buch-feld{max-width:170px;padding:9px 13px;font-size:14px}
+.buch-schluessel .knopf{padding:9px 16px}
+
 /* ---------- Snoopy rufen ---------- */
 .rufen{margin-top:22px;padding-top:20px;border-top:1px dashed rgba(232,128,154,.5)}
 .rufen-zeile{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -708,6 +749,42 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
         <span class="keks-lage" id="keks-lage" data-lage="allein">wird verbunden</span>
         <p class="keks-eigene" id="keks-eigene"></p>
       </div>
+    </div>
+  </section>
+
+  <section class="buch" aria-labelledby="buch-titel">
+    <div class="abschnittskopf">
+      <div>
+        <h2 id="buch-titel">Das Gästebuch</h2>
+        <p>Schreib etwas hinein. Der Name darf auch ein Fantasiename sein —
+           es geht darum, dass Nina weiß, wer da war.</p>
+      </div>
+      <span class="ort" id="buch-anzahl"></span>
+    </div>
+
+    <form class="buch-formular" id="buch-formular">
+      <div class="buch-reihe">
+        <input class="buch-feld" id="buch-name" type="text" maxlength="24"
+               placeholder="Name oder Fantasiename" autocomplete="off">
+        <textarea class="buch-feld" id="buch-text" maxlength="300"
+                  placeholder="Ein paar Worte für Nina …"></textarea>
+      </div>
+      <div class="buch-fuss">
+        <span class="buch-rest" id="buch-rest">300 Zeichen frei</span>
+        <button class="knopf stark" type="submit" id="buch-senden">Eintragen</button>
+      </div>
+      <p class="buch-meldung" id="buch-meldung"></p>
+    </form>
+
+    <div class="buch-liste" id="buch-liste"></div>
+
+    <div class="buch-schluessel">
+      <span class="buch-rest">Verwalten</span>
+      <input class="buch-feld" id="admin-name" type="text" placeholder="Name" autocomplete="off">
+      <input class="buch-feld" id="admin-wort" type="password" placeholder="Passwort"
+             autocomplete="current-password">
+      <button class="knopf" id="admin-knopf">Anmelden</button>
+      <span class="buch-rest" id="admin-lage"></span>
     </div>
   </section>
 
@@ -1240,20 +1317,25 @@ let filmLaeuft = false;
    sonst steht erst ein Jahreszeitenbild da und springt eine Sekunde später auf
    die Stube um. Wo der Film läuft, gehört ihm auch das Standbild. */
 function filmMoeglich(){
-  if (window.innerWidth < 820) return false;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
   const netz = navigator.connection;
   if (netz && (netz.saveData || /2g/.test(netz.effectiveType || ""))) return false;
   return true;
 }
 
+/* Auf dem Telefon läuft derselbe Film, aber in klein: 900 statt 1920 Pixel breit,
+   0,5 statt 2,6 MB. Auf einem Handybildschirm sieht man den Unterschied nicht —
+   im Mobilfunk sehr wohl. */
+function filmKlein(){ return window.innerWidth < 820; }
+
 function filmStarten(){
   if (filmLaeuft || !filmMoeglich()) return;
   filmLaeuft = true;
+  const klein = filmKlein() ? "-klein" : "";
   const webm = document.createElement("source");
-  webm.src = "bilder/stube.webm"; webm.type = "video/webm";
+  webm.src = "bilder/stube" + klein + ".webm"; webm.type = "video/webm";
   const mp4 = document.createElement("source");
-  mp4.src = "bilder/stube.mp4"; mp4.type = "video/mp4";
+  mp4.src = "bilder/stube" + klein + ".mp4"; mp4.type = "video/mp4";
   filmEl.appendChild(webm); filmEl.appendChild(mp4);
   filmEl.preload = "auto";
 
@@ -1944,10 +2026,9 @@ const snoopySprueche = {
    und sagt das auch. Lieber ehrlich allein zählen als so tun, als wären andere
    dabei. Sobald `keksKonfig` gefüllt ist, wird derselbe Zähler global — am
    Verhalten hier ändert sich nichts. */
-const keksKonfig = {
-  url:    "",          /* https://xxxxx.supabase.co */
-  schluessel: ""       /* der öffentliche anon-Schlüssel */
-};
+/* Die Gegenstelle liegt auf derselben Adresse: /api/keks. Ist kein Speicher
+   angebunden, antwortet sie mit 503 — dann zählt der Keks ehrlich nur hier. */
+const KEKS_WEG = "/api/keks";
 
 (function(){
   const knopf   = document.getElementById("keks-knopf");
@@ -1962,7 +2043,7 @@ const keksKonfig = {
   let eigene = 0;
   try { eigene = Number(localStorage.getItem("nina-eigene-kekse") || 0) || 0; } catch(e){}
 
-  const global = Boolean(keksKonfig.url && keksKonfig.schluessel);
+  let global = false;   /* entscheidet sich beim ersten Anfragen */
 
   function zahlZeigen(n){
     stand = n;
@@ -2011,13 +2092,14 @@ const keksKonfig = {
     if (!global || !offen) return;
     const wieviel = offen; offen = 0;
     try {
-      await fetch(keksKonfig.url + "/rest/v1/rpc/keks_klicken", {
+      const a = await fetch(KEKS_WEG, {
         method: "POST",
-        headers: { "apikey": keksKonfig.schluessel,
-                   "Authorization": "Bearer " + keksKonfig.schluessel,
-                   "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ anzahl: wieviel })
       });
+      const d = await a.json();
+      /* Der Server kennt die Wahrheit — auch wenn inzwischen andere geklickt haben. */
+      if (Number.isFinite(d.stand)) zahlZeigen(d.stand);
     } catch(e){ offen += wieviel; }   /* nicht durchgekommen: beim nächsten Mal mit */
   }
 
@@ -2040,81 +2122,175 @@ const keksKonfig = {
   });
 
   /* ---- Anlaufen ---- */
-  if (!global){
+  function alleinLaufen(grund){
+    global = false;
     let lokal = 0;
     try { lokal = Number(localStorage.getItem("nina-kekse-lokal") || 0) || 0; } catch(e){}
     zahlZeigen(lokal);
     eigeneZeigen();
     lageEl.dataset.lage = "allein";
-    lageEl.textContent = "zählt nur in diesem Browser";
-    return;
+    lageEl.textContent = grund;
   }
 
   lageEl.textContent = "wird verbunden";
-  fetch(keksKonfig.url + "/rest/v1/keks?name=eq.gesamt&select=stand", {
-    headers: { "apikey": keksKonfig.schluessel,
-               "Authorization": "Bearer " + keksKonfig.schluessel }
-  })
-    .then(a => a.json())
-    .then(reihen => {
-      zahlZeigen(Number(reihen?.[0]?.stand) || 0);
+  fetch(KEKS_WEG)
+    .then(async a => {
+      if (!a.ok) throw new Error(String(a.status));
+      return a.json();
+    })
+    .then(d => {
+      global = true;
+      zahlZeigen(Number(d.stand) || 0);
       eigeneZeigen();
       lageEl.dataset.lage = "gemeinsam";
       lageEl.textContent = "zählt für alle mit";
-      horchen();
-    })
-    .catch(() => {
-      lageEl.dataset.lage = "allein";
-      lageEl.textContent = "gerade nicht erreichbar";
-      zahlZeigen(0);
-    });
-
-  /* Änderungen von anderen: erst über die Leitung, sonst alle 20 Sekunden fragen. */
-  function horchen(){
-    let leitung = null;
-    try {
-      leitung = new WebSocket(
-        keksKonfig.url.replace(/^http/, "ws") + "/realtime/v1/websocket?apikey=" +
-        keksKonfig.schluessel + "&vsn=1.0.0");
-    } catch(e){}
-
-    if (leitung){
-      leitung.addEventListener("open", () => {
-        leitung.send(JSON.stringify({
-          topic: "realtime:oeffentlich:keks", event: "phx_join",
-          payload: { config: { postgres_changes: [
-            { event: "UPDATE", schema: "public", table: "keks" } ] } }, ref: "1" }));
-        setInterval(() => leitung.readyState === 1 &&
-          leitung.send(JSON.stringify({ topic:"phoenix", event:"heartbeat", payload:{}, ref:"h" })), 25000);
-      });
-      leitung.addEventListener("message", e => {
-        try {
-          const n = JSON.parse(e.data);
-          const neu = Number(n?.payload?.data?.record?.stand);
-          if (Number.isFinite(neu) && neu !== stand) zahlZeigen(neu);
-        } catch(err){}
-      });
-      leitung.addEventListener("error", () => nachfragen());
-      leitung.addEventListener("close",  () => nachfragen());
-    } else {
       nachfragen();
-    }
-  }
+    })
+    .catch(() => alleinLaufen("zählt nur in diesem Browser"));
 
   let fragUhr = null;
   function nachfragen(){
     if (fragUhr) return;
+    /* Alle fünfzehn Sekunden nachsehen, ob andere geklickt haben — aber nur,
+       solange die Seite auch angeschaut wird. Wer sie im Hintergrund offen hat,
+       fragt nicht. */
     fragUhr = setInterval(() => {
-      if (document.hidden) return;      /* im Hintergrund nicht nachfragen */
-      fetch(keksKonfig.url + "/rest/v1/keks?name=eq.gesamt&select=stand", {
-        headers: { "apikey": keksKonfig.schluessel,
-                   "Authorization": "Bearer " + keksKonfig.schluessel }
-      })
+      if (document.hidden || offen) return;
+      fetch(KEKS_WEG)
         .then(a => a.json())
-        .then(r => { const n = Number(r?.[0]?.stand); if (Number.isFinite(n) && n !== stand) zahlZeigen(n); })
+        .then(d => { const n = Number(d.stand); if (Number.isFinite(n) && n !== stand) zahlZeigen(n); })
         .catch(() => {});
-    }, 20000);
+    }, 15000);
   }
+})();
+
+
+/* ---------------- Das Gästebuch ----------------
+   Einträge liegen in derselben Ablage wie der Keks, angesprochen über
+   /api/gaestebuch. Gelöscht werden darf nur mit Passwort — und das wird auf
+   dem Server geprüft, nicht hier. Stünde es in dieser Datei, könnte jeder
+   Besucher das Gästebuch leeren, ohne es überhaupt zu kennen. */
+(function(){
+  const WEG = "/api/gaestebuch";
+  const formular = document.getElementById("buch-formular");
+  const nameEl   = document.getElementById("buch-name");
+  const textEl   = document.getElementById("buch-text");
+  const restEl   = document.getElementById("buch-rest");
+  const meldeEl  = document.getElementById("buch-meldung");
+  const listeEl  = document.getElementById("buch-liste");
+  const anzahlEl = document.getElementById("buch-anzahl");
+  const sendeEl  = document.getElementById("buch-senden");
+  let wort = "";                     /* nur im Speicher, nirgends abgelegt */
+
+  function melden(text, art){
+    meldeEl.textContent = text;
+    meldeEl.className = "buch-meldung" + (art ? " " + art : "");
+  }
+  function datum(iso){
+    const d = new Date(iso);
+    return d.toLocaleDateString("de-AT", { day:"numeric", month:"long" }) + ", " +
+           d.toLocaleTimeString("de-AT", { hour:"2-digit", minute:"2-digit" });
+  }
+  const sicher = t => String(t).replace(/[&<>"']/g, z =>
+    ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[z]));
+
+  textEl.addEventListener("input", () => {
+    const frei = 300 - textEl.value.length;
+    restEl.textContent = frei + (frei === 1 ? " Zeichen frei" : " Zeichen frei");
+  });
+
+  function zeichnen(eintraege){
+    anzahlEl.textContent = eintraege.length === 0 ? "noch leer"
+      : eintraege.length === 1 ? "ein Eintrag" : eintraege.length + " Einträge";
+
+    if (!eintraege.length){
+      listeEl.innerHTML = '<p class="buch-leer">Noch hat niemand etwas hinterlassen. ' +
+                          'Du könntest der Erste sein.</p>';
+      return;
+    }
+    listeEl.innerHTML = eintraege.map(e =>
+      '<article class="buch-eintrag" data-id="' + sicher(e.id) + '">' +
+        '<button class="buch-weg" data-weg="' + sicher(e.id) + '">Löschen</button>' +
+        '<span class="wann">' + sicher(datum(e.zeit)) + '</span>' +
+        '<h3>' + sicher(e.name) + '</h3>' +
+        '<p>' + sicher(e.text) + '</p>' +
+      '</article>').join("");
+  }
+
+  function laden(){
+    fetch(WEG)
+      .then(async a => { if (!a.ok) throw new Error(String(a.status)); return a.json(); })
+      .then(d => zeichnen(d.eintraege || []))
+      .catch(() => {
+        listeEl.innerHTML = '<p class="buch-leer">Das Gästebuch ist noch nicht angebunden. ' +
+                            'Sobald der Speicher steht, erscheinen die Einträge hier.</p>';
+        anzahlEl.textContent = "";
+        formular.querySelectorAll("input, textarea, button").forEach(el => el.disabled = true);
+      });
+  }
+
+  formular.addEventListener("submit", async e => {
+    e.preventDefault();
+    if (textEl.value.trim().length < 2){ melden("Schreib ein paar Worte.", "schlecht"); return; }
+    sendeEl.disabled = true;
+    melden("wird eingetragen …");
+    try {
+      const a = await fetch(WEG, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: nameEl.value, text: textEl.value })
+      });
+      const d = await a.json();
+      if (!a.ok) { melden(d.fehler || "Das hat nicht geklappt.", "schlecht"); }
+      else {
+        textEl.value = ""; restEl.textContent = "300 Zeichen frei";
+        melden("Steht drin. Danke!", "gut");
+        laden();
+      }
+    } catch(err){ melden("Gerade nicht erreichbar.", "schlecht"); }
+    sendeEl.disabled = false;
+  });
+
+  /* ---- Verwalten ---- */
+  const adminName = document.getElementById("admin-name");
+  const adminWort = document.getElementById("admin-wort");
+  const adminLage = document.getElementById("admin-lage");
+
+  document.getElementById("admin-knopf").addEventListener("click", () => {
+    if (document.body.classList.contains("verwaltet")){
+      document.body.classList.remove("verwaltet");
+      wort = ""; adminWort.value = "";
+      adminLage.textContent = "abgemeldet";
+      return;
+    }
+    if (adminName.value !== "admin" || !adminWort.value){
+      adminLage.textContent = "Name oder Passwort fehlt";
+      return;
+    }
+    /* Ob es stimmt, weiß erst der Server — beim ersten Löschversuch. */
+    wort = adminWort.value;
+    document.body.classList.add("verwaltet");
+    adminLage.textContent = "angemeldet — Löschknöpfe sind da";
+  });
+
+  listeEl.addEventListener("click", async e => {
+    const knopf = e.target.closest("[data-weg]");
+    if (!knopf) return;
+    if (!confirm("Diesen Eintrag löschen?")) return;
+    try {
+      const a = await fetch(WEG, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: knopf.dataset.weg, name: "admin", passwort: wort })
+      });
+      const d = await a.json();
+      if (!a.ok){ adminLage.textContent = d.fehler || "Löschen ging nicht"; return; }
+      adminLage.textContent = "gelöscht";
+      laden();
+    } catch(err){ adminLage.textContent = "gerade nicht erreichbar"; }
+  });
+
+  laden();
 })();
 
 /* ---------------- Puderzucker ---------------- */

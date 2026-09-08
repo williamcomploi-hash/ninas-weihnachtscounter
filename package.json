@@ -1,0 +1,10 @@
+{
+  "name": "ninas-weihnachtscounter",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Adventkalender mit Countdown bis zum Heiligen Abend am 24. Dezember",
+  "engines": {
+    "node": ">=20"
+  }
+}
