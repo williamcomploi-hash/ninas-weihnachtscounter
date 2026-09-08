@@ -493,8 +493,20 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   text-transform:uppercase;color:var(--tinte-matt);margin:0 6px 0 0}
 .rufen .knopf{background:#fff}
 .rufen .knopf:disabled{opacity:.45;cursor:default;border-color:var(--linie);color:var(--tinte-matt)}
-.rufen-antwort{font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.1em;
-  color:var(--rot);min-height:16px;margin:12px 0 0}
+.rufen-antwort{font-size:15px;min-height:22px;margin:14px 0 0;color:var(--tinte-matt);
+  transition:color .2s}
+.rufen-antwort b{font-family:var(--f-zahl);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;margin-right:8px;padding:3px 9px;border-radius:99px;
+  background:rgba(63,110,86,.14);color:var(--tanne);white-space:nowrap}
+/* Wenn sie nicht hört, muss man das SEHEN — sonst wirkt es kaputt und nicht frech. */
+.rufen-antwort.trotz{color:var(--rot-tief);font-style:italic}
+.rufen-antwort.trotz b{background:rgba(192,48,63,.14);color:var(--rot);font-style:normal}
+.rufen-fussnote{font-size:13.5px;color:var(--tinte-matt);margin:10px 0 0;opacity:.85}
+
+/* Die Sprechblase wird bei einer Abfuhr deutlicher. */
+.snoopy-blase.trotzig{border-color:var(--rot);color:var(--rot);
+  font-family:var(--f-display);font-size:15px;letter-spacing:0;text-transform:none;
+  font-weight:600;padding:7px 15px}
 
 /* ---------- Tisch ---------- */
 .tisch{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
@@ -647,6 +659,8 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
           <button class="knopf" data-befehl="sitzen">Sitz</button>
         </div>
         <p class="rufen-antwort" id="rufen-antwort">Sie läuft irgendwo herum. Ruf sie, wenn du magst.</p>
+        <p class="rufen-fussnote">Sie hört in sieben von zehn Fällen. Die anderen drei Male
+           ist sie nicht kaputt — sie hat einfach keine Lust.</p>
       </div>
     </div>
   </section>
@@ -1700,11 +1714,13 @@ const snoopySprueche = {
   }
   function sagen(wort){
     if (!wort) { blase.classList.remove("da"); return; }
+    if (!blase.classList.contains("trotzig")) blase.classList.remove("trotzig");
     blase.textContent = wort;
     blase.classList.add("da");
     setTimeout(() => blase.classList.remove("da"), 2200);
   }
   function wechsle(h, dauerMs, wort){
+    if (wort !== null) blase.classList.remove("trotzig");
     haltung = h;
     bisWann = performance.now() + dauerMs;
     koerper.classList.remove("geht","atmet","streckt");
@@ -1772,12 +1788,14 @@ const snoopySprueche = {
     liegen:  ["Sie legt sich hin.", "Sie hat sich einen warmen Platz gesucht.", "Na gut, aber nur kurz."],
     sitzen:  ["Sie setzt sich hin und schaut.", "Sie sitzt. Für den Moment.", "Sie schaut dich an."]
   };
+  /* Bei einer Abfuhr sagt sie es auch — in der Blase, kurz und deutlich.
+     Ohne sichtbare Antwort hält man es für einen kaputten Knopf. */
   const ignoriert = [
-    "Sie hat dich gehört. Sie tut nur nichts.",
-    "Sie schaut kurz her und dann weg.",
-    "Später vielleicht.",
-    "Sie putzt sich erst fertig.",
-    "Das war ein Nein."
+    ["Nö.",      "Sie hat dich gehört. Sie tut nur nichts."],
+    ["Später.",  "Sie schaut kurz her und dann weg."],
+    ["Mhm.",     "Sie überlegt es sich. Sehr lange."],
+    ["Gleich.",  "Sie putzt sich erst fertig. Das dauert."],
+    ["Nein.",    "Das war ein Nein."]
   ];
   const zufaellig = liste => liste[Math.floor(Math.random() * liste.length)];
 
@@ -1788,13 +1806,19 @@ const snoopySprueche = {
 
       if (hoert){
         wechsle(befehl, dauer[befehl]() + 3000, snoopySprueche[befehl]);
-        antwortEl.textContent = zufaellig(gehorcht[befehl]);
+        blase.classList.remove("trotzig");
+        antwortEl.classList.remove("trotz");
+        antwortEl.innerHTML = "<b>Snoopy hört</b>" + zufaellig(gehorcht[befehl]);
       } else {
-        /* Sie macht das, was ihr gerade lieber ist. */
+        /* Sie macht das, was ihr gerade lieber ist — und sagt es dazu. */
         const trotz = zufaellig(["putzen", "gaehnen", "liegen", "gehen"]);
         if (trotz === "gehen") neuesZiel();
-        wechsle(trotz, dauer[trotz](), snoopySprueche[trotz]);
-        antwortEl.textContent = zufaellig(ignoriert);
+        const [wort, satz] = zufaellig(ignoriert);
+        wechsle(trotz, dauer[trotz](), null);
+        blase.classList.add("trotzig");
+        sagen(wort);
+        antwortEl.classList.add("trotz");
+        antwortEl.innerHTML = "<b>Snoopy will nicht</b>" + satz;
       }
 
       /* Kurz sperren, damit man sie nicht durch die Haltungen jagt. */
