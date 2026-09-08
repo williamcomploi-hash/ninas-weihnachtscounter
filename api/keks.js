@@ -7,9 +7,8 @@
  * es gibt hier nichts, was einer Person zuzuordnen wäre.
  */
 
-import { befehl, lagerDa, bremse, herkunft, kurz, antworte } from "./_lager.js";
+import { sql, lagerDa, vorbereiten, bremse, herkunft, kurz, antworte } from "./_lager.js";
 
-const SCHLUESSEL = "keks:gesamt";
 const HOECHSTENS_JE_ANFRAGE = 25;   /* mehr als 25 auf einmal ist kein Klopfen mehr */
 const JE_MINUTE = 120;              /* je Adresse */
 
@@ -19,16 +18,21 @@ export default async function handler(req, res) {
   }
 
   try {
+    await vorbereiten();
+
     if (req.method === "GET") {
-      const stand = Number(await befehl("GET", SCHLUESSEL)) || 0;
-      return antworte(res, 200, { stand });
+      const [zeile] = await sql`select stand from keks where name = 'gesamt'`;
+      return antworte(res, 200, { stand: Number(zeile?.stand) || 0 });
     }
 
     if (req.method === "POST") {
       const wer = kurz(herkunft(req));
-      if (!(await bremse(`bremse:keks:${wer}`, JE_MINUTE, 60))) {
-        const stand = Number(await befehl("GET", SCHLUESSEL)) || 0;
-        return antworte(res, 429, { stand, fehler: "Zu schnell. Gleich wieder." });
+      if (!(await bremse(`keks:${wer}`, JE_MINUTE, 60))) {
+        const [zeile] = await sql`select stand from keks where name = 'gesamt'`;
+        return antworte(res, 429, {
+          stand: Number(zeile?.stand) || 0,
+          fehler: "Zu schnell. Gleich wieder.",
+        });
       }
 
       const roh = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
@@ -36,8 +40,14 @@ export default async function handler(req, res) {
       if (!Number.isFinite(anzahl) || anzahl < 1) anzahl = 1;
       if (anzahl > HOECHSTENS_JE_ANFRAGE) anzahl = HOECHSTENS_JE_ANFRAGE;
 
-      const stand = Number(await befehl("INCRBY", SCHLUESSEL, anzahl)) || 0;
-      return antworte(res, 200, { stand });
+      /* Erhöhen und den neuen Stand in einem Zug — so kommen gleichzeitige
+         Klicks von verschiedenen Leuten nicht durcheinander. */
+      const [zeile] = await sql`
+        update keks set stand = stand + ${anzahl}
+        where name = 'gesamt'
+        returning stand`;
+
+      return antworte(res, 200, { stand: Number(zeile?.stand) || 0 });
     }
 
     res.setHeader("Allow", "GET, POST");
