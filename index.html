@@ -1762,14 +1762,23 @@ if(imDezember){
   const bis=Math.ceil((ersterDez-jetzt)/864e5);
   document.querySelector(".heute-karte").classList.add("zugedeckt");
   document.getElementById("heute-bild").innerHTML=bild.socke;
-  document.getElementById("heute-marke").textContent="Noch verschlossen";
+  /* Zwei Zahlen auf einer Seite: oben zählt der grosse Zähler bis zur
+     Bescherung am 24., hier bis zum ersten Türchen am 1. Dezember. Ohne
+     ausgeschriebenes Ziel hielt Nina die kleinere für einen Rechenfehler —
+     darum steht der 1. Dezember hier dreimal, und der Satz sagt ausdrücklich,
+     wohin der Zähler oben läuft. Kleine Zahlen als Wort, ab 12 als Ziffer
+     (Hausregel), Singular am letzten Tag. */
+  const wort=["","ein","zwei","drei","vier","fünf","sechs","sieben","acht","neun","zehn","elf"];
+  const tage=bis===1?"ein Tag":(bis<12?wort[bis]:bis)+" Tage";
+  document.getElementById("heute-marke").textContent="Noch verschlossen · öffnet am 1. Dezember";
   document.getElementById("heute-titel").textContent="Am 1. Dezember geht das erste auf";
   document.getElementById("heute-text").textContent=
     "Bis dahin steht hier nichts. 24 Türchen warten, jedes an seinem Tag — "+
     "und der Zauber unten läuft schon, der hält sich an keinen Kalender.";
   document.getElementById("heute-hinweis").textContent=
-    "Noch "+bis+" Tage. Der Countdown oben zählt weiter, das Türchen wartet.";
-  heuteKnopf.textContent="Noch "+bis+" Tage";
+    "Noch "+tage+" bis zum ersten Türchen (1. Dezember). "+
+    "Der Zähler oben läuft bis zur Bescherung am 24. Dezember.";
+  heuteKnopf.textContent="1. Dezember · noch "+tage;
   heuteKnopf.disabled=true;
   heuteKnopf.style.opacity=".5";
   heuteKnopf.style.cursor="not-allowed";
