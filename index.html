@@ -431,6 +431,11 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   color:var(--rot);background:#fff;border:1px solid var(--linie);border-radius:99px;
   padding:6px 12px;opacity:0;transition:opacity .3s;box-shadow:0 6px 14px -10px rgba(74,42,36,.5)}
 .snoopy-blase.da{opacity:1}
+/* Beim Betteln steht sie auf den Hinterbeinen, der Kopf reicht bis an den
+   oberen Rand — die Blase auf der üblichen Höhe lag genau auf dem Gesicht.
+   Nur für diese Haltung über den Rahmen schieben; bei den anderen bleibt sie,
+   wo sie war. */
+.snoopy-koerper.hoch .snoopy-blase{bottom:calc(100% + 4px)}
 
 @media(max-width:640px){.snoopy-koerper{width:115px;height:115px}}
 
@@ -862,6 +867,8 @@ body.verwaltet .buch-weg{display:block}
           <button class="knopf" data-befehl="spielen">Spielen</button>
           <button class="knopf" data-befehl="liegen">Platz</button>
           <button class="knopf" data-befehl="sitzen">Sitz</button>
+          <button class="knopf" data-befehl="betteln">Leckerli</button>
+          <button class="knopf" data-befehl="werfen">Schüssel</button>
         </div>
         <p class="rufen-antwort" id="rufen-antwort">Sie läuft irgendwo herum. Ruf sie, wenn du magst.</p>
         <p class="rufen-fussnote">Sie hört in sieben von zehn Fällen. Die anderen drei Male
@@ -1945,7 +1952,24 @@ const snoopyAusgleich = {
   trinken2:[1.059, 0.162, 0.0224, 0.4776, 0.4883],
   trinken3:[0.985, 0.1006, 0.0171, 0.4829, 0.5497],
   trinken4:[0.722, 0.0955, 0.1118, 0.3882, 0.5548],
-  trinken5:[0.958, 0.1177, -0.0225, 0.5225, 0.5326]
+  trinken5:[0.958, 0.1177, -0.0225, 0.5225, 0.5326],
+  /* Betteln und Schüssel werfen: gleiche Messung, gleiche Größenregel
+     (Bezugsmaß 0,444, Exponent 0,7, innerhalb der Folge voll ausgeglichen).
+     ANDERS ist nur der Anker. Bei beiden bleiben die Hinterbeine am Boden und
+     nur eine Vorderpfote geht hoch — der Schwerpunkt wandert mit der Pfote mit
+     (beim Betteln 1,1 Prozentpunkte hoch, 2,8 zur Seite). Am Schwerpunkt
+     ausgerichtet würde sie auf der Stelle hüpfen und rutschen. Deshalb:
+     Fußlinie bei beiden auf 0,900 wie überall sonst; zur Seite beim Betteln die
+     Mitte des unteren Körperdrittels (der sitzende Po bleibt, wo er ist), beim
+     Werfen der Schwerpunkt — dort wechselt sie vom Stehen ins Sitzen, einen
+     ruhenden Körperteil, an dem man sich festhalten könnte, gibt es nicht.
+     Beim Werfen zählt nur die Katze: Schüssel und Futter sind aus der Messung
+     genommen, sonst zöge die fliegende Schüssel sie beim Wurf zur Seite.
+     Mess-Skript: scratchpad/emil-snoopy/messen-neu.mjs. */
+  betteln1:[0.982, -0.0433, 0.0076, 0.5116, 0.5769],
+  betteln2:[0.951, -0.0306, 0.043, 0.4836, 0.5533],
+  werfen1:[1.035, -0.0576, -0.029, 0.529, 0.7347],
+  werfen2:[1.249, -0.0919, 0.0377, 0.4623, 0.7815]
 };
 /* Für jede Haltung eine Aufnahme. Das Gehen wechselt zwischen zwei Schritten. */
 /* Welche Aufnahmen zu welcher Haltung gehören. Mehrere Namen = Bildfolge. */
@@ -1959,10 +1983,18 @@ const snoopyHaltungen = {
   fressen: ["fressen"],
   trinken: ["trinken1","trinken2","trinken3","trinken4","trinken5"],
   spielen: ["spiel1","spiel2","spiel3","spiel4"],
-  putzen:  ["putzen"]
+  putzen:  ["putzen"],
+  betteln: ["betteln1","betteln2"],
+  werfen:  ["werfen1","werfen2"]
 };
+/* Folgen, die EINMAL ablaufen und dann auf dem letzten Bild stehen bleiben.
+   Eine Schüssel, die in Schleife weggehauen wird und zurückspringt, sähe aus
+   wie ein Bildfehler. */
+const snoopyEinmal = new Set(["werfen"]);
 
 const snoopySprueche = {
+  betteln: "bettelt",
+  werfen:  "räumt ab",
   gaehnen: "gähnt",
   fressen: "frisst was",
   trinken: "trinkt",
@@ -2027,11 +2059,19 @@ const snoopySprueche = {
       /* Nach dem Einblenden hart weiterschalten, sonst überlagern sich zwei
          Beinstellungen und die Katze sieht doppelt aus. */
       hartUhr = setTimeout(() => koerper.classList.add("folge"), 140);
+      /* Takt je Folge. Betteln hat nur zwei Bilder (Pfoten zusammen, Pfote
+         hoch) — im 340-ms-Takt der anderen Folgen zappelte sie. Beim Werfen
+         muss das Ausholen lang genug stehen, dass man die Pfote unter der
+         Schüssel sieht, bevor sie fliegt. */
+      const takt = h === "gehen" ? 200 : h === "betteln" ? 650 : h === "werfen" ? 600 : 340;
       schrittUhr = setInterval(() => {
+        if (snoopyEinmal.has(h) && schrittZaehler === reihe.length - 1){
+          clearInterval(schrittUhr); schrittUhr = null; return;
+        }
         reihe[schrittZaehler].classList.remove("da");
         schrittZaehler = (schrittZaehler + 1) % reihe.length;
         reihe[schrittZaehler].classList.add("da");
-      }, h === "gehen" ? 200 : 340);
+      }, takt);
     }
   }
   function sagen(wort){
@@ -2046,6 +2086,7 @@ const snoopySprueche = {
     haltung = h;
     bisWann = performance.now() + dauerMs;
     koerper.classList.remove("geht","atmet","streckt");
+    koerper.classList.toggle("hoch", h === "betteln");
     if (h === "gehen") koerper.classList.add("geht");
     else if (h === "liegen" || h === "sitzen" || h === "stehen" || h === "trinken")
       koerper.classList.add("atmet");
@@ -2060,14 +2101,19 @@ const snoopySprueche = {
   const folgt = {
     gehen:   [["stehen",3],["gehen",2],["fressen",1],["spielen",2],["sitzen",2]],
     stehen:  [["gehen",4],["sitzen",2],["strecken",1],["spielen",1]],
-    sitzen:  [["gehen",3],["putzen",2],["gaehnen",1],["liegen",2],["spielen",1]],
+    sitzen:  [["gehen",3],["putzen",2],["gaehnen",1],["liegen",2],["spielen",1],["betteln",0.5]],
     liegen:  [["liegen",3],["gaehnen",2],["strecken",1],["sitzen",1]],
     gaehnen: [["liegen",3],["strecken",2],["sitzen",1]],
     strecken:[["gehen",3],["sitzen",2],["spielen",1]],
-    fressen: [["trinken",4],["putzen",2]],
+    /* Die Schüssel fliegt nur, wo eine Schüssel ist: nach dem Fressen, und selten. */
+    fressen: [["trinken",4],["putzen",2],["werfen",0.6]],
     trinken: [["putzen",4],["stehen",2],["liegen",1]],
     spielen: [["spielen",2],["gehen",3],["putzen",2],["liegen",1]],
-    putzen:  [["gehen",3],["liegen",2],["sitzen",1]]
+    putzen:  [["gehen",3],["liegen",2],["sitzen",1]],
+    /* Betteln lohnt sich manchmal — dann wird gefressen. */
+    betteln: [["sitzen",3],["fressen",1],["gehen",2]],
+    /* Nach der Tat: als wäre nichts gewesen. Erst sitzen, meist putzen. */
+    werfen:  [["putzen",3],["sitzen",2]]
   };
   function naechste(){
     const liste = folgt[haltung] || folgt.sitzen;
@@ -2086,7 +2132,11 @@ const snoopySprueche = {
     fressen: () => 5000 + Math.random() * 4000,
     trinken: () => 5000 + Math.random() * 4000,
     spielen: () => 6000 + Math.random() * 6000,
-    putzen:  () => 4000 + Math.random() * 5000
+    putzen:  () => 4000 + Math.random() * 5000,
+    betteln: () => 3500 + Math.random() * 3000,
+    /* 600 ms Ausholen, dann gut eine Sekunde die fliegende Schüssel. Länger
+       nicht: eine Schüssel, die sekundenlang in der Luft steht, ist ein Standbild. */
+    werfen:  () => 1700
   };
 
   function neuesZiel(){
@@ -2108,7 +2158,9 @@ const snoopySprueche = {
     fressen: ["Sie kommt sofort.", "Dafür lässt sie alles stehen.", "Das musst du nicht zweimal sagen."],
     spielen: ["Sie ist schon dabei.", "Das Knäuel hat verloren.", "Augen weit, Hinterteil wackelt."],
     liegen:  ["Sie legt sich hin.", "Sie hat sich einen warmen Platz gesucht.", "Na gut, aber nur kurz."],
-    sitzen:  ["Sie setzt sich hin und schaut.", "Sie sitzt. Für den Moment.", "Sie schaut dich an."]
+    sitzen:  ["Sie setzt sich hin und schaut.", "Sie sitzt. Für den Moment.", "Sie schaut dich an."],
+    betteln: ["Sie macht Männchen.", "Pfoten hoch, Blick nach oben.", "Das Wort Leckerli hat sie gehört."],
+    werfen:  ["Weg ist die Schüssel.", "Das Futter ist jetzt überall.", "Sie war mit dem Service nicht zufrieden."]
   };
   /* Bei einer Abfuhr sagt sie es auch — in der Blase, kurz und deutlich.
      Ohne sichtbare Antwort hält man es für einen kaputten Knopf. */
@@ -2127,7 +2179,10 @@ const snoopySprueche = {
       const hoert = Math.random() > 0.3;   /* sieben von zehn */
 
       if (hoert){
-        wechsle(befehl, dauer[befehl]() + 3000, snoopySprueche[befehl]);
+        /* Gerufen bleibt sie drei Sekunden länger dabei — außer bei Folgen, die
+           nur einmal ablaufen: sonst hinge die Schüssel vier Sekunden in der Luft. */
+        const nachlauf = snoopyEinmal.has(befehl) ? 0 : 3000;
+        wechsle(befehl, dauer[befehl]() + nachlauf, snoopySprueche[befehl]);
         blase.classList.remove("trotzig");
         antwortEl.classList.remove("trotz");
         antwortEl.innerHTML = "<b>Snoopy hört</b>" + zufaellig(gehorcht[befehl]);
