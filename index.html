@@ -262,6 +262,60 @@ h1 em{font-style:normal;display:block;
 .heute-marke{font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
   color:var(--rot);margin-bottom:12px;display:block}
 
+/* ---------- Trailer (Snooptanic) ----------
+   Abstand, Rundung, Rand und Schatten bewusst von .heute/.heute-karte
+   übernommen: der Abschnitt soll wie ein Geschwister der Highlight-Karte
+   aussehen, nicht wie ein eingebettetes Fremdteil. Kein Innenabstand — das
+   Video füllt die Karte bis an den Rand, sonst säße ein heller Rahmen um
+   eine schwarze Titelkarte und wirkte wie ein Passepartout um ein Loch.
+   aspect-ratio hält den Platz schon vor, solange noch nichts geladen ist
+   (preload="none"), damit die Seite beim ersten Abspielen nicht springt. */
+.trailer{position:relative;z-index:2;margin-top:clamp(46px,7vw,80px)}
+.trailer-karte{position:relative;overflow:hidden;border-radius:24px;
+  border:1px solid rgba(232,128,154,.55);background:#000;box-shadow:var(--schein);
+  aspect-ratio:16/9}
+.trailer-karte video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+/* Großer Abspielknopf über der Titelkarte. Er deckt das ganze Bild ab,
+   damit ein Tippen irgendwo aufs Poster startet — am Handy der erwartete
+   Griff. Er steht im HTML mit hidden und wird erst vom Skript gezeigt: ohne
+   Skript läge sonst ein Knopf, der nichts tut, über den eingebauten
+   Steuerelementen. Nach dem ersten Tippen verschwindet er endgültig; ab da
+   gelten die normalen Steuerelemente des Browsers (Pause, Ton, Vollbild).
+   Er sitzt im unteren Drittel, damit er den Schriftzug der Titelkarte
+   (mittig) nicht verdeckt. */
+.trailer-start{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-end;gap:10px;padding:0 0 clamp(14px,6%,44px);
+  border:0;margin:0;background:none;cursor:pointer;color:#f3c987;font-family:inherit}
+.trailer-start[hidden]{display:none}
+.trailer-start .rund{width:clamp(52px,8vw,78px);height:clamp(52px,8vw,78px);border-radius:50%;
+  display:grid;place-items:center;
+  background:linear-gradient(100deg,var(--rot),var(--rosa-satt));
+  box-shadow:0 12px 28px -12px rgba(192,48,63,.9),0 0 0 6px rgba(255,248,244,.14);
+  transition:transform .22s}
+/* Dreieck ein Stück nach rechts: seine Masse liegt links, genau mittig
+   gesetzt sähe es verrutscht aus. */
+.trailer-start .rund svg{width:40%;height:40%;margin-left:8%;fill:#fff8f4}
+.trailer-start .schrift{font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.2em;
+  text-transform:uppercase}
+.trailer-start:hover .rund{transform:scale(1.06)}
+.trailer-start:focus-visible{outline:2px solid #f3c987;outline-offset:-6px;border-radius:22px}
+/* Am Handy ist die Karte keine 200 px hoch: dort fällt die Beschriftung weg
+   und der Knopf wird kleiner, sonst läge er auf „Ein Film mit Snoopy“. */
+@media(max-width:600px){
+  .trailer-start{padding-bottom:6%}
+  .trailer-start .schrift{display:none}
+  .trailer-start .rund{width:46px;height:46px;box-shadow:0 10px 22px -10px rgba(192,48,63,.9),0 0 0 4px rgba(255,248,244,.14)}}
+/* Das „Neu!“-Schild neben der Überschrift: dieselbe Regel wie an den
+   Ruf-Knöpfen, hier aber im Textfluss statt angeheftet — an einer
+   Überschrift gibt es keinen Knopfrand, an dem es hängen könnte, und
+   absolut gesetzt läge es am Handy auf dem umbrochenen Titel. Vorlesen:
+   „Snooptanic, neu“ steht im aria-label der Überschrift, das Schild selbst
+   ist aria-hidden. Wieder entfernen: Span und aria-label an der Überschrift
+   löschen — sonst liest der Screenreader weiter „neu“ vor. */
+.abschnittskopf h2 .neu-schild{position:static;display:inline-block;vertical-align:middle;
+  margin-left:12px;font-size:clamp(10px,1vw,12px);padding:.42em .6em .32em;border-radius:7px;
+  transform:translateY(-.15em)}
+
 /* ---------- Türchen ---------- */
 .kalender{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
 .gitter{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(9px,1.4vw,16px)}
@@ -749,6 +803,33 @@ body.verwaltet .buch-weg{display:block}
         <h3 id="heute-titel">—</h3>
         <p id="heute-text">—</p>
       </div>
+    </div>
+  </section>
+
+  <!-- Trailer. preload="none": die knapp 5 MB kommen erst beim Tippen,
+       nicht beim Öffnen der Seite — am Handy im Mobilnetz zählt das.
+       Kein autoplay und kein muted: der Film ist mit Ton gedacht, und er
+       soll sich nie von selbst bewegen (auch wegen prefers-reduced-motion). -->
+  <section class="trailer" aria-labelledby="sn-titel">
+    <div class="abschnittskopf">
+      <div>
+        <h2 id="sn-titel" aria-label="Snooptanic, neu">Snooptanic<span class="neu-schild" aria-hidden="true">Neu!</span></h2>
+        <p>Die große Liebesgeschichte, neu besetzt: Snoopy spielt Rose.
+           Ein Schiff, ein Eisberg — und eine Katze, die sich von beidem nicht beeindrucken lässt.</p>
+      </div>
+      <span class="ort">Trailer · 34 Sek.</span>
+    </div>
+    <div class="trailer-karte">
+      <video id="trailer-film" controls preload="none" playsinline
+             poster="bilder/snooptanic-poster.jpg"
+             aria-label="Trailer „Snooptanic“ mit Snoopy als Rose, 34 Sekunden, mit Ton">
+        <source src="bilder/snooptanic.mp4" type="video/mp4">
+      </video>
+      <button class="trailer-start" id="trailer-start" type="button" hidden
+              aria-label="Trailer „Snooptanic“ abspielen, mit Ton">
+        <span class="rund" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3.5v17L20 12z"/></svg></span>
+        <span class="schrift" aria-hidden="true">Trailer ansehen</span>
+      </button>
     </div>
   </section>
 
@@ -2657,6 +2738,35 @@ const KEKS_WEG = "/api/keks";
       futter.scrollIntoView({behavior:"smooth", block:"center"});
       setTimeout(() => futter.click(), 700);
     }
+  });
+})();
+
+
+/* ---------------- Trailer ----------------
+   Zeigt den großen Abspielknopf und startet auf Tippen. play() läuft direkt
+   im Klick, sonst hält der Browser es nicht für eine Nutzergeste und spielt
+   ohne Ton oder gar nicht. Scheitert play() trotzdem (etwa alter Browser),
+   bleibt der Knopf weg und die eingebauten Steuerelemente übernehmen —
+   einen zweiten, toten Versuch gibt es nicht.
+   Startet etwas anderes das Video (etwa die Mediensteuerung des Systems),
+   verschwindet der Knopf ebenso: das "play"-Ereignis kommt in jedem Fall. */
+(function(){
+  const film = document.getElementById("trailer-film");
+  const start = document.getElementById("trailer-start");
+  if (!film || !start) return;
+  /* Solange der große Knopf liegt, blendet das Skript die eingebauten
+     Steuerelemente aus — sonst liegen Knopf und Leiste am Handy übereinander.
+     Ohne Skript bleibt controls stehen, dann gibt es eben nur die Leiste. */
+  const freigeben = () => { start.hidden = true; film.controls = true; };
+  start.hidden = false;
+  film.controls = false;
+  film.addEventListener("play", freigeben, {once:true});
+  start.addEventListener("click", () => {
+    freigeben();
+    film.muted = false;
+    const v = film.play();
+    if (v && v.catch) v.catch(() => {});
+    film.focus({preventScroll:true});
   });
 })();
 
