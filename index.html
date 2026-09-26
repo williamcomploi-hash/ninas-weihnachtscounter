@@ -602,6 +602,20 @@ body.verwaltet .buch-weg{display:block}
   text-transform:uppercase;color:var(--tinte-matt);margin:0 6px 0 0}
 .rufen .knopf{background:#fff}
 .rufen .knopf:disabled{opacity:.45;cursor:default;border-color:var(--linie);color:var(--tinte-matt)}
+/* „Neu!“-Schild an frisch dazugekommenen Befehlen. Absolut angeheftet, damit
+   der Knopf nicht breiter wird als seine Nachbarn und die Leiste am Handy
+   gleich umbricht wie ohne Schild. Es ragt 8 px nach oben — weniger als der
+   Zeilenabstand der Leiste (10 px), so liegt es nie auf dem Knopf darüber.
+   Fest #c0303f statt var(--rot): --rot ist der Ton des Tages und wird je
+   nach Stimmung grün oder blau — das Schild soll aber immer rot sein.
+   Weiß darauf hat 5,6:1 Kontrast. Für Screenreader steht „neu“ im
+   aria-label des Knopfs, das Schild selbst ist aria-hidden. Wieder entfernen:
+   Span und aria-label am Knopf löschen, diese Regel kann bleiben. */
+.rufen .knopf{position:relative}   /* ohne :has(), das ältere Safari-Fassungen nicht kennen */
+.neu-schild{position:absolute;top:-8px;right:-6px;pointer-events:none;
+  font-family:var(--f-zahl);font-size:9px;line-height:1;letter-spacing:.1em;
+  text-transform:uppercase;font-weight:600;color:#fff;background:#c0303f;
+  padding:3px 5px 2px;border-radius:6px;box-shadow:0 3px 6px -3px rgba(120,20,30,.6)}
 .rufen-antwort{font-size:15px;min-height:22px;margin:14px 0 0;color:var(--tinte-matt);
   transition:color .2s}
 .rufen-antwort b{font-family:var(--f-zahl);font-size:10px;letter-spacing:.16em;
@@ -867,8 +881,8 @@ body.verwaltet .buch-weg{display:block}
           <button class="knopf" data-befehl="spielen">Spielen</button>
           <button class="knopf" data-befehl="liegen">Platz</button>
           <button class="knopf" data-befehl="sitzen">Sitz</button>
-          <button class="knopf" data-befehl="betteln">Leckerli</button>
-          <button class="knopf" data-befehl="werfen">Schüssel</button>
+          <button class="knopf" data-befehl="betteln" aria-label="Leckerli, neu">Leckerli<span class="neu-schild" aria-hidden="true">Neu!</span></button>
+          <button class="knopf" data-befehl="werfen" aria-label="Schüssel, neu">Schüssel<span class="neu-schild" aria-hidden="true">Neu!</span></button>
         </div>
         <p class="rufen-antwort" id="rufen-antwort">Sie läuft irgendwo herum. Ruf sie, wenn du magst.</p>
         <p class="rufen-fussnote">Sie hört in sieben von zehn Fällen. Die anderen drei Male
