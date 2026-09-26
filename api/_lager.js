@@ -14,6 +14,7 @@
  */
 
 import { neon } from "@neondatabase/serverless";
+import { createHmac } from "node:crypto";
 
 /* Wie die Variable heißt, hängt davon ab, welches Präfix beim Verbinden in
    Vercel gesetzt wurde — DATABASE_URL, POSTGRES_URL, STORAGE_URL … Statt die
@@ -50,7 +51,7 @@ const sql = lagerDa ? neon(URL_) : null;
 export { sql };
 
 /* Die Tabellen entstehen beim ersten Zugriff. Absichtlich hier und nicht in
-   einer eigenen Migration: es sind drei Tabellen, sie ändern sich nicht, und
+   einer eigenen Migration: es sind wenige Tabellen, sie ändern sich nicht, und
    ein Ablauf, den jemand von Hand anstoßen müsste, wird irgendwann vergessen. */
 let vorbereitet = null;
 export function vorbereiten() {
@@ -75,6 +76,25 @@ export function vorbereiten() {
         zaehler    integer not null,
         bis        timestamptz not null
       )`;
+      /* Wunsch-Trailer: Vorschläge und ihre Likes. Die Likes in eigener Tabelle
+         mit (wunsch_id, fingerabdruck) als Primärschlüssel — damit ist ein
+         zweites Like desselben Abdrucks auf denselben Vorschlag schon von der
+         Datenbank her unmöglich, auch wenn zwei Klicks gleichzeitig ankommen.
+         Ein Zähler als Spalte in „wunsch" wäre schneller zu lesen, könnte aber
+         nicht wissen, WER schon geliked hat. on delete cascade: löscht die
+         Verwaltung einen Vorschlag, gehen seine Likes mit. */
+      await sql`create table if not exists wunsch (
+        id    text primary key,
+        name  text not null,
+        titel text not null,
+        zeit  timestamptz not null default now()
+      )`;
+      await sql`create table if not exists wunsch_likes (
+        wunsch_id     text not null references wunsch (id) on delete cascade,
+        fingerabdruck text not null,
+        zeit          timestamptz not null default now(),
+        primary key (wunsch_id, fingerabdruck)
+      )`;
     })().catch(e => { vorbereitet = null; throw e; });
   }
   return vorbereitet;
@@ -91,6 +111,37 @@ export function kurz(text) {
   let h = 5381;
   for (let i = 0; i < text.length; i++) h = ((h * 33) ^ text.charCodeAt(i)) >>> 0;
   return h.toString(36);
+}
+
+/* Salz für den Like-Abdruck. Bevorzugt eine eigene Umgebungsvariable
+   WUNSCH_SALZ; fehlt sie, dient die Datenbankadresse als Geheimnis — sie
+   enthält das Datenbankpasswort, steht nie in der Seite und ist ohnehin da.
+   Absichtlich NICHT ADMIN_PASSWORT: das wird eher einmal geändert, und jede
+   Änderung des Salzes macht alle Abdrücke neu — dann dürfte jeder jeden
+   Vorschlag ein zweites Mal liken. Dasselbe gilt, wenn WUNSCH_SALZ später
+   gesetzt oder das Datenbankpasswort gedreht wird: die Likes bleiben stehen,
+   nur die Sperre „schon geliked" beginnt von vorn. */
+const SALZ = process.env.WUNSCH_SALZ || URL_;
+
+/**
+ * Abdruck für „einmal liken": dieselbe Herkunft wie bei der Bremse
+ * (herkunft), aber gesalzen und mit HMAC-SHA-256 statt mit kurz().
+ *
+ * Warum nicht einfach kurz(herkunft(req)) wie die Bremse: die Bremszeilen
+ * verfallen nach Minuten, der Like-Abdruck bleibt liegen. Ein ungesalzener
+ * 32-Bit-Hash einer IPv4-Adresse lässt sich in Sekunden durch alle vier
+ * Milliarden Adressen zurückrechnen — gespeichert wäre dann faktisch die
+ * Adresse. Mit geheimem Salz geht das nicht, solange das Salz nicht bekannt
+ * ist. 24 Hexzeichen (96 Bit) genügen gegen Zufallstreffer bei weitem.
+ *
+ * `zweck` trennt die Abdrücke verschiedener Verwendungen, damit derselbe
+ * Wert nicht über Tabellen hinweg dieselbe Person verknüpft.
+ */
+export function abdruck(req, zweck) {
+  return createHmac("sha256", SALZ)
+    .update(zweck + ":" + herkunft(req))
+    .digest("hex")
+    .slice(0, 24);
 }
 
 /**

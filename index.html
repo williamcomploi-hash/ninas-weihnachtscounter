@@ -316,6 +316,51 @@ h1 em{font-style:normal;display:block;
   margin-left:12px;font-size:clamp(10px,1vw,12px);padding:.42em .6em .32em;border-radius:7px;
   transform:translateY(-.15em)}
 
+/* ---------- Wunsch-Trailer ----------
+   Hängt am Trailer, darum ein kürzerer Abstand nach oben als zwischen zwei
+   fremden Abschnitten — es soll als Nachsatz zu „Snooptanic“ lesen.
+   Formular und Felder leihen sich .buch-formular/.buch-feld vom Gästebuch:
+   gleiche Seite, gleiche Handschrift, und eine Änderung am Gästebuch-Look
+   zieht hier mit. Eigen ist nur die Reihe: Titel breit, Name schmal, Knopf
+   gleich daneben — ein Feld und ein Knopf brauchen keine eigene Fußzeile.
+   Am Handy (≤ 640 px) alles untereinander, wie im Gästebuch. */
+.wunsch{position:relative;z-index:2;margin-top:clamp(34px,5vw,56px)}
+.wunsch-formular{margin-bottom:18px}
+.wunsch-reihe{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,200px) auto;gap:12px;align-items:center}
+@media(max-width:640px){.wunsch-reihe{grid-template-columns:1fr}}
+.wunsch-liste{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.wunsch-eintrag{display:flex;align-items:center;gap:12px;padding:12px 14px 12px 18px;
+  border-radius:16px;background:#fff;border:1px solid var(--linie-zart)}
+/* min-width:0 + overflow-wrap: ein 80-Zeichen-Titel ohne Leerzeichen darf am
+   Handy nicht den Like-Knopf aus der Karte schieben. */
+.wunsch-text{flex:1;min-width:0}
+.wunsch-titel{display:block;font-family:var(--f-display);font-weight:600;font-size:16.5px;
+  line-height:1.35;overflow-wrap:anywhere}
+.wunsch-von{display:block;font-family:var(--f-zahl);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--tinte-matt);margin-top:3px;overflow-wrap:anywhere}
+/* Der Like-Knopf: Herz + Zahl in einer Pille, wie man es kennt. Leeres Herz =
+   noch nicht, gefülltes = schon geliked. Das Aussehen hängt bewusst an
+   aria-pressed und nicht an einer eigenen Klasse — so können Anzeige und
+   Vorlese-Zustand nie auseinanderlaufen. */
+.wunsch-like{flex:none;display:inline-flex;align-items:center;gap:7px;min-height:40px;
+  padding:8px 14px;border-radius:99px;border:1px solid var(--linie);background:#fff;
+  color:var(--tinte-matt);font-family:var(--f-zahl);font-size:13px;cursor:pointer;transition:.18s}
+.wunsch-like svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+.wunsch-like:hover{border-color:var(--rot);color:var(--rot)}
+.wunsch-like:focus-visible{outline:2px solid var(--rot);outline-offset:2px}
+.wunsch-like[aria-pressed="true"]{color:var(--rot);border-color:var(--rot);background:var(--glasur)}
+.wunsch-like[aria-pressed="true"] svg{fill:currentColor}
+.wunsch-like:disabled{cursor:progress;opacity:.7}
+/* Löschen nur in der Verwaltung — dieselbe Anmeldung wie im Gästebuch
+   (body.verwaltet). Im Fluss statt absolut wie .buch-weg: oben rechts sitzt
+   hier schon der Like-Knopf. */
+.wunsch-weg{display:none;flex:none;font-family:var(--f-zahl);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;padding:6px 10px;border-radius:99px;border:1px solid var(--rot);
+  background:#fff;color:var(--rot);cursor:pointer}
+.wunsch-weg:hover{background:var(--rot);color:#fff}
+body.verwaltet .wunsch-weg{display:block}
+.wunsch-klein{font-size:12.5px;color:var(--tinte-matt);margin:14px 0 0;opacity:.85}
+
 /* ---------- Türchen ---------- */
 .kalender{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
 .gitter{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(9px,1.4vw,16px)}
@@ -604,6 +649,45 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 .maerkte-mehr[hidden]{display:none}
 .maerkte-leer{margin:6px 0 0;color:var(--tinte-matt);font-style:italic}
 .maerkte-fuss{margin:18px 0 0;font-size:13px;color:var(--tinte-matt)}
+/* Tag wählen: eine Kopfzeile (Heute, Datumsfeld, Alle Tage) und darunter die
+   wischbare Tagesleiste. Die Leiste scrollt in sich (overflow-x:auto) — die
+   Seite selbst bekommt nie einen waagrechten Balken, weil die Leiste als
+   Blockelement nie breiter als die Hülle wird. scroll-snap „proximity" statt
+   „mandatory": mandatory rastet am Handy beim sanften Wischen hart zurück und
+   fühlt sich an, als klemme die Leiste. Tipp-Flächen ≥ 44 px hoch. */
+.maerkte-tag{margin:-8px 0 22px}
+.maerkte-tag-kopf{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.maerkte-tag-kopf .knopf{padding:9px 16px}
+.maerkte-tag-kopf .knopf[aria-pressed="true"]{background:var(--tinte);border-color:var(--tinte);color:#fff8f4}
+.maerkte-tag-kopf .knopf:disabled{opacity:.45;cursor:default;transform:none;border-color:var(--linie);color:var(--tinte-matt)}
+.maerkte-tag-kopf .knopf[hidden]{display:none}
+.maerkte-datum{font-family:var(--f-zahl);font-size:13px;color:var(--tinte);min-height:40px;
+  padding:7px 12px;border-radius:99px;border:1px solid var(--linie);background:#fff}
+.maerkte-datum:focus-visible{outline:2px solid var(--rot);outline-offset:2px}
+.maerkte-tag-hinweis{font-size:13px;color:var(--tinte-matt);flex-basis:100%;margin:0}
+.maerkte-tag-hinweis:empty{display:none}
+.tag-leiste{display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;
+  scroll-snap-type:x proximity;scroll-padding:0 8px;padding:2px 2px 10px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.tag-chip{flex:none;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-width:52px;min-height:48px;padding:5px 8px;border-radius:14px;
+  border:1px solid var(--linie);background:#fff;color:var(--tinte);cursor:pointer;
+  font-family:var(--f-zahl);line-height:1.15;transition:background .15s,border-color .15s}
+.tag-chip .wt{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tinte-matt)}
+.tag-chip .dm{font-size:13px;font-weight:700}
+/* Wochenende leicht getönt: dann fahren die meisten los. Fester Ton statt
+   Tagesfarbe, wie beim Status-Schild. */
+.tag-chip.wochenende{background:#fdf0e2}
+.tag-chip.ist-heute{border-color:var(--tinte);border-width:2px}
+.tag-chip:hover{border-color:var(--rot)}
+.tag-chip:focus-visible{outline:2px solid var(--rot);outline-offset:2px}
+.tag-chip[aria-pressed="true"]{background:var(--tinte);border-color:var(--tinte);color:#fff8f4}
+.tag-chip[aria-pressed="true"] .wt{color:#fff8f4}
+/* Monatswechsel: ein schmaler, senkrechter Schriftzug zwischen den Tagen —
+   braucht kaum Breite und ist beim Wischen trotzdem nicht zu übersehen. */
+.tag-monat{flex:none;align-self:stretch;display:flex;align-items:center;padding:0 4px;
+  writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--f-zahl);font-size:9.5px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--rot);font-weight:700}
 
 /* ---------- Elfen ---------- */
 .werkstatt{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
@@ -898,6 +982,34 @@ body.verwaltet .buch-weg{display:block}
     </div>
   </section>
 
+  <!-- Wunsch-Trailer: Vorschläge für den nächsten Film, mit Likes.
+       Gespeichert über /api/wunsch. Die Liste füllt das Skript, und zwar nur
+       mit textContent — nie innerHTML für fremden Text. -->
+  <section class="wunsch" aria-labelledby="wu-titel">
+    <div class="abschnittskopf">
+      <div>
+        <h2 id="wu-titel" aria-label="Wunsch-Trailer, neu">Wunsch-Trailer<span class="neu-schild" aria-hidden="true">Neu!</span></h2>
+        <p>Welchen Film soll Snoopy als Nächstes auf den Arm nehmen?</p>
+      </div>
+      <span class="ort" id="wunsch-anzahl"></span>
+    </div>
+
+    <form class="buch-formular wunsch-formular" id="wunsch-formular">
+      <div class="wunsch-reihe">
+        <input class="buch-feld" id="wunsch-titel" type="text" maxlength="80"
+               placeholder="Filmtitel oder Idee" aria-label="Filmtitel oder Idee" autocomplete="off">
+        <input class="buch-feld" id="wunsch-name" type="text" maxlength="24"
+               placeholder="Name (freiwillig)" aria-label="Name, freiwillig" autocomplete="off">
+        <button class="knopf stark" type="submit" id="wunsch-senden">Vorschlagen</button>
+      </div>
+      <p class="buch-meldung" id="wunsch-meldung" aria-live="polite"></p>
+    </form>
+
+    <ul class="wunsch-liste" id="wunsch-liste"></ul>
+    <p class="wunsch-klein">Gespeichert werden nur Titel und Name. Für „einmal liken“ merkt sich
+       die Seite einen verschlüsselten Abdruck, keine Adresse.</p>
+  </section>
+
   <section class="kalender" aria-labelledby="k-titel">
     <div class="abschnittskopf">
       <div>
@@ -944,8 +1056,22 @@ body.verwaltet .buch-weg{display:block}
       <button class="knopf" type="button" data-gebiet="li" aria-pressed="false">Liechtenstein</button>
       <button class="knopf" type="button" data-gebiet="ch" aria-pressed="false">Schweiz</button>
       <button class="knopf" type="button" data-gebiet="de" aria-pressed="false">Lindau</button>
-      <span class="trenner" aria-hidden="true"></span>
-      <button class="knopf" type="button" id="m-heute" aria-pressed="false">Heute offen</button>
+    </div>
+
+    <!-- Tag wählen. Ersetzt den früheren Knopf „Heute offen": „Heute" ist jetzt
+         nur noch ein Tag unter vielen. Die Leiste füllt das Skript (Saison
+         6.11.2026–13.1.2027); ohne Skript bleibt die Liste ungefiltert. -->
+    <div class="maerkte-tag" role="group" aria-label="Tag wählen">
+      <div class="maerkte-tag-kopf">
+        <span class="rufen-schrift">Tag wählen</span>
+        <button class="knopf" type="button" id="m-heute" aria-pressed="false">Heute</button>
+        <input class="maerkte-datum" type="date" id="m-datum" min="2026-11-06" max="2027-01-13"
+               aria-label="Datum wählen">
+        <button class="knopf" type="button" id="m-alle-tage" hidden
+                aria-label="Tagesauswahl aufheben, alle Tage zeigen">× Alle Tage</button>
+        <p class="maerkte-tag-hinweis" id="m-tag-hinweis"></p>
+      </div>
+      <div class="tag-leiste" id="m-tage"></div>
     </div>
 
     <article class="maerkte-held" id="m-held" aria-labelledby="m-held-titel">
@@ -2899,24 +3025,44 @@ const MAERKTE_AUSNAHMEN = {
     return a.getDate() + ". " + MON[a.getMonth()] + "–" + e.getDate() + ". " + MON[e.getMonth()];
   }
 
-  /* folgt | bald | offen | zu | vorbei */
-  function lage(m){
+  /* Tagesauswahl. `gewaehlt` ist ein ISO-Datum oder null (= alle Tage, die
+     Status-Schilder beziehen sich dann wie früher auf heute). Die Saison ist
+     fest gesetzt statt aus den Daten errechnet: einzelne Einträge laufen bis
+     in den März (Laternliwege), eine Leiste bis dahin wäre am Handy endlos. */
+  const SAISON_VON = "2026-11-06", SAISON_BIS = "2027-01-13";
+  const WT_KURZ = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  const WT_LANG = ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+  const MON_LANG = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+  const tagKurz = iso => { const d = zuDatum(iso);
+    return WT_KURZ[d.getDay()] + " " + d.getDate() + "." + (d.getMonth()+1) + "."; };
+  const tagLang = iso => { const d = zuDatum(iso);
+    return WT_LANG[d.getDay()] + ", " + d.getDate() + ". " + MON_LANG[d.getMonth()]; };
+  let gewaehlt = null;
+
+  /* folgt | bald | offen | zu | vorbei — bezogen auf den Tag `iso`
+     (ohne Angabe: heute). Dieselbe Prüfung für „heute" und für jeden
+     gewählten Tag; es gibt absichtlich nur diese eine. */
+  function lage(m, iso){
+    const tag = iso || heute;
     if (m.f || !m.v) return "folgt";
-    if (heute < m.v) return "bald";
-    if (heute > m.b) return "vorbei";
+    if (tag < m.v) return "bald";
+    if (tag > m.b) return "vorbei";
     const aus = MAERKTE_AUSNAHMEN[m.n];
     if (aus){
-      if (aus.zu && aus.zu.includes(heute)) return "zu";
-      if (aus.spannen && !aus.spannen.some(([v, b]) => heute >= v && heute <= b)) return "zu";
-      if (aus.wochentage && !aus.wochentage.includes(jetzt.getDay())) return "zu";
+      if (aus.zu && aus.zu.includes(tag)) return "zu";
+      if (aus.spannen && !aus.spannen.some(([v, b]) => tag >= v && tag <= b)) return "zu";
+      if (aus.wochentage && !aus.wochentage.includes(zuDatum(tag).getDay())) return "zu";
     }
     return "offen";
   }
-  function lageText(m, l){
+  function lageText(m, l, iso){
     if (l === "folgt") return "Termin folgt";
     if (l === "bald") return "ab " + spanne(m.v, m.v);
-    if (l === "offen") return "heute offen";
-    if (l === "zu") return "heute zu";
+    /* Ist ein anderer Tag als heute gewählt, nennt das Schild den Tag —
+       „heute offen" unter einem gewählten 12.12. wäre schlicht falsch. */
+    const bezug = iso && iso !== heute ? " am " + tagKurz(iso) : null;
+    if (l === "offen") return bezug ? "offen" + bezug : "heute offen";
+    if (l === "zu") return bezug ? "zu" + bezug : "heute zu";
     return "vorbei";
   }
   const gebietVon = m => m.l === "AT" ? "vbg" : m.l === "LI" ? "li" : m.l === "CH" ? "ch" : "de";
@@ -2929,7 +3075,7 @@ const MAERKTE_AUSNAHMEN = {
   }
 
   function karte(m){
-    const l = lage(m);
+    const l = lage(m, gewaehlt);
     const li = document.createElement("li");
     li.className = "markt";
     const kopf = document.createElement("div"); kopf.className = "markt-kopf";
@@ -2940,7 +3086,7 @@ const MAERKTE_AUSNAHMEN = {
     } else wann.textContent = spanne(m.v, m.b);
     const st = document.createElement("span");
     st.className = "markt-status" + (l === "offen" ? " offen" : "");
-    st.textContent = lageText(m, l);
+    st.textContent = lageText(m, l, gewaehlt);
     kopf.append(wann, st);
     const h = document.createElement("h3"); h.textContent = m.n;
     const ort = absatz("markt-ort", m.o);
@@ -2964,33 +3110,34 @@ const MAERKTE_AUSNAHMEN = {
     .filter(m => m !== zauber)
     .sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
 
-  let gebiet = "alle", nurHeute = false, allesZeigen = false;
+  let gebiet = "alle", allesZeigen = false;
   const mehr = document.createElement("button");
   mehr.type = "button"; mehr.className = "knopf maerkte-mehr"; mehr.hidden = true;
   liste.after(mehr);
   mehr.addEventListener("click", () => { allesZeigen = true; zeichnen(); });
   function zeichnen(){
     const sicht = sortiert.filter(m =>
-      (gebiet === "alle" || gebietVon(m) === gebiet) && (!nurHeute || lage(m) === "offen"));
+      (gebiet === "alle" || gebietVon(m) === gebiet) && (!gewaehlt || lage(m, gewaehlt) === "offen"));
     /* Klein bleiben: in „Alle" ohne Filter erst 8 zeigen, der Rest auf Wunsch. */
-    const kappen = gebiet === "alle" && !nurHeute && !allesZeigen && sicht.length > 8;
+    const kappen = gebiet === "alle" && !gewaehlt && !allesZeigen && sicht.length > 8;
     liste.replaceChildren(...(kappen ? sicht.slice(0, 8) : sicht).map(karte));
     mehr.hidden = !kappen;
     if (kappen) mehr.textContent = "Alle " + sicht.length + " Termine zeigen";
     let heldZeigen = false;
     if (zauber){
-      const l = lage(zauber);
-      heldStatus.textContent = lageText(zauber, l);
+      const l = lage(zauber, gewaehlt);
+      heldStatus.textContent = lageText(zauber, l, gewaehlt);
       heldStatus.className = "markt-status" + (l === "offen" ? " offen" : "");
-      heldZeigen = (gebiet === "alle" || gebiet === "ch") && (!nurHeute || l === "offen");
+      heldZeigen = (gebiet === "alle" || gebiet === "ch") && (!gewaehlt || l === "offen");
     }
     held.hidden = !heldZeigen;
     const anzahl = sicht.length + (heldZeigen ? 1 : 0);
     stand.textContent = anzahl === 1 ? "1 Termin" : anzahl + " Termine";
     if (anzahl === 0){
       leer.hidden = false;
-      leer.textContent = nurHeute
-        ? (heute < "2026-11-06" ? "Heute hat noch nichts offen — die Saison beginnt im November." : "Heute hat hier nichts offen. Schau morgen wieder.")
+      leer.textContent = gewaehlt
+        ? (gewaehlt === heute ? "Heute hat hier nichts offen. Schau morgen wieder."
+                              : "Am " + tagKurz(gewaehlt) + " hat hier nichts offen.")
         : "Hier ist gerade nichts eingetragen.";
     } else leer.hidden = true;
   }
@@ -3003,12 +3150,121 @@ const MAERKTE_AUSNAHMEN = {
       zeichnen();
     });
   });
-  heuteKnopf.addEventListener("click", () => {
-    nurHeute = !nurHeute;
-    heuteKnopf.setAttribute("aria-pressed", String(nurHeute));
+
+  /* ---- Tag wählen ----
+     Drei Wege auf denselben Zustand `gewaehlt`: die Tagesleiste, das
+     Datumsfeld (öffnet am Handy den Datumswähler des Systems) und „Heute".
+     Alle laufen über tagSetzen(), damit Leiste, Feld und Knöpfe nie
+     auseinanderlaufen. „× Alle Tage" setzt zurück auf null. */
+  const leiste = document.getElementById("m-tage");
+  const datumEl = document.getElementById("m-datum");
+  const alleTage = document.getElementById("m-alle-tage");
+  const hinweis = document.getElementById("m-tag-hinweis");
+  const inSaison = iso => iso >= SAISON_VON && iso <= SAISON_BIS;
+  const chips = [];
+
+  /* Tage der Saison. Gezählt wird über Date mit 12 Uhr mittags — so kann
+     die Umstellung auf Winterzeit keinen Tag verschlucken oder doppeln. */
+  for (let d = zuDatum(SAISON_VON); tagIso(d) <= SAISON_BIS; d.setDate(d.getDate() + 1)){
+    const iso = tagIso(d);
+    if (iso === SAISON_VON || d.getDate() === 1){
+      const monat = document.createElement("span");
+      monat.className = "tag-monat"; monat.setAttribute("aria-hidden", "true");
+      monat.textContent = MON[d.getMonth()];
+      leiste.append(monat);
+    }
+    const k = document.createElement("button");
+    k.type = "button"; k.className = "tag-chip"; k.dataset.tag = iso;
+    if (d.getDay() === 0 || d.getDay() === 6) k.classList.add("wochenende");
+    if (iso === heute) k.classList.add("ist-heute");
+    k.setAttribute("aria-pressed", "false");
+    k.setAttribute("aria-label", tagLang(iso) + (iso === heute ? ", heute" : ""));
+    k.tabIndex = -1;
+    const wt = document.createElement("span"); wt.className = "wt"; wt.textContent = WT_KURZ[d.getDay()];
+    const dm = document.createElement("span"); dm.className = "dm";
+    dm.textContent = d.getDate() + "." + (d.getMonth() + 1) + ".";
+    k.append(wt, dm);
+    leiste.append(k);
+    chips.push(k);
+  }
+
+  /* Die Leiste nur in sich scrollen, nie die Seite: scrollIntoView würde am
+     Handy die ganze Seite zur Leiste ziehen, sobald das Skript startet. */
+  function insBild(k, weich){
+    const ziel = k.offsetLeft - leiste.offsetLeft - 8;
+    leiste.scrollTo({ left: Math.max(0, ziel), behavior: weich ? "smooth" : "auto" });
+  }
+
+  /* Ausgangspunkt der Leiste: heute, vor der Saison der erste Saisontag,
+     danach der letzte. Er ist der eine Tab-Halt der Leiste (roving tabindex)
+     und steht im Bild — gefiltert wird aber erst, wenn jemand einen Tag
+     antippt. Die Liste soll beim Öffnen der Seite zeigen, was es gibt,
+     nicht nur, was an einem vorgewählten Tag offen hat. */
+  const start = inSaison(heute) ? heute : (heute < SAISON_VON ? SAISON_VON : SAISON_BIS);
+  let fokusChip = chips.find(k => k.dataset.tag === start) || chips[0];
+  fokusChip.tabIndex = 0;
+
+  function tagSetzen(iso, weich){
+    gewaehlt = iso && inSaison(iso) ? iso : null;
+    hinweisSetzen();   /* ein alter „außerhalb der Saison"-Satz gehört weg */
+    chips.forEach(k => k.setAttribute("aria-pressed", String(k.dataset.tag === gewaehlt)));
+    datumEl.value = gewaehlt || "";
+    heuteKnopf.setAttribute("aria-pressed", String(gewaehlt !== null && gewaehlt === heute));
+    alleTage.hidden = !gewaehlt;
+    if (gewaehlt){
+      const k = chips.find(x => x.dataset.tag === gewaehlt);
+      if (k){ fokusChip.tabIndex = -1; k.tabIndex = 0; fokusChip = k; insBild(k, weich); }
+    }
+    allesZeigen = false;
     zeichnen();
+  }
+
+  leiste.addEventListener("click", e => {
+    const k = e.target.closest(".tag-chip");
+    if (!k) return;
+    /* Nochmal auf den gewählten Tag = Auswahl aufheben, wie ein Schalter. */
+    tagSetzen(k.dataset.tag === gewaehlt ? null : k.dataset.tag, true);
   });
+  /* Pfeiltasten wählen direkt den Nachbartag (wie bei einer Radiogruppe),
+     Pos1/Ende springen an den Rand der Saison. */
+  leiste.addEventListener("keydown", e => {
+    const k = e.target.closest(".tag-chip");
+    if (!k) return;
+    const i = chips.indexOf(k);
+    const ziel = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1
+               : e.key === "Home" ? 0 : e.key === "End" ? chips.length - 1 : null;
+    if (ziel === null || !chips[ziel]) return;
+    e.preventDefault();
+    tagSetzen(chips[ziel].dataset.tag, true);
+    chips[ziel].focus({ preventScroll: true });
+  });
+  /* "change" statt "input": manche Handy-Wähler feuern "input" schon beim
+     Drehen der Walze, dann spränge die Liste bei jedem Zwischenschritt. */
+  datumEl.addEventListener("change", () => {
+    if (!datumEl.value){ tagSetzen(null); return; }
+    if (!inSaison(datumEl.value)){
+      hinweis.textContent = "Wähle einen Tag zwischen 6. Nov. 2026 und 13. Jan. 2027.";
+      datumEl.value = gewaehlt || "";
+      return;
+    }
+    tagSetzen(datumEl.value, true);
+  });
+  alleTage.addEventListener("click", () => tagSetzen(null));
+
+  /* „Heute" gibt es nur, solange heute Saison ist. Davor und danach ist der
+     Knopf ausgegraut, und ein Satz sagt warum — ein Knopf, der wortlos
+     nichts tut, sähe kaputt aus. */
+  function hinweisSetzen(){
+    hinweis.textContent = inSaison(heute) ? ""
+      : heute < SAISON_VON ? "Die Saison beginnt am 6. November — wähle einen Tag, um zu sehen, was dann offen hat."
+      : "Die Saison ist vorbei. Bis nächsten Advent!";
+  }
+  heuteKnopf.disabled = !inSaison(heute);
+  hinweisSetzen();
+  heuteKnopf.addEventListener("click", () => tagSetzen(gewaehlt === heute ? null : heute, true));
+
   zeichnen();
+  insBild(fokusChip, false);
 })();
 
 /* ---------------- Trailer ----------------
@@ -3037,6 +3293,212 @@ const MAERKTE_AUSNAHMEN = {
     if (v && v.catch) v.catch(() => {});
     film.focus({preventScroll:true});
   });
+})();
+
+/* ---------------- Wunsch-Trailer ----------------
+   Vorschläge und Likes über /api/wunsch. Ob ein Like zählt, entscheidet der
+   Server (Abdruck aus der Adresse, gesalzen — siehe api/wunsch.js). Der
+   localStorage-Eintrag hier ist nur das Gedächtnis der Anzeige: fällt der
+   Server beim Laden aus, stimmen wenigstens die eigenen Herzen. Sobald eine
+   Antwort vom Server kommt, gilt die — auch gegen den localStorage. So sieht
+   ein zweiter Browser am selben Anschluss trotzdem „schon geliked“.
+
+   Nutzertext geht ausschließlich über textContent in die Seite. Anders als
+   im Gästebuch gibt es hier kein sicher()-und-innerHTML: ein vergessenes
+   sicher() an einer Stelle wäre eine Lücke, textContent kann das nicht. */
+(function(){
+  const WEG = "/api/wunsch";
+  const MERKER = "wunsch-geliked";   /* localStorage: Liste der gelikten Kennungen */
+  const formular = document.getElementById("wunsch-formular");
+  const titelEl  = document.getElementById("wunsch-titel");
+  const nameEl   = document.getElementById("wunsch-name");
+  const sendeEl  = document.getElementById("wunsch-senden");
+  const meldeEl  = document.getElementById("wunsch-meldung");
+  const listeEl  = document.getElementById("wunsch-liste");
+  const anzahlEl = document.getElementById("wunsch-anzahl");
+  if (!formular || !listeEl) return;
+
+  /* localStorage kann fehlen oder werfen (privates Fenster, Speicher voll) —
+     dann eben ohne Gedächtnis; der Server weiß es ja trotzdem. */
+  function gemerkt(){
+    try { return new Set(JSON.parse(localStorage.getItem(MERKER) || "[]")); }
+    catch(e){ return new Set(); }
+  }
+  function merken(menge){
+    try { localStorage.setItem(MERKER, JSON.stringify([...menge].slice(-200))); } catch(e){}
+  }
+  function melden(text, art){
+    meldeEl.textContent = text;
+    meldeEl.className = "buch-meldung" + (art ? " " + art : "");
+  }
+
+  const HERZ = "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z";
+  const SVG = "http://www.w3.org/2000/svg";
+
+  function likeZeigen(knopf, likes, geliked){
+    knopf.setAttribute("aria-pressed", String(geliked));
+    knopf.querySelector(".zahl").textContent = String(likes);
+    knopf.setAttribute("aria-label",
+      (geliked ? "Gefällt dir – zurücknehmen" : "Gefällt mir") + ", " +
+      likes + (likes === 1 ? " Like" : " Likes"));
+  }
+
+  function eintragBauen(w){
+    const li = document.createElement("li");
+    li.className = "wunsch-eintrag";
+
+    const text = document.createElement("div");
+    text.className = "wunsch-text";
+    const titel = document.createElement("span");
+    titel.className = "wunsch-titel";
+    titel.textContent = w.titel;
+    const von = document.createElement("span");
+    von.className = "wunsch-von";
+    von.textContent = "von " + (w.name || "Anonym");
+    text.append(titel, von);
+
+    const weg = document.createElement("button");
+    weg.type = "button";
+    weg.className = "wunsch-weg";
+    weg.dataset.wunschWeg = w.id;
+    weg.textContent = "Löschen";
+
+    const knopf = document.createElement("button");
+    knopf.type = "button";
+    knopf.className = "wunsch-like";
+    knopf.dataset.wunschLike = w.id;
+    const svg = document.createElementNS(SVG, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    const pfad = document.createElementNS(SVG, "path");
+    pfad.setAttribute("d", HERZ);
+    svg.appendChild(pfad);
+    const zahl = document.createElement("span");
+    zahl.className = "zahl";
+    knopf.append(svg, zahl);
+    likeZeigen(knopf, Number(w.likes) || 0, Boolean(w.geliked));
+
+    li.append(text, weg, knopf);
+    return li;
+  }
+
+  function zeichnen(wuensche){
+    anzahlEl.textContent = wuensche.length === 0 ? "noch leer"
+      : wuensche.length === 1 ? "ein Vorschlag" : wuensche.length + " Vorschläge";
+    listeEl.replaceChildren();
+    if (!wuensche.length){
+      const leer = document.createElement("li");
+      leer.className = "buch-leer";
+      leer.textContent = "Noch kein Wunsch. Deiner könnte der erste sein.";
+      listeEl.appendChild(leer);
+      return;
+    }
+    wuensche.forEach(w => listeEl.appendChild(eintragBauen(w)));
+  }
+
+  function laden(){
+    fetch(WEG)
+      .then(async a => { if (!a.ok) throw new Error(String(a.status)); return a.json(); })
+      .then(d => {
+        const wuensche = d.wuensche || [];
+        /* Server-Stand in das Gedächtnis übernehmen — in beide Richtungen. */
+        const menge = gemerkt();
+        wuensche.forEach(w => w.geliked ? menge.add(w.id) : menge.delete(w.id));
+        merken(menge);
+        zeichnen(wuensche);
+      })
+      .catch(() => {
+        listeEl.replaceChildren();
+        const leer = document.createElement("li");
+        leer.className = "buch-leer";
+        leer.textContent = "Die Wunschliste ist gerade nicht erreichbar.";
+        listeEl.appendChild(leer);
+        anzahlEl.textContent = "";
+        formular.querySelectorAll("input, button").forEach(el => el.disabled = true);
+      });
+  }
+
+  formular.addEventListener("submit", async e => {
+    e.preventDefault();
+    if (titelEl.value.trim().length < 2){ melden("Schreib einen Filmtitel oder eine Idee.", "schlecht"); return; }
+    sendeEl.disabled = true;
+    melden("wird gespeichert …");
+    try {
+      const a = await fetch(WEG, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ titel: titelEl.value, name: nameEl.value })
+      });
+      const d = await a.json();
+      if (!a.ok) { melden(d.fehler || "Das hat nicht geklappt.", "schlecht"); }
+      else {
+        titelEl.value = "";
+        melden("Steht auf der Liste. Danke!", "gut");
+        laden();
+      }
+    } catch(err){ melden("Gerade nicht erreichbar.", "schlecht"); }
+    sendeEl.disabled = false;
+  });
+
+  listeEl.addEventListener("click", async e => {
+    /* ---- Like: ein Klick setzt, der nächste nimmt zurück ----
+       Die Anzeige springt sofort um (sonst fühlt sich der Knopf taub an),
+       wird aber mit der Server-Antwort überschrieben. Die Liste wird dabei
+       NICHT neu sortiert: rutschte der Eintrag unter dem Finger weg, träfe
+       der nächste Tipp den falschen. Neu sortiert wird beim nächsten Laden. */
+    const knopf = e.target.closest("[data-wunsch-like]");
+    if (knopf){
+      if (knopf.disabled) return;
+      const id = knopf.dataset.wunschLike;
+      const vorher = knopf.getAttribute("aria-pressed") === "true";
+      const vorherZahl = Number(knopf.querySelector(".zahl").textContent) || 0;
+      likeZeigen(knopf, Math.max(0, vorherZahl + (vorher ? -1 : 1)), !vorher);
+      knopf.disabled = true;
+      try {
+        const a = await fetch(WEG, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ aktion: vorher ? "unlike" : "like", id })
+        });
+        const d = await a.json();
+        if (!a.ok) throw new Error(d.fehler || "");
+        likeZeigen(knopf, Number(d.likes) || 0, Boolean(d.geliked));
+        const menge = gemerkt();
+        d.geliked ? menge.add(id) : menge.delete(id);
+        merken(menge);
+      } catch(err){
+        likeZeigen(knopf, vorherZahl, vorher);
+        melden(err.message || "Gerade nicht erreichbar.", "schlecht");
+      }
+      knopf.disabled = false;
+      return;
+    }
+
+    /* ---- Löschen: derselbe Weg wie im Gästebuch ----
+       Angemeldet wird unten im Gästebuch (body.verwaltet). Das Passwort liest
+       dieses Skript aus demselben Feld, statt es ein zweites Mal abzufragen —
+       das Gästebuch leert das Feld beim Abmelden, dann ist es auch hier weg.
+       Geprüft wird es ohnehin erst auf dem Server. */
+    const weg = e.target.closest("[data-wunsch-weg]");
+    if (!weg) return;
+    if (!document.body.classList.contains("verwaltet")) return;
+    if (!confirm("Diesen Vorschlag löschen?")) return;
+    const wortEl = document.getElementById("admin-wort");
+    try {
+      const a = await fetch(WEG, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: weg.dataset.wunschWeg, name: "admin",
+                               passwort: wortEl ? wortEl.value : "" })
+      });
+      const d = await a.json();
+      if (!a.ok){ melden(d.fehler || "Löschen ging nicht.", "schlecht"); return; }
+      melden("gelöscht", "gut");
+      laden();
+    } catch(err){ melden("Gerade nicht erreichbar.", "schlecht"); }
+  });
+
+  laden();
 })();
 
 

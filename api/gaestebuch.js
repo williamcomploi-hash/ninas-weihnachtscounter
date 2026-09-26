@@ -21,8 +21,10 @@ const NAME_MAX   = 24;
 const TEXT_MAX   = 300;
 const PAUSE_SEK  = 120;    /* ein Eintrag alle zwei Minuten je Adresse */
 
-/** Nimmt der Zeichenkette alles, was Ärger macht. */
-function saeubern(roh, hoechstens) {
+/** Nimmt der Zeichenkette alles, was Ärger macht.
+ *  Exportiert, weil api/wunsch.js dieselbe Säuberung braucht — eine Fassung
+ *  für beide, damit eine Verschärfung hier nicht dort vergessen wird. */
+export function saeubern(roh, hoechstens) {
   return String(roh ?? "")
     .normalize("NFKC")                 /* Vollbreite, Ligaturen usw. auf die Grundform */
     .replace(/\p{Cf}/gu, "")           /* unsichtbare Formatzeichen (Zero-Width, Richtungsmarken) */
@@ -47,7 +49,7 @@ function vergleichsname(name) {
  *  fremden Buchstaben (kyrillisches а, griechisches ο …) ist auf dem Bildschirm nicht
  *  vom echten zu unterscheiden. Darum: 5 Zeichen, mindestens eines nicht-lateinisch,
  *  und die lateinischen davon passen an ihrer Stelle zu „admin" → gesperrt. */
-function sieht_aus_wie_admin(name) {
+export function sieht_aus_wie_admin(name) {
   const v = vergleichsname(name);
   if (v === "admin") return true;
   const z = [...v];
@@ -62,7 +64,7 @@ function sieht_aus_wie_admin(name) {
 }
 
 /** Verweise werden entwertet — ein Gästebuch ist keine Anzeigenfläche. */
-function ohneVerweise(text) {
+export function ohneVerweise(text) {
   return text.replace(/(https?:\/\/|www\.)\S+/gi, "[Link entfernt]");
 }
 
