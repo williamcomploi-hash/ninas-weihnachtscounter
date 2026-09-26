@@ -540,6 +540,71 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   .zauber-leiste .rest{min-width:0}
 }
 
+/* ---------- Weihnachtsmärkte ----------
+   Karten nach dem Vorbild von .speise (weiß, zarter Rand), der Zauberwald
+   als Ausnahme im Kleid der Highlight-Karte — er ist der eine Ausflug, den
+   der Eigentümer ausdrücklich hervorgehoben haben will, alles andere ist
+   Auswahl. Das Raster füllt sich mit Spalten ab 290 px: am Handy (334 px
+   Inhaltsbreite) bleibt es damit von selbst einspaltig, ohne eigene Regel.
+   Nichts wird mit line-clamp gekürzt — die Texte sind von Hand kurz
+   gehalten, abgeschnittene Öffnungszeiten wären schlimmer als lange. */
+.maerkte{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
+.maerkte-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.maerkte-filter .knopf{padding:9px 16px}
+/* Gedrückt = dunkel gefüllt. Bewusst --tinte und nicht --rot: --rot wechselt
+   mit dem Tageston, und ein blauer „aktiv“-Knopf neben einem roten
+   Neu!-Schild sähe nach zwei verschiedenen Bedeutungen aus. */
+.maerkte-filter .knopf[aria-pressed="true"]{background:var(--tinte);border-color:var(--tinte);color:#fff8f4}
+.maerkte-filter .trenner{width:1px;align-self:stretch;background:var(--linie);margin:0 4px}
+
+.maerkte-held{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);
+  gap:clamp(18px,3vw,36px);padding:clamp(20px,3vw,32px);margin-bottom:clamp(14px,2vw,20px);
+  border-radius:24px;border:1px solid rgba(232,128,154,.55);
+  background:linear-gradient(120deg,#fff 0%,#ffeef1 52%,#fdf0e2 100%);box-shadow:var(--schein)}
+.maerkte-held[hidden]{display:none}
+@media(max-width:720px){.maerkte-held{grid-template-columns:1fr}}
+.maerkte-held h3{font-size:clamp(22px,3vw,30px);margin:4px 0 6px}
+.maerkte-held .text{margin:0 0 14px;color:var(--tinte-matt)}
+.maerkte-held dl{margin:0;display:grid;gap:10px}
+.maerkte-held dt{font-family:var(--f-zahl);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--tinte-matt)}
+.maerkte-held dd{margin:2px 0 0;font-size:15px;line-height:1.5}
+
+.maerkte-liste{list-style:none;margin:0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(min(290px,100%),1fr));gap:clamp(12px,1.8vw,18px)}
+.markt{display:flex;flex-direction:column;gap:4px;padding:16px 18px 14px;border-radius:18px;
+  background:#fff;border:1px solid var(--linie-zart)}
+.markt[hidden]{display:none}
+.markt-kopf{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.markt-wann{font-family:var(--f-zahl);font-size:11px;letter-spacing:.08em;color:var(--rot);
+  font-weight:700}
+.markt-wann.offen-termin{color:var(--tinte-matt);font-weight:400}
+.markt h3{font-size:18px;line-height:1.3;margin-top:2px}
+.markt-ort{font-size:14px;color:var(--tinte-matt)}
+.markt-ort b{font-family:var(--f-zahl);font-size:10px;letter-spacing:.1em;font-weight:700;
+  margin-left:6px;padding:1px 5px;border-radius:4px;border:1px solid var(--linie)}
+.markt-zeit,.markt-text{margin:0;font-size:13.5px;line-height:1.45}
+.markt-zeit{color:var(--tinte)}
+.markt-text{color:var(--tinte-matt)}
+.markt-hinweis{font-style:italic}
+.markt-link{margin-top:auto;padding-top:8px;align-self:flex-start;
+  font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--tinte);text-decoration:underline;text-underline-offset:3px}
+.markt-link:hover{color:var(--rot)}
+/* Status-Schild. Farben fest statt Tageston, damit „heute offen“ immer
+   grün und „heute zu“ immer gedämpft aussieht. Kontrast geprüft:
+   #3f6e56 auf seinem 14-%-Grün 4,84:1, #8a6259 auf dem 10-%-Lebkuchenton
+   4,67:1 (beide über 4,5:1, WCAG AA). Wer die Deckkraft der Hintergründe
+   erhöht, rechnet neu — bei ~20 % fällt das Grün unter 4,5:1. */
+.markt-status{flex:none;font-family:var(--f-zahl);font-size:9.5px;letter-spacing:.12em;
+  text-transform:uppercase;white-space:nowrap;padding:3px 8px;border-radius:99px;
+  background:rgba(169,102,47,.1);color:var(--tinte-matt)}
+.markt-status.offen{background:rgba(63,110,86,.14);color:var(--tanne);font-weight:700}
+.maerkte-mehr{margin-top:16px;background:#fff}
+.maerkte-mehr[hidden]{display:none}
+.maerkte-leer{margin:6px 0 0;color:var(--tinte-matt);font-style:italic}
+.maerkte-fuss{margin:18px 0 0;font-size:13px;color:var(--tinte-matt)}
+
 /* ---------- Elfen ---------- */
 .werkstatt{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
 .elfen{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(10px,1.5vw,18px)}
@@ -858,6 +923,62 @@ body.verwaltet .buch-weg{display:block}
     <button class="knopf" id="zauber-weiter">Anderer Zauber</button>
     <button class="knopf" id="zauber-heute">Zauber von heute</button>
   </div>
+
+  <!-- Weihnachtsmärkte. Steht nach der Zauber-Leiste und nicht direkt nach
+       den Türchen: Leiste und Türchen gehören zusammen (die Leiste hängt mit
+       26 px Abstand am Kalender), dazwischen geschoben würde sie zum
+       verwaisten Band. Danach beginnt der „Rund ums Fest“-Teil der Seite
+       (Werkstatt, Tisch, Kekse) — dort sitzen die Ausflüge natürlich. -->
+  <section class="maerkte" aria-labelledby="m-titel">
+    <div class="abschnittskopf">
+      <div>
+        <h2 id="m-titel" aria-label="Weihnachtsmärkte &amp; Zauber, neu">Weihnachtsmärkte &amp; Zauber<span class="neu-schild" aria-hidden="true">Neu!</span></h2>
+        <p>Wohin im Advent: Märkte und Lichterzauber zwischen Bodensee, Rheintal und Graubünden.</p>
+      </div>
+      <span class="ort" id="m-stand" aria-live="polite">32 Termine</span>
+    </div>
+
+    <div class="maerkte-filter" role="group" aria-label="Märkte filtern">
+      <button class="knopf" type="button" data-gebiet="alle" aria-pressed="true">Alle</button>
+      <button class="knopf" type="button" data-gebiet="vbg" aria-pressed="false">Vorarlberg</button>
+      <button class="knopf" type="button" data-gebiet="li" aria-pressed="false">Liechtenstein</button>
+      <button class="knopf" type="button" data-gebiet="ch" aria-pressed="false">Schweiz</button>
+      <button class="knopf" type="button" data-gebiet="de" aria-pressed="false">Lindau</button>
+      <span class="trenner" aria-hidden="true"></span>
+      <button class="knopf" type="button" id="m-heute" aria-pressed="false">Heute offen</button>
+    </div>
+
+    <article class="maerkte-held" id="m-held" aria-labelledby="m-held-titel">
+      <div>
+        <div class="markt-kopf">
+          <span class="heute-marke">Ausflugstipp · Graubünden</span>
+          <span class="markt-status" id="m-held-status"></span>
+        </div>
+        <h3 id="m-held-titel">Zauberwald Lenzerheide</h3>
+        <p class="markt-ort">Lenzerheide GR<b>CH</b></p>
+        <p class="text">Ein Lichtkunst-Rundweg durch den Winterwald — 18 Werke, dazu Konzerte
+           und ein kleines Marktdorf.</p>
+        <a class="markt-link" href="https://www.zauberwald.ch/" target="_blank" rel="noopener">Zur Seite</a>
+      </div>
+      <dl>
+        <div><dt>Wann</dt>
+          <dd>11.–31. Dez., täglich 17:00–22:30 mit Zeitfenster-Ticket; am 31. Dez. bis 20:30</dd></div>
+        <div><dt>Eintritt</dt>
+          <dd>Erwachsene ab CHF 49 (mit Konzert), Kinder 4–15 ab CHF 5.
+              Preis fürs reine Licht-Ticket noch nicht bekannt.</dd></div>
+        <div><dt>Anreise</dt>
+          <dd>Das Ticket gilt als Postauto-Fahrschein: Chur–Lenzerheide–Tiefencastel
+              und Lenzerheide–Davos.</dd></div>
+        <div><dt>Achtung</dt>
+          <dd>14. Dez. geschlossen · 24. Dez. nur 17–19 Uhr, nur die Lichtinstallationen ·
+              kein Wiedereintritt</dd></div>
+      </dl>
+    </article>
+
+    <ul class="maerkte-liste" id="m-liste"></ul>
+    <p class="maerkte-leer" id="m-leer" hidden></p>
+    <p class="maerkte-fuss">Stand 26.09.2026 — Termine bitte vor dem Besuch auf der Seite des Veranstalters prüfen.</p>
+  </section>
 
   <section class="werkstatt" aria-labelledby="w-titel">
     <div class="abschnittskopf">
@@ -2741,6 +2862,154 @@ const KEKS_WEG = "/api/keks";
   });
 })();
 
+
+/* ---------------- Weihnachtsmärkte ----------------
+   Daten: Recherche vom 26.09.2026 (Vault: 02 Projekte/Ninas-Weihnachtscounter).
+   f = Termin noch nicht bestätigt -> nie „offen", nur „Termin folgt".
+   Ausnahmen: Lindau nur Do–So, Lech zwei Wochenenden, Zauberwald 14.12. zu.
+   Zum Prüfen lässt sich das Datum setzen: ?heute=2026-12-14 */
+const MAERKTE = [{"n":"Zauberwald Lenzerheide","o":"Lenzerheide (GR)","l":"CH","z":"täglich 17:00–22:30 mit Zeitfenster-Tickets; 14.12. geschlossen (Privatanlass); 24.12. nur Lichtinstallationen 17–19; 31.12. Ticket 17:00–20:30","x":"Lichtkunst-Rundweg im Winterwald (18 Werke), Konzerte, Marktdorf. Eintritt: Erwachsene ab CHF 49 (Music-Act), Kinder 4–15 ab CHF 5 (Christmas-Ticket); Light-Art-Preis offen. Ticket gilt als PostAuto-Fahrschein Chur–Lenzerheide–Tiefencastel und Lenzerheide–Davos; kein Wiedereintritt","u":"https://www.zauberwald.ch/","v":"2026-12-11","b":"2026-12-31"},{"n":"Christkindlimarkt Chur","o":"Chur, Bahnhofstrasse","l":"CH","z":"täglich; Warenstände 11–19, Gastro 11–21","x":"Rund 40–45 Holzchalets in der Churer Bahnhofstrasse; kurz vom Bahnhof","u":"https://www.christkindlimarkt.info/","v":"2026-11-27","b":"2026-12-23"},{"n":"Sternenmarkt und Sternenstadt St.Gallen","o":"St.Gallen, Gallusplatz / Altstadt","l":"CH","z":"laut Vorjahr 2025: Warenstände Mo–Fr 11–19, Sa/So 11–18; Gastro am Vadian länger (bis 21/22); 24.12. bis 16 Uhr. Zeiten 2026 noch nicht veröffentlicht","x":"Rund 700 leuchtende Sterne über der Altstadt und dem Stiftsbezirk (UNESCO-Welterbe); gut mit dem Zug erreichbar","u":"https://www.sternenstadt.ch/","v":"2026-11-26","b":"2026-12-24"},{"n":"Christchindlimarkt Appenzell","o":"Appenzell, Postplatz","l":"CH","z":"Sa 13–19, So 11–17","x":"Kleiner Markt mit viel Handgemachtem im Appenzeller Dorfkern, immer am ersten Dezember-Wochenende","u":"https://www.appenzell.ch/","v":"2026-12-05","b":"2026-12-06"},{"n":"Buchser Chlausmarkt","o":"Buchs SG, Marktplatz am Werdenbergersee","l":"CH","z":"Fr ab 16 bis So 18 Uhr; Detailzeiten laut Veranstalter noch offen","x":"Marktdörfli am See mit Blick auf Schloss und Städtli Werdenberg; Samichlaus, Streichelzoo, Kinderzug","u":"https://www.verkehrsverein-buchs.ch/","v":"2026-12-04","b":"2026-12-06"},{"n":"Weihnachtsmarkt Altstätten","o":"Altstätten SG, Frauenhof-Areal (Marktgasse)","l":"CH","z":"täglich 14–18","x":"Kleiner Markt im Rheintaler Städtli, Aussteller zeigen altes Handwerk vor Ort","u":"https://www.altstaetten.ch/anlaesseaktuelles/7702429","v":"2026-12-18","b":"2026-12-20"},{"n":"Winterzauber Klosters","o":"Klosters (GR), Montana-Areal beim Bahnhof","l":"CH","z":"Vorjahr: 20.–23. und 26.–30.12. 16–20 Uhr, 31.12. 23–1 Uhr","x":"Lichtinstallationen (Kollektiv NOA), Fassadenprojektionen, sechs Markthäuschen; Eintritt frei (Vorjahr)","u":"https://www.davos.ch/","f":1,"vv":"2025-12-20","vb":"2025-12-31"},{"n":"Vaduzer Weihnachtsmarkt","o":"Vaduz, Peter-Kaiser-Platz / Städtle","l":"LI","z":"Sa/So; Zeiten beim Veranstalter noch nicht angegeben (Sekundärangabe: Sa 11–19, So 11–17, nicht gegengeprüft)","x":"31. Ausgabe; Markt im Städtle unterhalb von Schloss Vaduz","u":"https://www.erlebevaduz.li/veranstaltungen/winter/weihnachtsmarkt/","v":"2026-12-12","b":"2026-12-13"},{"n":"Vaduzer Weihnachts-Städtle (Vaduzer Winterzauber)","o":"Vaduz, Städtle","l":"LI","z":"täglich; Zeiten offen","x":"Geschmücktes Städtle mit Stationen zum Staunen und Mitmachen; dazu Adventsprogramm 1.–24.12.2026","u":"https://www.erlebevaduz.li/veranstaltungen/winter/adventsangebote/","v":"2026-11-27","b":"2027-01-10"},{"n":"Vaduz on Ice","o":"Vaduz, Zentrum","l":"LI","z":"Zeiten und Preise offen","x":"Eisfeld mitten in Vaduz, Teil des Vaduzer Winterzaubers","u":"https://www.vaduz-on-ice.li/","v":"2026-11-06","b":"2027-01-10"},{"n":"Weihnachtsmarkt Schellenberg","o":"Schellenberg, Dorfplatz","l":"LI","z":"Sa/So 11–18","x":"Frühester Markt der Saison in Liechtenstein, im Unterland","u":"https://www.tourismus.li/weihnachtsmaerkte-und-adventsanlaesse.html","v":"2026-11-21","b":"2026-11-22"},{"n":"Nikolausmarkt Schaan","o":"Schaan, Lindaplatz","l":"LI","z":"Sa 11–19","x":"Nikolausmarkt am Lindaplatz im Zentrum von Schaan","u":"https://www.tourismus.li/weihnachtsmaerkte-und-adventsanlaesse.html","v":"2026-11-28","b":"2026-11-28"},{"n":"Adventsmarkt Ruggell","o":"Ruggell, Parkplatz Musikhaus","l":"LI","z":"Sa 11–18","x":"Dorf-Adventsmarkt im Liechtensteiner Unterland","u":"https://www.tourismus.li/weihnachtsmaerkte-und-adventsanlaesse.html","v":"2026-11-28","b":"2026-11-28"},{"n":"Weihnachtsmarkt Triesen","o":"Triesen, Gemeindezentrum","l":"LI","z":"Sa; Zeiten offen","x":"Dorf-Weihnachtsmarkt beim Gemeindezentrum","u":"https://www.tourismus.li/weihnachtsmaerkte-und-adventsanlaesse.html","v":"2026-11-28","b":"2026-11-28"},{"n":"Adventszauber Balzers","o":"Balzers, Alter Pfarrhof","l":"LI","z":"Sa 14:45–19","x":"Adventsanlass im Alten Pfarrhof am Südende Liechtensteins","u":"https://www.tourismus.li/weihnachtsmaerkte-und-adventsanlaesse.html","v":"2026-11-28","b":"2026-11-28"},{"n":"Adventszauber Gamprin","o":"Gamprin, Grossabünt","l":"LI","z":"So (1. Advent); Zeiten offen","x":"Adventsanlass am ersten Adventsonntag","u":"https://www.tourismus.li/weihnachtsmaerkte-und-adventsanlaesse.html","v":"2026-11-29","b":"2026-11-29"},{"n":"Lichterglanz Triesenberg","o":"Triesenberg, Dorfzentrum","l":"LI","z":"So 13–18","x":"Lichterfest im Walserdorf hoch über dem Rheintal","u":"https://www.tourismus.li/weihnachtsmaerkte-und-adventsanlaesse.html","v":"2026-11-29","b":"2026-11-29"},{"n":"Weihnachtszauber Malbun","o":"Malbun (Triesenberg), Zentrum","l":"LI","z":"Sa 16–20","x":"Weihnachtsmarkt im Skiort Malbun zum Start der Wintersaison","u":"https://www.tms-tourismus.li/events/weinachtszauber-malbun","v":"2026-12-19","b":"2026-12-19"},{"n":"Bregenzer Weihnacht","o":"Bregenz, Kornmarktplatz / Rathausstraße / Leutbühel / Oberstadt","l":"AT","z":"täglich; Handel 11–20, Gastro 11–21; Bühnenprogramm Fr–So","x":"Riesenrad am Kornmarktplatz, kleiner Eislaufplatz, Kunsthandwerk in der Oberstadt; Eintritt frei","u":"https://visitbregenz.com/en/events/markets-in-bregenz/christmas-market-in-bregenz","v":"2026-11-15","b":"2026-12-23"},{"n":"Dornbirner Christkindlemarkt","o":"Dornbirn, Marktplatz","l":"AT","z":"20.11. 17–21; ab 21.11. täglich 10–21","x":"Adventkranz um den Marktplatzbrunnen, Bühnenprogramm, Kinderprogramm im Pfarrpark","u":"https://www.dornbirn.info/de/dornbirner-christkindlemarkt-3","v":"2026-11-20","b":"2026-12-23"},{"n":"Weihnachtsstadt Feldkirch","o":"Feldkirch, Marktgasse und Neustadt","l":"AT","z":"Handel Mo–Sa 11–19, So 11–18; Gastro Mo–Mi 11–20, Do–Sa 11–21, So 11–18; 24.12. 10–13; Neustadt nur Do–So (17.–24.12. täglich)","x":"Mittelalterliche Altstadt als Lichtermeer, Lebkuchenhaus, Weihnachtsbühne","u":"https://feldkirch-leben.at/erleben/events-feste/weihnachtsstadt","v":"2026-11-26","b":"2026-12-24"},{"n":"Blosengelmarkt Feldkirch","o":"Feldkirch, Marktgasse","l":"AT","z":"Fr/Sa 11–20","x":"Traditioneller Adventauftakt seit 1975; Erlös geht an sieben Feldkircher Vereine und Sozialeinrichtungen","u":"https://feldkirch-leben.at/erleben/veranstaltungen/blosengelmarkt","v":"2026-11-20","b":"2026-11-21"},{"n":"Bludenzer Christkindlemarkt","o":"Bludenz, Mühlgasse (Altstadt)","l":"AT","z":"laut Vorjahr 2025: Mo–Mi 11–20, Do–Fr 11–21, Sa 10–20, So 13–20, 24.12. 10–13; Zeiten 2026 noch nicht veröffentlicht","x":"Altstadtmarkt mit Raclette und Küachle, Kinderprogramm, Christbaumversteigerung für einen guten Zweck","u":"https://www.bludenz-events.at/","v":"2026-11-26","b":"2026-12-24"},{"n":"Hohenemser Weihnachtszauber mit Wichtelwald","o":"Hohenems, Kirchplatz / Salomon-Sulzer-Platz / Loretto-Platz","l":"AT","z":"Vorjahr: Wichtelwald täglich 16–19:30; Nasch- und Punschhütten Do–So 16–22","x":"Beleuchteter Wichtelwald über drei Plätze inkl. Jüdisches Viertel, Maronistand; besonders familientauglich","u":"https://www.hohenems.at/","v":"2026-11-21","b":"2026-12-28","f":1,"vv":"2025-11-21","vb":"2025-12-28"},{"n":"Luschnouar Chrischtkendlimarkt","o":"Lustenau, rund um den Kirchplatz","l":"AT","z":"Fr/Sa 14–22 (Handel bis 20), So 14–18","x":"Krippenausstellung des Lustenauer Krippenvereins, Kutschenfahrten, Nikolausbesuch","u":"https://marketing.lustenau.at/de/aktivitaeten/luschnouar-markt/themenmaerkte/vorschau-maerkte-2026","v":"2026-11-27","b":"2026-11-29"},{"n":"Weihnachtsmarkt Götzis","o":"Götzis","l":"AT","z":"Zeiten offen","x":"Dorfmarkt im Vorderland; separater Markt Am Garnmarkt laut WKO am 4.–5.12.2026","u":"https://goetzis.at/veranstaltungen/","v":"2026-11-27","b":"2026-11-29"},{"n":"Schwarzenberger Adventmarkt","o":"Schwarzenberg (Bregenzerwald), Kirchplatz","l":"AT","z":"Fr/Sa 15–20","x":"Kleiner, sehr authentischer Markt zwischen 270 Jahre alten Wälderhäusern; Kekse vom Kirchenchor, Honigkerzen","u":"https://www.schwarzenberg.at/veranstaltung/schwarzenberger-advent/","v":"2026-11-27","b":"2026-11-28"},{"n":"Bärger Adventmarkt","o":"Bartholomäberg (Montafon), Ortszentrum","l":"AT","z":"So: 10 Uhr Gottesdienst, Markt ab 11; Museum Frühmesshaus 11–16","x":"Bergdorf-Adventmarkt am 1. Advent, Nikolaus und Krampus um 13 Uhr, Krippen im Museum","u":"https://www.montafon.at/","v":"2026-11-29","b":"2026-11-29"},{"n":"Silbriga Sonntig Markt","o":"Schruns (Montafon), Kirchplatz","l":"AT","z":"So ab 10 Uhr","x":"Größter Weihnachtsmarkt im Montafon mit über 60 Ständen, Kutschenfahrten, Harmoniemusik Schruns","u":"https://wirtschaft-montafon.at/silbriga-sonntig-markt/","v":"2026-12-13","b":"2026-12-13"},{"n":"Weihnachtsmarkt Lech","o":"Lech am Arlberg, Kirchplatz","l":"AT","z":"nur 11.–13.12. und 18.–20.12.; Uhrzeit laut Veranstalterseite 15–20 (Jahr dort nicht angegeben)","x":"Kleiner Bergdorfmarkt; am 20.12. kommt das Christkind auf den Kirchplatz. Dazu Weihnachtsmarkt Zug 5.–6.12. und Zürs 21.12.2026","u":"https://www.lechzuers.com/de/weihnachtsmarkt-in-lech","v":"2026-12-11","b":"2026-12-20"},{"n":"Weihnachtsschiff Bregenz–Lindau (Vorarlberg Lines)","o":"Hafen Bregenz ↔ Hafen Lindau","l":"AT","z":"Vorjahr: Fr–So; ab Bregenz 12:30, 14:10, 15:50, 17:30","x":"Schiff zwischen zwei Weihnachtsmärkten, an Bord Winterwald und über 10 m Modelleisenbahn. Vorjahrespreis retour: Erw. 18,50 €, Kinder 7,20 €","u":"https://www.bodensee.eu/de/was-erleben/bodensee-highlights/top-veranstaltungen/christmas-cruises-of-the-vorarlberg-lines_event1052","f":1,"vv":"2025-11-28","vb":"2025-12-21"},{"n":"Lindauer Hafenweihnacht","o":"Lindau (Bodensee), Hafen","l":"DE","z":"Do–So 11–21","x":"Markt direkt am Hafen mit Alpenblick, Märchenwald mit echten Tieren; Bahnhof Lindau-Insel liegt direkt am Markt","u":"https://www.lindau.de/lindau-erleben/veranstaltungen/lindauer-hafenweihnacht/","v":"2026-11-26","b":"2026-12-20"}];
+
+const MAERKTE_AUSNAHMEN = {
+  "Lindauer Hafenweihnacht": { wochentage: [4, 5, 6, 0] },
+  "Weihnachtsmarkt Lech": { spannen: [["2026-12-11", "2026-12-13"], ["2026-12-18", "2026-12-20"]] },
+  "Zauberwald Lenzerheide": { zu: ["2026-12-14"] }
+};
+(function(){
+  const liste = document.getElementById("m-liste");
+  if (!liste) return;
+  const leer = document.getElementById("m-leer");
+  const stand = document.getElementById("m-stand");
+  const held = document.getElementById("m-held");
+  const heldStatus = document.getElementById("m-held-status");
+  const heuteKnopf = document.getElementById("m-heute");
+  const MON = ["Jan.","Feb.","März","Apr.","Mai","Juni","Juli","Aug.","Sep.","Okt.","Nov.","Dez."];
+
+  const q = new URLSearchParams(location.search).get("heute");
+  const jetzt = q && /^\d{4}-\d{2}-\d{2}$/.test(q) ? new Date(q + "T12:00:00") : new Date();
+  const tagIso = d => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  const heute = tagIso(jetzt);
+  const zuDatum = s => new Date(s + "T12:00:00");
+
+  function spanne(v, b){
+    const a = zuDatum(v), e = zuDatum(b);
+    if (v === b) return a.getDate() + ". " + MON[a.getMonth()];
+    if (a.getMonth() === e.getMonth() && a.getFullYear() === e.getFullYear())
+      return a.getDate() + ".–" + e.getDate() + ". " + MON[e.getMonth()];
+    return a.getDate() + ". " + MON[a.getMonth()] + "–" + e.getDate() + ". " + MON[e.getMonth()];
+  }
+
+  /* folgt | bald | offen | zu | vorbei */
+  function lage(m){
+    if (m.f || !m.v) return "folgt";
+    if (heute < m.v) return "bald";
+    if (heute > m.b) return "vorbei";
+    const aus = MAERKTE_AUSNAHMEN[m.n];
+    if (aus){
+      if (aus.zu && aus.zu.includes(heute)) return "zu";
+      if (aus.spannen && !aus.spannen.some(([v, b]) => heute >= v && heute <= b)) return "zu";
+      if (aus.wochentage && !aus.wochentage.includes(jetzt.getDay())) return "zu";
+    }
+    return "offen";
+  }
+  function lageText(m, l){
+    if (l === "folgt") return "Termin folgt";
+    if (l === "bald") return "ab " + spanne(m.v, m.v);
+    if (l === "offen") return "heute offen";
+    if (l === "zu") return "heute zu";
+    return "vorbei";
+  }
+  const gebietVon = m => m.l === "AT" ? "vbg" : m.l === "LI" ? "li" : m.l === "CH" ? "ch" : "de";
+  function sicher(u){
+    try { const x = new URL(u); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : null; }
+    catch (e) { return null; }
+  }
+  function absatz(klasse, text){
+    const p = document.createElement("p"); p.className = klasse; p.textContent = text; return p;
+  }
+
+  function karte(m){
+    const l = lage(m);
+    const li = document.createElement("li");
+    li.className = "markt";
+    const kopf = document.createElement("div"); kopf.className = "markt-kopf";
+    const wann = document.createElement("span"); wann.className = "markt-wann";
+    if (m.f){
+      wann.classList.add("offen-termin");
+      wann.textContent = m.vv ? "Vorjahr: " + spanne(m.vv, m.vb) : "Termin folgt";
+    } else wann.textContent = spanne(m.v, m.b);
+    const st = document.createElement("span");
+    st.className = "markt-status" + (l === "offen" ? " offen" : "");
+    st.textContent = lageText(m, l);
+    kopf.append(wann, st);
+    const h = document.createElement("h3"); h.textContent = m.n;
+    const ort = absatz("markt-ort", m.o);
+    const land = document.createElement("b"); land.textContent = m.l; ort.append(land);
+    li.append(kopf, h, ort);
+    if (m.z) li.append(absatz("markt-zeit", m.z));
+    if (m.x) li.append(absatz("markt-text", m.x));
+    if (m.f) li.append(absatz("markt-text markt-hinweis", "Der Termin für 2026 ist noch nicht veröffentlicht."));
+    const url = sicher(m.u);
+    if (url){
+      const a = document.createElement("a"); a.className = "markt-link"; a.href = url;
+      a.target = "_blank"; a.rel = "noopener"; a.textContent = "Zur Seite"; li.append(a);
+    }
+    return li;
+  }
+
+  /* Unbestätigte stehen mit dem Vorjahrestermin, eine Saison weiter gedacht — sonst sortieren sie sich vor alle anderen. */
+  const sortKey = m => m.v || (m.vv ? (Number(m.vv.slice(0,4)) + 1) + m.vv.slice(4) : "9999");
+  const zauber = MAERKTE.find(m => m.n === "Zauberwald Lenzerheide");
+  const sortiert = MAERKTE
+    .filter(m => m !== zauber)
+    .sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+
+  let gebiet = "alle", nurHeute = false, allesZeigen = false;
+  const mehr = document.createElement("button");
+  mehr.type = "button"; mehr.className = "knopf maerkte-mehr"; mehr.hidden = true;
+  liste.after(mehr);
+  mehr.addEventListener("click", () => { allesZeigen = true; zeichnen(); });
+  function zeichnen(){
+    const sicht = sortiert.filter(m =>
+      (gebiet === "alle" || gebietVon(m) === gebiet) && (!nurHeute || lage(m) === "offen"));
+    /* Klein bleiben: in „Alle" ohne Filter erst 8 zeigen, der Rest auf Wunsch. */
+    const kappen = gebiet === "alle" && !nurHeute && !allesZeigen && sicht.length > 8;
+    liste.replaceChildren(...(kappen ? sicht.slice(0, 8) : sicht).map(karte));
+    mehr.hidden = !kappen;
+    if (kappen) mehr.textContent = "Alle " + sicht.length + " Termine zeigen";
+    let heldZeigen = false;
+    if (zauber){
+      const l = lage(zauber);
+      heldStatus.textContent = lageText(zauber, l);
+      heldStatus.className = "markt-status" + (l === "offen" ? " offen" : "");
+      heldZeigen = (gebiet === "alle" || gebiet === "ch") && (!nurHeute || l === "offen");
+    }
+    held.hidden = !heldZeigen;
+    const anzahl = sicht.length + (heldZeigen ? 1 : 0);
+    stand.textContent = anzahl === 1 ? "1 Termin" : anzahl + " Termine";
+    if (anzahl === 0){
+      leer.hidden = false;
+      leer.textContent = nurHeute
+        ? (heute < "2026-11-06" ? "Heute hat noch nichts offen — die Saison beginnt im November." : "Heute hat hier nichts offen. Schau morgen wieder.")
+        : "Hier ist gerade nichts eingetragen.";
+    } else leer.hidden = true;
+  }
+
+  const gebietKnoepfe = document.querySelectorAll(".maerkte-filter [data-gebiet]");
+  gebietKnoepfe.forEach(k => {
+    k.addEventListener("click", () => {
+      gebiet = k.dataset.gebiet;
+      gebietKnoepfe.forEach(x => x.setAttribute("aria-pressed", String(x === k)));
+      zeichnen();
+    });
+  });
+  heuteKnopf.addEventListener("click", () => {
+    nurHeute = !nurHeute;
+    heuteKnopf.setAttribute("aria-pressed", String(nurHeute));
+    zeichnen();
+  });
+  zeichnen();
+})();
 
 /* ---------------- Trailer ----------------
    Zeigt den großen Abspielknopf und startet auf Tippen. play() läuft direkt
