@@ -226,7 +226,7 @@ h1 em{font-style:normal;display:block;
 .zaehler-kopf h2{font-size:clamp(19px,2.4vw,25px)}
 .ziel{font-family:var(--f-zahl);font-size:11.5px;color:var(--rot);letter-spacing:.1em}
 
-.uhr{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.6vw,16px)}
+.uhr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(8px,1.6vw,16px)}
 .feld{text-align:center;padding:clamp(13px,1.9vw,20px) 6px;border-radius:16px;
   background:linear-gradient(180deg,#fff 0%,#fff6f7 100%);
   border:1px solid var(--linie-zart);box-shadow:0 8px 18px -14px rgba(150,34,47,.5)}
@@ -494,6 +494,119 @@ body.verwaltet .wunsch-weg{display:block}
 @media(max-width:640px){
   .sprung-liste{padding:7px 16px;gap:5px}
   .sprung a{padding:0 13px}
+}
+
+/* ---------- Schnellnavigation am Handy: Burger-Menü und Blatt ----------
+   Die wischbare Bahn hat am Handy nicht getragen: auf 375 px passten vier
+   Knöpfe, der fünfte war angeschnitten, der Neu-Punkt an „Wünsche“ halb
+   weg, und dass man wischen kann, sah niemand. Unter 641 px verschwindet
+   die Leiste deshalb ganz; an ihre Stelle tritt ein rundes Burger-Menü
+   fest in der Ecke oben rechts, das ein Blatt von unten mit allen
+   Abschnitten als Raster öffnet. Über 640 px bleibt alles wie oben — dort
+   passt die Reihe, und ein Menü davor wäre nur ein Tipp mehr.
+   Alles hängt an .mit-blatt, das erst das Skript setzt: ohne Skript öffnet
+   der Knopf nichts, und dann ist die alte Bahn mit echten Ankern immer noch
+   besser als ein toter Knopf.
+   Fest (fixed) statt klebend: so ist das Menü auch auf dem ersten
+   Bildschirm über der Bühne sofort da, nicht erst, wenn die Leiste oben
+   angekommen ist. Die <nav> bleibt als Kasten der Höhe 0 stehen (Landmarke
+   für Screenreader, Halter für den Knopf); ihr Schleier und ihre Unschärfe
+   fallen weg — backdrop-filter an ihr machte sie außerdem zum Bezugsrahmen
+   des festen Knopfs, und der klebte dann mit ihr statt an der Ecke.
+   --leiste-hoehe misst das Skript am Handy an der Unterkante des Knopfs,
+   damit eine angesprungene Überschrift unter ihm landet statt dahinter.
+   Sicherheitsabstände per env(): greifen nur mit viewport-fit=cover, das
+   die Seite nicht setzt — dann hält der Browser die Ecke selbst frei, und
+   env() ist 0. Setzt es jemand später, stimmt der Abstand von allein. */
+.sprung-knopf,.blatt{display:none}
+@media(max-width:640px){
+  .sprung.mit-blatt{height:0;margin:0;border:0;background:none;box-shadow:none;
+    -webkit-backdrop-filter:none;backdrop-filter:none}
+  .sprung.mit-blatt .sprung-bahn{display:none}
+  /* Solange das Blatt offen ist, hebt sich die <nav> über dessen Schleier
+     (75): der Knopf ist dann ein × und schließt, und er soll dabei nicht
+     abgedunkelt unter dem Schleier liegen. */
+  html.blatt-offen .sprung.mit-blatt{z-index:76}
+  /* 44 px rund — die Mindest-Tippfläche, nicht größer: er schwebt dauernd
+     über dem Inhalt. Derselbe halbdurchsichtige Schleier mit Unschärfe wie
+     vorher die Leiste, damit darunter laufender Text durchscheint. */
+  .sprung.mit-blatt .sprung-knopf{position:fixed;
+    top:calc(10px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));
+    display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;
+    border-radius:50%;border:1px solid var(--linie);cursor:pointer;color:var(--tinte);
+    background:rgba(var(--grund-rgb),.78);
+    -webkit-backdrop-filter:blur(10px) saturate(1.15);backdrop-filter:blur(10px) saturate(1.15);
+    box-shadow:0 10px 24px -16px rgba(74,42,36,.55);-webkit-tap-highlight-color:transparent}
+  .sprung-knopf:focus-visible{outline:2px solid var(--rot);outline-offset:2px}
+  .sprung-knopf svg{width:20px;height:20px;overflow:visible}
+  /* Drei Striche, die offen zum × werden: der mittlere blendet aus, die
+     äußeren rücken in die Mitte und drehen sich. Gedreht wird um die Mitte
+     des Symbols (transform-box), nicht um die Ecke der Zeichenfläche. */
+  .sprung-knopf line{transform-box:view-box;transform-origin:50% 50%;
+    transition:transform .24s ease,opacity .18s ease}
+  .sprung-knopf[aria-expanded="true"] .strich-oben{transform:translateY(5px) rotate(45deg)}
+  .sprung-knopf[aria-expanded="true"] .strich-mitte{opacity:0}
+  .sprung-knopf[aria-expanded="true"] .strich-unten{transform:translateY(-5px) rotate(-45deg)}
+  /* Neu-Punkt am Menü: dieselbe Zeichnung wie an den Knöpfen der Leiste,
+     nur in die Rundung oben rechts gesetzt. Das Skript schaltet ihn nur
+     ein, wenn mindestens ein Abschnitt einen Neu-Punkt trägt — wird der
+     letzte entfernt, geht er von selbst mit. Offen ist er aus: dann steht
+     das × da, und die Punkte sieht man ohnehin im Raster. */
+  .sprung-knopf .sprung-neu{top:5px;right:5px;width:9px;height:9px;display:none}
+  .sprung-knopf.hat-neu .sprung-neu{display:block}
+  .sprung-knopf.hat-neu[aria-expanded="true"] .sprung-neu{display:none}
+
+  /* Das Blatt. z-index 75: über Snoopy (6), der Tafel (50) und dem
+     Vorschau-Band (70), das sonst genau über der untersten Rasterzeile
+     läge; unter dem Zwischenruf (80), den es auf Geräten ohne Maus ohnehin
+     nie gibt. */
+  .blatt{position:fixed;inset:0;z-index:75;align-items:flex-end;
+    background:rgba(74,42,36,.0);transition:background-color .24s ease}
+  .blatt.da{display:flex}
+  .blatt.offen{background:rgba(74,42,36,.38)}
+  /* max-height mit dvh (und vh als Rückfall für ältere Browser): das Blatt
+     passt auch auf 320 × 568 ganz ins Bild; wird es doch zu hoch (große
+     Systemschrift, Querformat), scrollt nur das Raster darin, nie die
+     Seite dahinter. Unten die Sicherheitszone, damit die letzte Reihe nicht
+     unter dem Home-Balken des iPhones liegt. */
+  .blatt-inhalt{position:relative;width:100%;max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);
+    display:flex;flex-direction:column;
+    border-radius:24px 24px 0 0;border:1px solid rgba(232,128,154,.6);border-bottom:0;
+    background:linear-gradient(160deg,#fff 0%,#ffeef1 58%,#fdefe0 100%);
+    box-shadow:0 -24px 60px -30px rgba(74,42,36,.6);
+    padding:0 14px calc(14px + env(safe-area-inset-bottom));
+    transform:translateY(100%);transition:transform .26s cubic-bezier(.2,.8,.3,1)}
+  .blatt.offen .blatt-inhalt{transform:none}
+  .blatt-kopf{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 2px 12px 6px;border-bottom:1px solid var(--linie);margin-bottom:12px}
+  .blatt-kopf h2{font-size:22px;line-height:1.2;color:var(--tinte)}
+  .blatt-kopf h2:focus{outline:none}
+  /* Das Kreuz wie das der Tafel, aber mit voller Tipp-Fläche von 44 px —
+     am Handy ist es der erste Weg heraus, den man sucht. */
+  .blatt .zu{position:static;flex:none;width:44px;height:44px;padding:0;
+    display:flex;align-items:center;justify-content:center;border-radius:50%}
+  .blatt-raster{list-style:none;margin:0;padding:2px;display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+    overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  /* Die Kacheln sind die Pillen der Leiste in groß: 48 px hoch (über den
+     geforderten 44), eckiger, damit zwei nebeneinander wie ein Raster und
+     nicht wie eine Perlenkette aussehen. Aktiv wieder mit --tinte gefüllt,
+     aus demselben Grund wie oben. */
+  .blatt-raster a{position:relative;display:flex;align-items:center;min-height:48px;
+    padding:0 26px 0 14px;border-radius:14px;border:1px solid var(--linie);
+    background:rgba(255,255,255,.86);color:var(--tinte);text-decoration:none;
+    font-family:var(--f-zahl);font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    overflow-wrap:anywhere;-webkit-tap-highlight-color:transparent}
+  .blatt-raster a:active{border-color:var(--rot);color:var(--rot)}
+  .blatt-raster a:focus-visible{outline:2px solid var(--rot);outline-offset:2px}
+  .blatt-raster a[aria-current="true"]{background:var(--tinte);border-color:var(--tinte);color:#fff8f4}
+  /* Der Neu-Punkt sitzt hier rechts mittig in der Kachel, mit Platz dank
+     padding-right — nicht oben in der Ecke, wo ihn die Rundung anschnitte. */
+  .blatt-raster .sprung-neu{top:50%;right:12px;margin-top:-4px;width:8px;height:8px}
+  /* Solange das Blatt offen ist, steht die Seite dahinter still. Sonst
+     schöbe ein Wisch neben dem Raster auf iOS die Seite weiter, und nach
+     dem Schließen stünde man woanders als beim Öffnen. */
+  html.blatt-offen,html.blatt-offen body{overflow:hidden}
 }
 
 /* ---------- Tafel ---------- */
@@ -1111,7 +1224,36 @@ body.verwaltet .buch-weg{display:block}
       <li><a href="#regeln">Snoopy</a></li>
     </ul>
   </div>
+  <!-- Burger-Menü, nur am Handy (≤ 640 px) und erst, wenn das Skript
+       läuft (.mit-blatt). Kein sichtbarer Text, darum das aria-label; ob
+       offen oder zu, sagt aria-expanded. Der Neu-Punkt ist wie an den
+       Knöpfen oben nur Zierde (aria-hidden) — „neu“ steht im Raster an den
+       Abschnitten selbst. -->
+  <button type="button" class="sprung-knopf" id="sprung-knopf" aria-label="Menü"
+          aria-expanded="false" aria-controls="sprung-blatt" aria-haspopup="dialog">
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <line class="strich-oben" x1="3" y1="5" x2="17" y2="5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line class="strich-mitte" x1="3" y1="10" x2="17" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line class="strich-unten" x1="3" y1="15" x2="17" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <span class="sprung-neu" aria-hidden="true"></span>
+  </button>
 </nav>
+
+<!-- Das Blatt zum Knopf oben. Das Raster füllt das Skript aus den Links der
+     Leiste — es gibt also weiterhin nur eine Liste der Abschnitte, und ein
+     neuer Abschnitt oben erscheint hier von selbst. Steht außerhalb der
+     <nav>, weil die am Handy pointer-events:none trägt und klebt; das Blatt
+     muss frei über der ganzen Seite liegen. -->
+<div class="blatt" id="sprung-blatt" role="dialog" aria-modal="true" aria-labelledby="blatt-titel" hidden>
+  <div class="blatt-inhalt">
+    <div class="blatt-kopf">
+      <h2 id="blatt-titel" tabindex="-1">Abschnitte</h2>
+      <button type="button" class="zu" id="blatt-zu" aria-label="Schließen">×</button>
+    </div>
+    <ul class="blatt-raster" id="blatt-raster"></ul>
+  </div>
+</div>
 
 <main class="huelle">
 
@@ -3619,10 +3761,29 @@ const MAERKTE_AUSNAHMEN = {
      im System umschaltet, soll nicht neu laden müssen. */
   const ohneBewegung = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  const knopf = document.getElementById("sprung-knopf");
+  const blatt = document.getElementById("sprung-blatt");
+  const raster = document.getElementById("blatt-raster");
+  const zu = document.getElementById("blatt-zu");
+  const mitBlatt = !!(knopf && blatt && raster && zu);
+  /* Vor dem ersten Messen setzen: am Handy ändert .mit-blatt die Höhe der
+     Leiste (auf 0), und die Messung unten muss schon die neue sehen. */
+  if (mitBlatt) nav.classList.add("mit-blatt");
+
   /* Höhe messen statt fest annehmen: bei großer Systemschrift wird die
-     Leiste höher, und scroll-margin-top soll dann mitwachsen. */
+     Leiste höher, und scroll-margin-top soll dann mitwachsen.
+     Am Handy ist die Leiste 0 hoch, dort zählt die Unterkante des festen
+     Menüknopfs — sonst landete eine angesprungene Überschrift unter ihm.
+     Aus dem berechneten top statt aus getBoundingClientRect: bei
+     prefers-reduced-motion läuft wegen der Regel ganz unten jede Eigenschaft
+     .01 ms lang über, auch das backdrop-filter der <nav> beim Setzen von
+     .mit-blatt. In diesem Augenblick ist die <nav> Bezugsrahmen des festen
+     Knopfs, er steht unten bei ihr, und die Messung ergab 615 statt 54 px
+     (im Test so gesehen). top hängt davon nicht ab. */
+  const leisteHoehe = () => nav.offsetHeight ||
+    (knopf ? Math.ceil((parseFloat(getComputedStyle(knopf).top) || 0) + knopf.offsetHeight) : 0);
   const hoeheSetzen = () =>
-    document.documentElement.style.setProperty("--leiste-hoehe", nav.offsetHeight + "px");
+    document.documentElement.style.setProperty("--leiste-hoehe", leisteHoehe() + "px");
   hoeheSetzen();
   window.addEventListener("resize", hoeheSetzen);
 
@@ -3635,13 +3796,34 @@ const MAERKTE_AUSNAHMEN = {
     bahn.scrollTo({ left: Math.max(0, ziel), behavior: weich && !ohneBewegung() ? "smooth" : "auto" });
   }
 
+  /* Das Raster im Handy-Blatt: je Link der Leiste eine Kopie, samt
+     aria-label und Neu-Punkt. Kopiert statt zweimal ins HTML geschrieben,
+     damit die Abschnittsliste nur an einer Stelle gepflegt wird (siehe
+     Kommentar über der <nav>). Die Kopie hängt als p.b am selben Paar —
+     Hervorhebung und Sprung laufen so für Leiste und Blatt über denselben
+     Weg, und es kann nie das eine „Märkte“ und das andere „Tisch“ zeigen.
+     Trägt irgendein Abschnitt einen Neu-Punkt, bekommt ihn auch das Menü. */
+  if (mitBlatt){
+    paare.forEach(p => {
+      const li = document.createElement("li");
+      p.b = p.a.cloneNode(true);
+      p.b.removeAttribute("aria-current");
+      li.appendChild(p.b);
+      raster.appendChild(li);
+    });
+    knopf.classList.toggle("hat-neu", !!nav.querySelector(".sprung-liste .sprung-neu"));
+  }
+
   let aktiv = null;
   function markieren(p){
     if (p === aktiv) return;
     aktiv = p;
     paare.forEach(x => {
-      if (x === p) x.a.setAttribute("aria-current", "true");
-      else x.a.removeAttribute("aria-current");
+      [x.a, x.b].forEach(el => {
+        if (!el) return;
+        if (x === p) el.setAttribute("aria-current", "true");
+        else el.removeAttribute("aria-current");
+      });
     });
     if (p) knopfInsBild(p.a, true);
   }
@@ -3665,7 +3847,7 @@ const MAERKTE_AUSNAHMEN = {
     const beobachter = new IntersectionObserver(eintraege => {
       eintraege.forEach(e => e.isIntersecting ? sichtbar.add(e.target) : sichtbar.delete(e.target));
       auswerten();
-    }, { rootMargin: "-" + (nav.offsetHeight + 1) + "px 0px -55% 0px" });
+    }, { rootMargin: "-" + (leisteHoehe() + 1) + "px 0px -55% 0px" });
     paare.forEach(p => beobachter.observe(p.ziel));
     if (kopf) beobachter.observe(kopf);
   }
@@ -3691,6 +3873,10 @@ const MAERKTE_AUSNAHMEN = {
     const p = a && paare.find(x => x.a === a);
     if (!p) return;
     e.preventDefault();
+    springen(p);
+  });
+
+  function springen(p){
     markieren(p);
     gesperrt = true; nachSprung = true;
     clearTimeout(sperrUhr);
@@ -3704,7 +3890,145 @@ const MAERKTE_AUSNAHMEN = {
       if (!h.hasAttribute("tabindex")) h.setAttribute("tabindex", "-1");
       h.focus({ preventScroll: true });
     }
-  });
+  }
+
+  /* ---------- Handy: Knopf und Blatt ----------
+     Schließen geht auf vier Wegen — Kreuz, Tipp auf den Schleier, Escape,
+     Zurück-Wisch. Der Zurück-Wisch braucht einen eigenen Eintrag im
+     Verlauf: beim Öffnen wird einer angelegt (gleiche Adresse, nur ein
+     Merker im state), der Zurück-Wisch nimmt ihn wieder weg und löst
+     popstate aus. Ohne diesen Eintrag verließe der Wisch die ganze Seite,
+     und genau das erwartet am Handy niemand, wenn nur ein Blatt offen ist.
+     Schließt man auf einem der anderen Wege, räumt history.back() den
+     Eintrag selbst wieder ab, sonst bliebe bei jedem Öffnen ein toter
+     Zurück-Schritt übrig. Alles, was nach dem Schließen passieren soll
+     (Sprung, Fokus), läuft deshalb erst im popstate: würde vorher schon
+     gerollt, könnte der Browser beim Zurückgehen die alte Scrollposition
+     des Eintrags wiederherstellen und den Sprung zunichtemachen. */
+  if (mitBlatt){
+    const titel = document.getElementById("blatt-titel");
+    const handy = window.matchMedia("(max-width:640px)");
+    let offen = false, imVerlauf = false, danach = null, zuUhr = 0, zug = 0, altesRollen = null;
+
+    function oeffnen(){
+      if (offen) return;
+      offen = true;
+      zug++;
+      clearTimeout(zuUhr);
+      blatt.hidden = false;
+      blatt.classList.add("da");
+      /* Einmal Layout erzwingen, sonst setzt der Browser „da“ und „offen“
+         im selben Schritt und das Blatt steht ohne Hereingleiten da. */
+      void blatt.offsetWidth;
+      blatt.classList.add("offen");
+      document.documentElement.classList.add("blatt-offen");
+      knopf.setAttribute("aria-expanded", "true");
+      /* Wurde die Seite mit offenem Blatt neu geladen, steht der Merker
+         schon im Verlauf — dann keinen zweiten anlegen.
+         scrollRestoration vorher auf „manual“: sonst stellt der Browser
+         beim history.back() die Scrollposition dieses Eintrags wieder her —
+         und zwar erst nach popstate, mitten in den gerade begonnenen weichen
+         Sprung hinein, der dann einfach stehen bleibt (im Test genau so
+         passiert). Der neue Eintrag erbt die Einstellung; zurück auf den
+         alten Wert geht sie in zumachen(). */
+      if (!(history.state && history.state.sprungBlatt)){
+        try {
+          altesRollen = history.scrollRestoration || null;
+          if (altesRollen) history.scrollRestoration = "manual";
+          history.pushState({ sprungBlatt: true }, ""); imVerlauf = true;
+        } catch (e) { imVerlauf = false; }
+      }
+      /* Fokus auf die Kachel des aktuellen Abschnitts, sonst auf die
+         Überschrift: so steht die Tastatur gleich dort, wo man ist, und der
+         Screenreader nennt über aria-labelledby den Namen des Blatts. */
+      const start = (aktiv && aktiv.b) || titel;
+      if (start) start.focus({ preventScroll: true });
+    }
+
+    /* nachher: was nach dem Schließen passieren soll (Sprung). Ohne Angabe
+       geht der Fokus zurück an den Knopf, von dem aus geöffnet wurde. */
+    function schliessen(nachher){
+      if (!offen) return;
+      danach = nachher || null;
+      if (imVerlauf && history.state && history.state.sprungBlatt){
+        imVerlauf = false;
+        history.back();   /* → popstate → zumachen() */
+        /* Rückfall, falls popstate ausbleibt (etwa in einer eingebetteten
+           Ansicht ohne eigenen Verlauf): das Blatt darf nie offen hängen.
+           zug: wurde inzwischen neu geöffnet, gilt der Rückfall nicht mehr. */
+        const dieser = ++zug;
+        setTimeout(() => { if (zug === dieser) zumachen(); }, 400);
+      } else {
+        zumachen();
+      }
+    }
+
+    function zumachen(){
+      if (!offen) return;
+      offen = false;
+      imVerlauf = false;
+      /* Erst einen Augenblick später zurückstellen: der Browser prüft den
+         Wert, wenn er nach popstate die Position wiederherstellen will —
+         stünde da schon wieder „auto“, zöge er einen sofortigen Sprung
+         (prefers-reduced-motion) an die alte Stelle zurück. */
+      if (altesRollen){
+        const alt = altesRollen; altesRollen = null;
+        setTimeout(() => { try { history.scrollRestoration = alt; } catch (e) {} }, 250);
+      }
+      blatt.classList.remove("offen");
+      document.documentElement.classList.remove("blatt-offen");
+      knopf.setAttribute("aria-expanded", "false");
+      /* Erst nach dem Hinausgleiten ausblenden. Fester Zeitgeber statt
+         transitionend: bei prefers-reduced-motion ist die Übergangszeit
+         fast null, und auf manchen Geräten kommt das Ereignis dann nie. */
+      zuUhr = setTimeout(() => { blatt.classList.remove("da"); blatt.hidden = true; },
+        ohneBewegung() ? 0 : 280);
+      const f = danach; danach = null;
+      if (f) f();
+      else knopf.focus({ preventScroll: true });
+    }
+
+    window.addEventListener("popstate", () => { if (offen) zumachen(); });
+
+    knopf.addEventListener("click", () => { offen ? schliessen() : oeffnen(); });
+    zu.addEventListener("click", () => schliessen());
+    blatt.addEventListener("click", e => {
+      if (e.target === blatt){ schliessen(); return; }
+      const a = e.target.closest('a[href^="#"]');
+      const p = a && paare.find(x => x.b === a);
+      if (!p) return;
+      e.preventDefault();
+      markieren(p);
+      schliessen(() => springen(p));
+    });
+
+    /* Escape schließt; Tab bleibt im Blatt gefangen, solange es offen ist —
+       aria-modal allein hält die Tastatur nicht auf, es sagt nur dem
+       Screenreader Bescheid. Tab wird dabei immer selbst weitergereicht,
+       nicht nur an den Rändern: Safari springt mit Tab in der Grundeinstellung
+       nicht auf Links, vom Kreuz aus wäre man sonst sofort aus dem Blatt
+       heraus gewesen (im WebKit-Test so gesehen). */
+    document.addEventListener("keydown", e => {
+      if (!offen) return;
+      if (e.key === "Escape"){ e.preventDefault(); schliessen(); return; }
+      if (e.key !== "Tab") return;
+      e.preventDefault();
+      const reihe = [zu].concat(paare.map(x => x.b).filter(Boolean));
+      const i = reihe.indexOf(document.activeElement);
+      /* Steht der Fokus auf der Überschrift (beim Öffnen ohne aktuellen
+         Abschnitt) oder sonstwo, geht es beim ersten bzw. letzten weiter. */
+      const n = i < 0 ? (e.shiftKey ? reihe.length - 1 : 0)
+                      : (i + (e.shiftKey ? -1 : 1) + reihe.length) % reihe.length;
+      reihe[n].focus();
+    });
+
+    /* Dreht jemand das Tablet quer oder zieht das Fenster breiter, gibt es
+       den Knopf nicht mehr — ein offenes Blatt ohne sichtbaren Auslöser
+       wird dann geschlossen. addListener für ältere Safari (siehe Märkte). */
+    const breiter = () => { if (!handy.matches && offen) schliessen(); };
+    if (handy.addEventListener) handy.addEventListener("change", breiter);
+    else if (handy.addListener) handy.addListener(breiter);
+  }
 
   auswerten();
 })();
