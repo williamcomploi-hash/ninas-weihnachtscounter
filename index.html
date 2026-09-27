@@ -426,6 +426,70 @@ body.verwaltet .wunsch-weg{display:block}
   color:#fff8f4;box-shadow:0 10px 22px -14px rgba(192,48,63,.9)}
 .knopf.stark:hover{color:#fff}
 
+/* ---------- Schnellnavigation ----------
+   Klebt oben, sobald die Bühne weggescrollt ist. Halbdurchsichtig mit
+   Unschärfe wie die Tafel, damit sie über dem Inhalt schwebt statt ihn als
+   Balken abzuschneiden — dünn gehalten (Knopfhöhe 40 px + 2 × 7 px), weil
+   sie am Handy dauerhaft vom Bildschirm abgeht.
+   Die Knöpfe sind die Pillen von .knopf/.maerkte-filter, „aktiv“ ebenso mit
+   --tinte gefüllt und nicht mit --rot: --rot wechselt mit dem Tageston, und
+   der rote Neu-Punkt soll daneben eindeutig bleiben.
+   Waagrecht scrollt nur die Bahn, nie die Seite. Die Liste darin ist
+   max-content breit und mit margin:auto mittig: passt sie (Desktop), steht
+   sie in der Mitte; passt sie nicht (Handy), fallen die Ränder auf 0 und
+   sie beginnt links, voll erreichbar — justify-content:center würde den
+   Anfang dagegen links aus dem Scrollbereich schieben.
+   scroll-snap „proximity“ aus demselben Grund wie bei der Tagesleiste:
+   „mandatory“ rastet beim sanften Wischen hart zurück.
+   --leiste-hoehe setzt das Skript auf die gemessene Höhe; 54 px ist nur der
+   Vorgabewert für den ersten Sprung vor dem Messen. Daraus ergibt sich
+   scroll-margin-top der Abschnitte: Überschrift nie unter der Leiste. */
+:root{--leiste-hoehe:54px}
+/* z-index 5: über dem Inhalt (2) und der Zauberschicht (1), aber unter
+   Snoopy (6). Auf dem ersten Bildschirm liegt die Leiste noch unten am
+   Rand, genau wo Snoopy läuft — darüber gelegt, verschwände die Katze
+   hinter den Knöpfen. Tafel, Zwischenruf und Vorschau liegen weit darüber. */
+.sprung{position:sticky;top:0;z-index:5;
+  background:rgba(var(--grund-rgb),.74);
+  -webkit-backdrop-filter:blur(10px) saturate(1.15);backdrop-filter:blur(10px) saturate(1.15);
+  border-bottom:1px solid var(--linie-zart);
+  box-shadow:0 10px 24px -22px rgba(74,42,36,.55);
+  /* 16 px Luft zum Zähler — genau der Zuschlag in scroll-margin-top unten.
+     Nur so steht die Leiste nach dem Sprung auf „Countdown“ bündig oben;
+     mit weniger lugte ein Streifen der Bühne über ihr hervor. Wer eine der
+     beiden Zahlen ändert, ändert die andere mit. */
+  margin-bottom:16px}
+.sprung-bahn{display:flex;overflow-x:auto;overscroll-behavior-x:contain;
+  scroll-snap-type:x proximity;scroll-padding:0 16px;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none}
+.sprung-bahn::-webkit-scrollbar{display:none}
+.sprung-liste{list-style:none;margin:0 auto;padding:7px 28px;width:max-content;
+  display:flex;gap:6px}
+.sprung-liste li{flex:none;scroll-snap-align:start}
+.sprung a{position:relative;display:inline-flex;align-items:center;min-height:40px;
+  padding:0 15px;border-radius:99px;border:1px solid var(--linie);background:rgba(255,255,255,.82);
+  color:var(--tinte-matt);text-decoration:none;white-space:nowrap;
+  font-family:var(--f-zahl);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  transition:background .2s,border-color .2s,color .2s}
+.sprung a:hover{border-color:var(--rot);color:var(--rot)}
+.sprung a:focus-visible{outline:2px solid var(--rot);outline-offset:-4px}
+.sprung a[aria-current="true"]{background:var(--tinte);border-color:var(--tinte);color:#fff8f4}
+/* Der Neu-Punkt: fest #c0303f wie das Neu-Schild (nicht der Tageston),
+   mit hellem Ring, damit er auch auf dem dunklen aktiven Knopf steht. */
+.sprung-neu{position:absolute;top:6px;right:7px;width:7px;height:7px;border-radius:50%;
+  background:#c0303f;box-shadow:0 0 0 2px #fff8f4;pointer-events:none}
+/* Außenabstand für den Sprung. Gilt für alle Abschnitte im Inhalt, auch
+   künftige — wer einen neuen einbaut, muss hier nichts nachtragen. */
+.huelle > section{scroll-margin-top:calc(var(--leiste-hoehe) + 16px)}
+/* Der Sprung fokussiert die Überschrift (für Tastatur und Screenreader).
+   Sie bekommt dafür tabindex="-1"; ein Fokusrahmen um eine Überschrift, die
+   niemand anklicken kann, sähe wie ein Fehler aus. */
+.huelle h2[tabindex="-1"]:focus{outline:none}
+@media(max-width:640px){
+  .sprung-liste{padding:7px 16px;gap:5px}
+  .sprung a{padding:0 13px}
+}
+
 /* ---------- Tafel ---------- */
 .tafel{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:22px;
   background:rgba(120,60,60,.34);backdrop-filter:blur(6px)}
@@ -688,6 +752,105 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
 .tag-monat{flex:none;align-self:stretch;display:flex;align-items:center;padding:0 4px;
   writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--f-zahl);font-size:9.5px;
   letter-spacing:.16em;text-transform:uppercase;color:var(--rot);font-weight:700}
+/* Rahmen um die Tagesleiste: trägt die Pfeil-Hinweise am Handy. Ein
+   Pseudo-Element direkt an der Leiste würde mitscrollen, darum außen. */
+.tag-rahmen{position:relative}
+
+/* ---------- Weihnachtsmärkte am Handy (≤ 640 px) ----------
+   Vorher war der Abschnitt am 360-px-Handy rund 3800 px hoch — acht volle
+   Karten plus Zauberwald, jede mit Zeiten und Beschreibung. Jetzt steht
+   jede Veranstaltung als Zeile (Datum · Status / Name · Ort · Land), ein
+   Tipp klappt die Details auf. Nur eine gleichzeitig offen, sonst wächst
+   die Liste beim Durchtippen doch wieder auf die alte Länge.
+   Aufbau (vom Skript): im <li> steht eine Zeile (h3 > button) nur für das
+   Handy und dahinter .markt-inhalt mit der unveränderten Desktop-Karte.
+   Am Desktop ist die Zeile display:none (auch für Screenreader weg) und
+   .markt-inhalt display:contents — die Kinder stehen dann wie früher direkt
+   im Flex-Stapel der Karte, der Desktop sieht exakt aus wie vorher. Am
+   Handy ist es umgekehrt: Kopf und Name der Karte fallen weg, weil sie in
+   der Zeile schon stehen.
+   Alles hängt an .klappbar, das erst das Skript setzt: ohne Skript gäbe es
+   keinen, der aufklappt, dann soll auch nichts zugeklappt sein. */
+.markt-zeile-h,.held-zeile-h{display:none}
+.markt-inhalt{display:contents}
+@media(max-width:640px){
+  .maerkte-liste{gap:8px}
+  .klappbar .markt{padding:0;gap:0;border-radius:14px}
+  .klappbar .markt-zeile-h,.klappbar .held-zeile-h{display:block;margin:0;font-size:inherit}
+  .klappbar .markt-inhalt{display:none}
+  .klappbar .markt.auf .markt-inhalt{display:flex;flex-direction:column;gap:4px;padding:0 14px 14px}
+  .klappbar .markt-inhalt > .markt-kopf,
+  .klappbar .markt-inhalt > h3{display:none}
+  /* Der Ort ist ein <p> ohne eigene Randregel; in der Karte fällt dessen
+     Browser-Abstand nicht auf, unter der Zeile stünde er als Leerzeile. */
+  .klappbar .markt-inhalt > .markt-ort{margin:0 0 4px}
+  .klappbar .markt.auf{border-color:var(--linie)}
+
+  /* Die Zeile selbst: ein Knopf über die ganze Kartenbreite, mindestens
+     48 px hoch. Zwei Zeilen im Raster, rechts der Pfeil über beide. Der
+     Name bricht um statt abgeschnitten zu werden — wie in der Karte gilt:
+     lieber eine Zeile mehr als ein halber Name. */
+  .markt-zeile{display:grid;grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"oben pfeil" "unten pfeil";column-gap:10px;row-gap:1px;
+    align-items:center;width:100%;min-height:48px;margin:0;padding:9px 12px 9px 14px;
+    border:0;border-radius:14px;background:none;color:var(--tinte);text-align:left;
+    font:inherit;cursor:pointer}
+  .markt-zeile:focus-visible{outline:2px solid var(--rot);outline-offset:-2px}
+  .markt-zeile .oben{grid-area:oben;display:flex;justify-content:space-between;align-items:center;
+    gap:8px;min-width:0}
+  .markt-zeile .unten{grid-area:unten;min-width:0;font-family:var(--f-display);font-weight:600;
+    font-size:15.5px;line-height:1.3;font-variation-settings:"SOFT" 30,"WONK" 1}
+  .markt-zeile .wo{font-family:var(--f-text);font-weight:400;font-size:13px;color:var(--tinte-matt);
+    white-space:nowrap}
+  .markt-zeile .wo b{font-family:var(--f-zahl);font-size:9.5px;letter-spacing:.1em;font-weight:700;
+    margin-left:5px;padding:1px 4px;border-radius:4px;border:1px solid var(--linie)}
+  .markt-zeile .markt-wann{font-size:10.5px;white-space:nowrap}
+  /* Status als Punkt mit Kurzwort. Nur ein Punkt wäre ohne Legende ein
+     Rätsel; das Wort bleibt, aber ohne die Pille, die in der Zeile zu
+     schwer wäre. Farben wie beim Schild (Kontrast dort geprüft). */
+  .markt-punkt{flex:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+    font-family:var(--f-zahl);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--tinte-matt)}
+  .markt-punkt::before{content:"";width:8px;height:8px;border-radius:50%;
+    background:rgba(169,102,47,.45)}
+  .markt-punkt.offen{color:var(--tanne);font-weight:700}
+  .markt-punkt.offen::before{background:var(--tanne);box-shadow:0 0 0 3px rgba(63,110,86,.18)}
+  .markt-punkt.folgt::before{background:none;border:1.5px solid rgba(169,102,47,.6);width:7px;height:7px}
+  .markt-zeile .pfeil{grid-area:pfeil;width:26px;height:26px;border-radius:50%;display:grid;
+    place-items:center;border:1px solid var(--linie);color:var(--tinte-matt);transition:transform .2s}
+  .markt-zeile .pfeil svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2}
+  .markt-zeile[aria-expanded="true"] .pfeil{transform:rotate(180deg);color:var(--rot);border-color:var(--rot)}
+
+  /* Zauberwald: Kopf (Ausflugstipp + Status) und Zeile bleiben sichtbar,
+     Beschreibung, Link und die Wann/Eintritt-Liste kommen auf Tipp. Er
+     behält sein Kleid als Heldenkarte, nur kürzer. */
+  .klappbar .maerkte-held{padding:16px 16px 12px;gap:12px}
+  .klappbar #m-held-titel,
+  .klappbar .maerkte-held > div > .markt-ort{display:none}
+  .klappbar .maerkte-held:not(.auf) .text,
+  .klappbar .maerkte-held:not(.auf) .markt-link,
+  .klappbar .maerkte-held:not(.auf) dl{display:none}
+  .klappbar .maerkte-held .held-zeile-h{margin:4px 0 0}
+  .klappbar .maerkte-held .markt-zeile{padding:6px 0;min-height:44px}
+  .klappbar .maerkte-held .markt-zeile .unten{font-size:clamp(20px,6vw,24px);line-height:1.2}
+  .klappbar .maerkte-held.auf .text{margin-top:6px}
+
+  /* Tagesleiste: am Handy ohne sichtbare Laufleiste (die Chips selbst
+     zeigen, dass man wischen kann), dafür ein Pfeil am Rand, solange in
+     diese Richtung noch Tage liegen. Das Skript setzt .mehr-links /
+     .mehr-rechts am Rahmen. pointer-events:none — der Pfeil ist Hinweis,
+     kein Knopf; ein Tipp darauf trifft den Tag darunter. */
+  .tag-leiste{scrollbar-width:none;padding-bottom:2px}
+  .tag-leiste::-webkit-scrollbar{display:none}
+  .tag-rahmen::before,.tag-rahmen::after{position:absolute;top:2px;bottom:2px;width:34px;
+    display:flex;align-items:center;font-family:var(--f-zahl);font-size:18px;font-weight:700;
+    color:var(--rot);pointer-events:none;opacity:0;transition:opacity .2s;z-index:1}
+  .tag-rahmen::before{content:"‹";content:"‹" / "";left:0;justify-content:flex-start;padding-left:3px;
+    background:linear-gradient(90deg,var(--zucker) 30%,rgba(var(--grund-rgb),0))}
+  .tag-rahmen::after{content:"›";content:"›" / "";right:0;justify-content:flex-end;padding-right:3px;
+    background:linear-gradient(270deg,var(--zucker) 30%,rgba(var(--grund-rgb),0))}
+  .tag-rahmen.mehr-links::before,.tag-rahmen.mehr-rechts::after{opacity:1}
+}
 
 /* ---------- Elfen ---------- */
 .werkstatt{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
@@ -915,9 +1078,36 @@ body.verwaltet .buch-weg{display:block}
   </section>
 </header>
 
+<!-- Schnellnavigation. Echte Links auf die Abschnitts-ids: ohne Skript
+     springt der Browser trotzdem hin, das Skript macht es nur weich und
+     markiert den Abschnitt, in dem man gerade ist. Steht zwischen Bühne und
+     Inhalt, damit sie erst unter dem großen Bild auftaucht und dann oben
+     kleben bleibt. Neuer Abschnitt: hier einen Eintrag in derselben
+     Reihenfolge wie im <main> anlegen und der section eine id geben.
+     „Neu“-Punkt wie beim Schild an den Überschriften: der Punkt ist
+     aria-hidden, „neu“ steht im aria-label des Links. Wieder entfernen:
+     beides löschen. -->
+<nav class="sprung" id="sprung" aria-label="Schnellnavigation">
+  <div class="sprung-bahn" id="sprung-bahn">
+    <ul class="sprung-liste">
+      <li><a href="#countdown">Countdown</a></li>
+      <li><a href="#highlight">Heute</a></li>
+      <li><a href="#snooptanic" aria-label="Snooptanic, neu">Snooptanic<span class="sprung-neu" aria-hidden="true"></span></a></li>
+      <li><a href="#wunsch" aria-label="Wünsche, neu">Wünsche<span class="sprung-neu" aria-hidden="true"></span></a></li>
+      <li><a href="#tuerchen">Türchen</a></li>
+      <li><a href="#maerkte" aria-label="Märkte, neu">Märkte<span class="sprung-neu" aria-hidden="true"></span></a></li>
+      <li><a href="#werkstatt">Werkstatt</a></li>
+      <li><a href="#tisch">Tisch</a></li>
+      <li><a href="#keks">Keks</a></li>
+      <li><a href="#gaestebuch">Gästebuch</a></li>
+      <li><a href="#regeln">Snoopy</a></li>
+    </ul>
+  </div>
+</nav>
+
 <main class="huelle">
 
-  <section class="zaehler" aria-labelledby="z-titel">
+  <section class="zaehler" id="countdown" aria-labelledby="z-titel">
     <div class="zaehler-kopf">
       <h2 id="z-titel">Bis zur Bescherung</h2>
       <span class="ziel" id="ziel-datum">24. Dezember, 18:00</span>
@@ -937,7 +1127,7 @@ body.verwaltet .buch-weg{display:block}
     </div>
   </section>
 
-  <section class="heute" aria-labelledby="h-titel">
+  <section class="heute" id="highlight" aria-labelledby="h-titel">
     <div class="abschnittskopf">
       <div>
         <h2 id="h-titel">Das Highlight für heute</h2>
@@ -959,7 +1149,7 @@ body.verwaltet .buch-weg{display:block}
        nicht beim Öffnen der Seite — am Handy im Mobilnetz zählt das.
        Kein autoplay und kein muted: der Film ist mit Ton gedacht, und er
        soll sich nie von selbst bewegen (auch wegen prefers-reduced-motion). -->
-  <section class="trailer" aria-labelledby="sn-titel">
+  <section class="trailer" id="snooptanic" aria-labelledby="sn-titel">
     <div class="abschnittskopf">
       <div>
         <h2 id="sn-titel" aria-label="Snooptanic, neu">Snooptanic<span class="neu-schild" aria-hidden="true">Neu!</span></h2>
@@ -985,7 +1175,7 @@ body.verwaltet .buch-weg{display:block}
   <!-- Wunsch-Trailer: Vorschläge für den nächsten Film, mit Likes.
        Gespeichert über /api/wunsch. Die Liste füllt das Skript, und zwar nur
        mit textContent — nie innerHTML für fremden Text. -->
-  <section class="wunsch" aria-labelledby="wu-titel">
+  <section class="wunsch" id="wunsch" aria-labelledby="wu-titel">
     <div class="abschnittskopf">
       <div>
         <h2 id="wu-titel" aria-label="Wunsch-Trailer, neu">Wunsch-Trailer<span class="neu-schild" aria-hidden="true">Neu!</span></h2>
@@ -1010,7 +1200,7 @@ body.verwaltet .buch-weg{display:block}
        die Seite einen verschlüsselten Abdruck, keine Adresse.</p>
   </section>
 
-  <section class="kalender" aria-labelledby="k-titel">
+  <section class="kalender" id="tuerchen" aria-labelledby="k-titel">
     <div class="abschnittskopf">
       <div>
         <h2 id="k-titel">24 Türchen</h2>
@@ -1041,7 +1231,7 @@ body.verwaltet .buch-weg{display:block}
        26 px Abstand am Kalender), dazwischen geschoben würde sie zum
        verwaisten Band. Danach beginnt der „Rund ums Fest“-Teil der Seite
        (Werkstatt, Tisch, Kekse) — dort sitzen die Ausflüge natürlich. -->
-  <section class="maerkte" aria-labelledby="m-titel">
+  <section class="maerkte" id="maerkte" aria-labelledby="m-titel">
     <div class="abschnittskopf">
       <div>
         <h2 id="m-titel" aria-label="Weihnachtsmärkte &amp; Zauber, neu">Weihnachtsmärkte &amp; Zauber<span class="neu-schild" aria-hidden="true">Neu!</span></h2>
@@ -1071,7 +1261,9 @@ body.verwaltet .buch-weg{display:block}
                 aria-label="Tagesauswahl aufheben, alle Tage zeigen">× Alle Tage</button>
         <p class="maerkte-tag-hinweis" id="m-tag-hinweis"></p>
       </div>
-      <div class="tag-leiste" id="m-tage"></div>
+      <div class="tag-rahmen" id="m-tage-rahmen">
+        <div class="tag-leiste" id="m-tage"></div>
+      </div>
     </div>
 
     <article class="maerkte-held" id="m-held" aria-labelledby="m-held-titel">
@@ -1106,7 +1298,7 @@ body.verwaltet .buch-weg{display:block}
     <p class="maerkte-fuss">Stand 26.09.2026 — Termine bitte vor dem Besuch auf der Seite des Veranstalters prüfen.</p>
   </section>
 
-  <section class="werkstatt" aria-labelledby="w-titel">
+  <section class="werkstatt" id="werkstatt" aria-labelledby="w-titel">
     <div class="abschnittskopf">
       <div>
         <h2 id="w-titel">Die Werkstatt</h2>
@@ -1117,7 +1309,7 @@ body.verwaltet .buch-weg{display:block}
     <div class="elfen" id="elfen"></div>
   </section>
 
-  <section class="tisch" aria-labelledby="t-titel">
+  <section class="tisch" id="tisch" aria-labelledby="t-titel">
     <div class="abschnittskopf">
       <div>
         <h2 id="t-titel">Was auf den Tisch kommt</h2>
@@ -1128,7 +1320,7 @@ body.verwaltet .buch-weg{display:block}
     <div class="speisen" id="speisen"></div>
   </section>
 
-  <section class="keksstube" aria-labelledby="keks-titel">
+  <section class="keksstube" id="keks" aria-labelledby="keks-titel">
     <div class="abschnittskopf">
       <div>
         <h2 id="keks-titel">Der Keks</h2>
@@ -1158,7 +1350,7 @@ body.verwaltet .buch-weg{display:block}
     </div>
   </section>
 
-  <section class="buch" aria-labelledby="buch-titel">
+  <section class="buch" id="gaestebuch" aria-labelledby="buch-titel">
     <div class="abschnittskopf">
       <div>
         <h2 id="buch-titel">Das Gästebuch</h2>
@@ -1194,7 +1386,7 @@ body.verwaltet .buch-weg{display:block}
     </div>
   </section>
 
-  <section class="katzenband">
+  <section class="katzenband" id="regeln">
     <div id="grosse-katze"></div>
     <div>
       <h2>Snoopys Regeln</h2>
@@ -3074,10 +3266,52 @@ const MAERKTE_AUSNAHMEN = {
     const p = document.createElement("p"); p.className = klasse; p.textContent = text; return p;
   }
 
+  /* ---- Aufklappen am Handy ----
+     Welche Veranstaltung offen ist, steht als Name in `offen` (null = keine)
+     und nicht am DOM-Knoten: zeichnen() baut die Liste bei jedem Filter neu,
+     und ein offener Eintrag, der nach dem Filtern noch da ist, soll offen
+     bleiben. Der Zauberwald gehört zur selben Gruppe — auch mit ihm ist
+     höchstens eines offen. Am Desktop ist die Zeile unsichtbar; `offen`
+     wirkt dort nicht, weil alle .auf-Regeln im Handy-Media-Query stehen. */
+  const abschnitt = liste.closest(".maerkte");
+  abschnitt.classList.add("klappbar");
+  const schmal = window.matchMedia("(max-width: 640px)");
+  let offen = null;
+  const PFEIL = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>';
+
+  /* Die Zeile: h3 > button, damit die Überschriften-Navigation des
+     Screenreaders am Handy dieselben Einträge findet wie am Desktop (dort
+     trägt das h3 der Karte den Namen, hier ist es ausgeblendet). */
+  function zeileBauen(m, obenTeile, detailId){
+    const h = document.createElement("h3"); h.className = "markt-zeile-h";
+    const k = document.createElement("button");
+    k.type = "button"; k.className = "markt-zeile"; k.dataset.markt = m.n;
+    k.setAttribute("aria-expanded", String(offen === m.n));
+    k.setAttribute("aria-controls", detailId);
+    if (obenTeile){
+      const oben = document.createElement("span"); oben.className = "oben";
+      oben.append(...obenTeile); k.append(oben);
+    }
+    const unten = document.createElement("span"); unten.className = "unten";
+    /* Ort nur bis zum ersten Komma: „Bregenz, Kornmarktplatz / Rathaus-
+       straße / …" wäre in der Zeile wieder eine halbe Karte. Der volle Ort
+       steht in den Details. */
+    const wo = document.createElement("span"); wo.className = "wo";
+    wo.textContent = " · " + m.o.split(",")[0].trim();
+    const land = document.createElement("b"); land.textContent = m.l; wo.append(land);
+    unten.append(document.createTextNode(m.n), wo);
+    const pfeil = document.createElement("span"); pfeil.className = "pfeil"; pfeil.innerHTML = PFEIL;
+    k.append(unten, pfeil);
+    h.append(k);
+    return h;
+  }
+
   function karte(m){
     const l = lage(m, gewaehlt);
     const li = document.createElement("li");
-    li.className = "markt";
+    li.className = "markt" + (offen === m.n ? " auf" : "");
+    const inhalt = document.createElement("div");
+    inhalt.className = "markt-inhalt"; inhalt.id = "m-d-" + MAERKTE.indexOf(m);
     const kopf = document.createElement("div"); kopf.className = "markt-kopf";
     const wann = document.createElement("span"); wann.className = "markt-wann";
     if (m.f){
@@ -3091,17 +3325,57 @@ const MAERKTE_AUSNAHMEN = {
     const h = document.createElement("h3"); h.textContent = m.n;
     const ort = absatz("markt-ort", m.o);
     const land = document.createElement("b"); land.textContent = m.l; ort.append(land);
-    li.append(kopf, h, ort);
-    if (m.z) li.append(absatz("markt-zeit", m.z));
-    if (m.x) li.append(absatz("markt-text", m.x));
-    if (m.f) li.append(absatz("markt-text markt-hinweis", "Der Termin für 2026 ist noch nicht veröffentlicht."));
+    inhalt.append(kopf, h, ort);
+    if (m.z) inhalt.append(absatz("markt-zeit", m.z));
+    if (m.x) inhalt.append(absatz("markt-text", m.x));
+    if (m.f) inhalt.append(absatz("markt-text markt-hinweis", "Der Termin für 2026 ist noch nicht veröffentlicht."));
     const url = sicher(m.u);
     if (url){
       const a = document.createElement("a"); a.className = "markt-link"; a.href = url;
-      a.target = "_blank"; a.rel = "noopener"; a.textContent = "Zur Seite"; li.append(a);
+      a.target = "_blank"; a.rel = "noopener"; a.textContent = "Zur Seite"; inhalt.append(a);
     }
+    /* Kopf der Handy-Zeile: dasselbe Datum wie die Karte (cloneNode, damit
+       „Vorjahr: …" und die gedämpfte Farbe mitkommen) und der Status als
+       Punkt mit demselben Text wie das Schild. */
+    const punkt = document.createElement("span");
+    punkt.className = "markt-punkt" + (l === "offen" ? " offen" : l === "folgt" ? " folgt" : "");
+    punkt.textContent = st.textContent;
+    li.append(zeileBauen(m, [wann.cloneNode(true), punkt], inhalt.id), inhalt);
     return li;
   }
+
+  /* Zeile für den Zauberwald: einmal gebaut, steht fest im Kopf der
+     Heldenkarte. Kein Datum oben — dort sitzt schon „Ausflugstipp“ mit dem
+     Status. aria-controls zeigt auf die ganze Karte, weil die Details dort
+     auf drei Stellen verteilt sind (Text, Link, Liste). */
+  const zauberHeld = MAERKTE.find(m => m.n === "Zauberwald Lenzerheide");
+  if (zauberHeld && held){
+    const heldZeile = zeileBauen(zauberHeld, null, "m-held");
+    heldZeile.classList.add("held-zeile-h");
+    heldZeile.classList.remove("markt-zeile-h");
+    held.querySelector(".markt-kopf").after(heldZeile);
+  }
+
+  /* Ein Tipp schaltet um und schließt alle anderen. Ohne Ausgleich spränge
+     die angetippte Zeile nach oben, sobald ein offener Eintrag darüber
+     zuklappt — dann läge unter dem Finger plötzlich ein anderer Markt. Darum
+     wird die Zeile nach dem Umschalten wieder an ihre alte Bildschirmhöhe
+     geschoben (sofort, ohne Animation: es soll nach „nichts bewegt sich"
+     aussehen, nicht nach einem Sprung mit Ansage). */
+  abschnitt.addEventListener("click", e => {
+    const k = e.target.closest(".markt-zeile");
+    if (!k) return;
+    const vorher = k.getBoundingClientRect().top;
+    offen = offen === k.dataset.markt ? null : k.dataset.markt;
+    abschnitt.querySelectorAll(".markt-zeile").forEach(x => {
+      const auf = x.dataset.markt === offen;
+      x.setAttribute("aria-expanded", String(auf));
+      const karteEl = x.closest(".markt, .maerkte-held");
+      if (karteEl) karteEl.classList.toggle("auf", auf);
+    });
+    const versatz = k.getBoundingClientRect().top - vorher;
+    if (Math.abs(versatz) > 1) window.scrollBy(0, versatz);
+  });
 
   /* Unbestätigte stehen mit dem Vorjahrestermin, eine Saison weiter gedacht — sonst sortieren sie sich vor alle anderen. */
   const sortKey = m => m.v || (m.vv ? (Number(m.vv.slice(0,4)) + 1) + m.vv.slice(4) : "9999");
@@ -3118,9 +3392,12 @@ const MAERKTE_AUSNAHMEN = {
   function zeichnen(){
     const sicht = sortiert.filter(m =>
       (gebiet === "alle" || gebietVon(m) === gebiet) && (!gewaehlt || lage(m, gewaehlt) === "offen"));
-    /* Klein bleiben: in „Alle" ohne Filter erst 8 zeigen, der Rest auf Wunsch. */
-    const kappen = gebiet === "alle" && !gewaehlt && !allesZeigen && sicht.length > 8;
-    liste.replaceChildren(...(kappen ? sicht.slice(0, 8) : sicht).map(karte));
+    /* Klein bleiben: in „Alle" ohne Filter erst 8 zeigen, der Rest auf Wunsch.
+       Am Handy 6 — die Zeilen sind dort zwar kurz, aber sechs passen mit
+       Zauberwald und Tagesleiste noch ungefähr auf einen Bildschirm. */
+    const kappe = schmal.matches ? 6 : 8;
+    const kappen = gebiet === "alle" && !gewaehlt && !allesZeigen && sicht.length > kappe;
+    liste.replaceChildren(...(kappen ? sicht.slice(0, kappe) : sicht).map(karte));
     mehr.hidden = !kappen;
     if (kappen) mehr.textContent = "Alle " + sicht.length + " Termine zeigen";
     let heldZeigen = false;
@@ -3195,6 +3472,24 @@ const MAERKTE_AUSNAHMEN = {
     leiste.scrollTo({ left: Math.max(0, ziel), behavior: weich ? "smooth" : "auto" });
   }
 
+  /* Pfeil-Hinweise am Rand (nur am Handy sichtbar, die Regel steht im
+     Media-Query). Ein Pfeil zeigt nur, solange in seine Richtung noch Tage
+     liegen — ein Pfeil am Ende der Leiste würde „da ist noch mehr" lügen.
+     Gemessen wird an erstem und letztem Tag, nicht an scrollLeft: insBild()
+     rollt den Starttag an den Rand, der „Nov."-Schriftzug davor liegt dann
+     knapp außerhalb — ein Pfeil nach links würde dort weitere Tage
+     versprechen, die es nicht gibt. 4 px Spielraum, weil Browser beim
+     Zoomen krumme Kommawerte melden. */
+  const tagRahmen = document.getElementById("m-tage-rahmen");
+  function pfeileSetzen(){
+    if (!tagRahmen || !chips.length) return;
+    const r = leiste.getBoundingClientRect();
+    tagRahmen.classList.toggle("mehr-links", chips[0].getBoundingClientRect().left < r.left - 4);
+    tagRahmen.classList.toggle("mehr-rechts", chips[chips.length - 1].getBoundingClientRect().right > r.right + 4);
+  }
+  leiste.addEventListener("scroll", pfeileSetzen, { passive: true });
+  window.addEventListener("resize", pfeileSetzen);
+
   /* Ausgangspunkt der Leiste: heute, vor der Saison der erste Saisontag,
      danach der letzte. Er ist der eine Tab-Halt der Leiste (roving tabindex)
      und steht im Bild — gefiltert wird aber erst, wenn jemand einen Tag
@@ -3265,6 +3560,130 @@ const MAERKTE_AUSNAHMEN = {
 
   zeichnen();
   insBild(fokusChip, false);
+  pfeileSetzen();
+  /* Dreht jemand das Handy oder zieht das Fenster über 640 px, gilt die
+     andere Kappe (6 oder 8) — neu zeichnen, sonst stünde die falsche Zahl
+     auf „Alle … zeigen". addListener für ältere Safari-Fassungen, die
+     addEventListener an MediaQueryList noch nicht kennen. */
+  const kappeNeu = () => zeichnen();
+  if (schmal.addEventListener) schmal.addEventListener("change", kappeNeu);
+  else if (schmal.addListener) schmal.addListener(kappeNeu);
+})();
+
+/* ---------------- Schnellnavigation ----------------
+   Die Links funktionieren auch ohne dieses Skript (echte #-Anker). Hier
+   kommt dazu: weicher Sprung, Hervorhebung des Abschnitts, in dem man
+   gerade liest, und der aktive Knopf wird in der Bahn ins Bild gerollt.
+
+   Welcher Abschnitt „dran" ist, entscheidet ein IntersectionObserver mit
+   einem Band vom Unterrand der Leiste bis 45 % Bildschirmhöhe: aktiv ist der
+   erste Abschnitt (in Seitenreihenfolge), der in diesem Band liegt — also
+   der, der gerade unter der Leiste steht. Ein Scroll-Listener, der bei
+   jedem Pixel alle Abschnitte vermisst, hätte dasselbe ergeben, rechnet
+   aber ständig; der Observer meldet sich nur, wenn sich etwas ändert.
+   Einzige Ausnahme: ganz unten. Die letzten Abschnitte sind kürzer als der
+   Bildschirm und erreichen das Band nie — dort gewinnt der letzte. */
+(function(){
+  const nav = document.getElementById("sprung");
+  const bahn = document.getElementById("sprung-bahn");
+  if (!nav || !bahn) return;
+  const paare = Array.from(nav.querySelectorAll('a[href^="#"]'))
+    .map(a => ({ a, ziel: document.getElementById(a.getAttribute("href").slice(1)) }))
+    .filter(p => p.ziel);
+  if (!paare.length) return;
+  const kopf = document.querySelector("header");
+  /* Jedes Mal frisch gefragt statt einmal beim Laden: wer die Einstellung
+     im System umschaltet, soll nicht neu laden müssen. */
+  const ohneBewegung = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* Höhe messen statt fest annehmen: bei großer Systemschrift wird die
+     Leiste höher, und scroll-margin-top soll dann mitwachsen. */
+  const hoeheSetzen = () =>
+    document.documentElement.style.setProperty("--leiste-hoehe", nav.offsetHeight + "px");
+  hoeheSetzen();
+  window.addEventListener("resize", hoeheSetzen);
+
+  /* Den Knopf nur innerhalb der Bahn mittig rollen, nie die Seite —
+     scrollIntoView würde die ganze Seite mitziehen (wie bei der Tagesleiste). */
+  function knopfInsBild(a, weich){
+    if (bahn.scrollWidth <= bahn.clientWidth) return;
+    const b = bahn.getBoundingClientRect(), r = a.getBoundingClientRect();
+    const ziel = bahn.scrollLeft + (r.left - b.left) - (b.width - r.width) / 2;
+    bahn.scrollTo({ left: Math.max(0, ziel), behavior: weich && !ohneBewegung() ? "smooth" : "auto" });
+  }
+
+  let aktiv = null;
+  function markieren(p){
+    if (p === aktiv) return;
+    aktiv = p;
+    paare.forEach(x => {
+      if (x === p) x.a.setAttribute("aria-current", "true");
+      else x.a.removeAttribute("aria-current");
+    });
+    if (p) knopfInsBild(p.a, true);
+  }
+
+  const sichtbar = new Set();
+  /* Während eines Klick-Sprungs steht die Hervorhebung still: sonst liefe
+     sie beim Vorbeirollen durch alle Abschnitte dazwischen, und am Ende
+     einer kurzen Seite (Gästebuch) setzte die „ganz unten"-Regel den
+     falschen. Erst wenn die Nutzerin selbst wieder scrollt, zählt das Band. */
+  let gesperrt = false, sperrUhr = 0, nachSprung = false;
+  function auswerten(){
+    if (gesperrt || nachSprung) return;
+    const unten = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+    if (unten){ markieren(paare[paare.length - 1]); return; }
+    const p = paare.find(x => sichtbar.has(x.ziel));
+    if (p) markieren(p);
+    else if (kopf && sichtbar.has(kopf)) markieren(null);
+  }
+
+  if ("IntersectionObserver" in window){
+    const beobachter = new IntersectionObserver(eintraege => {
+      eintraege.forEach(e => e.isIntersecting ? sichtbar.add(e.target) : sichtbar.delete(e.target));
+      auswerten();
+    }, { rootMargin: "-" + (nav.offsetHeight + 1) + "px 0px -55% 0px" });
+    paare.forEach(p => beobachter.observe(p.ziel));
+    if (kopf) beobachter.observe(kopf);
+  }
+
+  /* Der Sprung selbst endet, wenn 160 ms lang kein Scroll-Ereignis mehr
+     kam (scrollend kennt Safari noch nicht überall). Danach bleibt der
+     angeklickte Knopf markiert, bis wieder gescrollt wird. */
+  let wartet = false;
+  window.addEventListener("scroll", () => {
+    if (gesperrt){
+      clearTimeout(sperrUhr);
+      sperrUhr = setTimeout(() => { gesperrt = false; }, 160);
+      return;
+    }
+    nachSprung = false;
+    if (wartet) return;
+    wartet = true;
+    requestAnimationFrame(() => { wartet = false; auswerten(); });
+  }, { passive: true });
+
+  nav.addEventListener("click", e => {
+    const a = e.target.closest('a[href^="#"]');
+    const p = a && paare.find(x => x.a === a);
+    if (!p) return;
+    e.preventDefault();
+    markieren(p);
+    gesperrt = true; nachSprung = true;
+    clearTimeout(sperrUhr);
+    sperrUhr = setTimeout(() => { gesperrt = false; }, 160);
+    p.ziel.scrollIntoView({ behavior: ohneBewegung() ? "auto" : "smooth", block: "start" });
+    /* Fokus auf die Überschrift des Ziels: Tastatur geht von dort weiter,
+       der Screenreader liest vor, wo man gelandet ist. preventScroll, weil
+       der Fokus sonst den weichen Sprung abbricht und hart hinspringt. */
+    const h = p.ziel.querySelector("h2");
+    if (h){
+      if (!h.hasAttribute("tabindex")) h.setAttribute("tabindex", "-1");
+      h.focus({ preventScroll: true });
+    }
+  });
+
+  auswerten();
 })();
 
 /* ---------------- Trailer ----------------
