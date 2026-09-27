@@ -330,7 +330,13 @@ h1 em{font-style:normal;display:block;
 @media(max-width:640px){.wunsch-reihe{grid-template-columns:1fr}}
 .wunsch-liste{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .wunsch-eintrag{display:flex;align-items:center;gap:12px;padding:12px 14px 12px 18px;
-  border-radius:16px;background:#fff;border:1px solid var(--linie-zart)}
+  border-radius:16px;background:#fff;border:1px solid var(--linie-zart);
+  overflow-wrap:anywhere;overflow:hidden}
+/* overflow:hidden an der Karte: was die Säuberung auf dem Server noch
+   durchlässt (zwei kombinierende Zeichen je Buchstabe, sehr hohe Glyphen
+   mancher Schriften), bleibt in der eigenen Karte und legt sich nicht über
+   den Nachbarn. Der Fokusrahmen des Like-Knopfs (2 px + 2 px Abstand) passt
+   in das Innenpolster und wird nicht angeschnitten. */
 /* min-width:0 + overflow-wrap: ein 80-Zeichen-Titel ohne Leerzeichen darf am
    Handy nicht den Like-Knopf aus der Karte schieben. */
 .wunsch-text{flex:1;min-width:0}
@@ -1196,8 +1202,13 @@ body.verwaltet .buch-weg{display:block}
     </form>
 
     <ul class="wunsch-liste" id="wunsch-liste"></ul>
-    <p class="wunsch-klein">Gespeichert werden nur Titel und Name. Für „einmal liken“ merkt sich
-       die Seite einen verschlüsselten Abdruck, keine Adresse.</p>
+    <!-- Der Hinweis muss stimmen, nicht beruhigen: gespeichert wird eine
+         gesalzene Prüfsumme der IP-Adresse (api/_lager.js, abdruck), und die
+         Löschfrist steht in api/wunsch.js (LOESCHFRIST). Ändert sich dort
+         etwas, hier mitziehen. -->
+    <p class="wunsch-klein">Gespeichert werden nur Titel und Name. Für „einmal liken“ speichert der
+       Server eine gesalzene Prüfsumme deiner IP-Adresse — keine Adresse selbst. Sie wird am
+       7. Jänner 2027 gelöscht.</p>
   </section>
 
   <section class="kalender" id="tuerchen" aria-labelledby="k-titel">
@@ -3750,6 +3761,24 @@ const MAERKTE_AUSNAHMEN = {
     meldeEl.textContent = text;
     meldeEl.className = "buch-meldung" + (art ? " " + art : "");
   }
+  /* Was im Formular als Fehler erscheint, ist entweder der deutsche Satz,
+     den /api/wunsch selbst schickt, oder ein fester Ersatz — nie die
+     Meldung eines JavaScript-Fehlers. Die hieße sonst „Unexpected token '<'“
+     (wenn Vercel statt JSON eine Fehlerseite liefert) oder „Failed to
+     fetch“, auf Englisch und für niemanden verständlich. */
+  function fehlerText(d, ersatz){
+    return d && typeof d.fehler === "string" && d.fehler ? d.fehler : ersatz;
+  }
+  /* Antwortkörper lesen, ohne zu werfen: keine JSON-Antwort ergibt {}. */
+  function lesen(a){ return a.json().catch(() => ({})); }
+
+  /* Der eigene, gerade abgeschickte Vorschlag steht oben, bis die Seite neu
+     geladen wird. Ohne das rutschte er nach dem Absenden sofort unter alle
+     gelikten Einträge — wer eben etwas vorgeschlagen hat, sähe es nicht und
+     schickte es womöglich ein zweites Mal. Nur die Kennung wird gemerkt;
+     angezeigt wird immer der Stand vom Server. Ist er dort nicht mehr (von
+     der Verwaltung gelöscht), steht er auch hier nicht mehr. */
+  let eigeneId = null;
 
   const HERZ = "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z";
   const SVG = "http://www.w3.org/2000/svg";
@@ -3805,6 +3834,8 @@ const MAERKTE_AUSNAHMEN = {
     anzahlEl.textContent = wuensche.length === 0 ? "noch leer"
       : wuensche.length === 1 ? "ein Vorschlag" : wuensche.length + " Vorschläge";
     listeEl.replaceChildren();
+    const eigen = wuensche.findIndex(w => w.id === eigeneId);
+    if (eigen > 0) wuensche.unshift(wuensche.splice(eigen, 1)[0]);
     if (!wuensche.length){
       const leer = document.createElement("li");
       leer.className = "buch-leer";
@@ -3848,11 +3879,16 @@ const MAERKTE_AUSNAHMEN = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ titel: titelEl.value, name: nameEl.value })
       });
-      const d = await a.json();
-      if (!a.ok) { melden(d.fehler || "Das hat nicht geklappt.", "schlecht"); }
+      const d = await lesen(a);
+      if (!a.ok || !d.wunsch) { melden(fehlerText(d, "Das hat nicht geklappt."), "schlecht"); }
       else {
         titelEl.value = "";
         melden("Steht auf der Liste. Danke!", "gut");
+        /* Sofort oben einsetzen, noch bevor die Liste neu geladen ist —
+           laden() zeichnet danach den Server-Stand, mit ihm weiter oben. */
+        eigeneId = d.wunsch.id;
+        listeEl.querySelectorAll(".buch-leer").forEach(el => el.remove());
+        listeEl.prepend(eintragBauen(d.wunsch));
         laden();
       }
     } catch(err){ melden("Gerade nicht erreichbar.", "schlecht"); }
@@ -3879,15 +3915,19 @@ const MAERKTE_AUSNAHMEN = {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ aktion: vorher ? "unlike" : "like", id })
         });
-        const d = await a.json();
-        if (!a.ok) throw new Error(d.fehler || "");
-        likeZeigen(knopf, Number(d.likes) || 0, Boolean(d.geliked));
-        const menge = gemerkt();
-        d.geliked ? menge.add(id) : menge.delete(id);
-        merken(menge);
+        const d = await lesen(a);
+        if (!a.ok){
+          likeZeigen(knopf, vorherZahl, vorher);
+          melden(fehlerText(d, "Das hat nicht geklappt."), "schlecht");
+        } else {
+          likeZeigen(knopf, Number(d.likes) || 0, Boolean(d.geliked));
+          const menge = gemerkt();
+          d.geliked ? menge.add(id) : menge.delete(id);
+          merken(menge);
+        }
       } catch(err){
         likeZeigen(knopf, vorherZahl, vorher);
-        melden(err.message || "Gerade nicht erreichbar.", "schlecht");
+        melden("Gerade nicht erreichbar.", "schlecht");
       }
       knopf.disabled = false;
       return;
@@ -3910,8 +3950,8 @@ const MAERKTE_AUSNAHMEN = {
         body: JSON.stringify({ id: weg.dataset.wunschWeg, name: "admin",
                                passwort: wortEl ? wortEl.value : "" })
       });
-      const d = await a.json();
-      if (!a.ok){ melden(d.fehler || "Löschen ging nicht.", "schlecht"); return; }
+      const d = await lesen(a);
+      if (!a.ok){ melden(fehlerText(d, "Löschen ging nicht."), "schlecht"); return; }
       melden("gelöscht", "gut");
       laden();
     } catch(err){ melden("Gerade nicht erreichbar.", "schlecht"); }

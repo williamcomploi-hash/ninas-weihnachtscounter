@@ -14,7 +14,7 @@
  */
 
 import { neon } from "@neondatabase/serverless";
-import { createHmac } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 
 /* Wie die Variable heißt, hängt davon ab, welches Präfix beim Verbinden in
    Vercel gesetzt wurde — DATABASE_URL, POSTGRES_URL, STORAGE_URL … Statt die
@@ -92,15 +92,31 @@ export function vorbereiten() {
       await sql`create table if not exists wunsch_likes (
         wunsch_id     text not null references wunsch (id) on delete cascade,
         fingerabdruck text not null,
-        zeit          timestamptz not null default now(),
+        zeit          timestamptz,
         primary key (wunsch_id, fingerabdruck)
       )`;
+      /* „zeit" wird seit der Datenschutz-Nachbesserung nicht mehr befüllt:
+         Abdruck + Zeitpunkt zusammen verraten mehr als nötig (wann jemand
+         von welchem Anschluss aus aktiv war), und gebraucht wird der
+         Zeitpunkt für nichts — die Likes werden nur gezählt. Die Spalte
+         bleibt stehen, damit die Tabelle nicht umgebaut werden muss; die
+         beiden Zeilen nehmen der schon angelegten Tabelle nur Pflicht und
+         Vorgabewert, sonst trüge Postgres bei jedem Insert still now() ein.
+         Beides ändert nur den Katalog, keine Zeile, und darf beliebig oft
+         laufen. Vorhandene Zeitstempel bleiben bis zur Löschfrist liegen. */
+      await sql`alter table wunsch_likes alter column zeit drop not null`;
+      await sql`alter table wunsch_likes alter column zeit drop default`;
     })().catch(e => { vorbereitet = null; throw e; });
   }
   return vorbereitet;
 }
 
-/** Die Adresse des Aufrufers — nur für die Bremse, wird nirgends gespeichert. */
+/** Die Adresse des Aufrufers. Sie selbst wird nirgends gespeichert — nur
+ *  daraus gebildete Abdrücke: im Gästebuch kurz() als Bremsschlüssel (lebt
+ *  höchstens bis zum Ablauf der Bremse, danach löscht der nächste Aufruf die
+ *  Zeile), im Wunsch-Trailer abdruck()/bremsAbdruck() (gesalzen, siehe
+ *  unten). Wer hier etwas Neues ablegt, muss den Hinweistext unter der
+ *  Wunschliste in index.html mitziehen. */
 export function herkunft(req) {
   const kopf = req.headers["x-forwarded-for"] || "";
   return String(kopf).split(",")[0].trim() || "unbekannt";
@@ -113,45 +129,84 @@ export function kurz(text) {
   return h.toString(36);
 }
 
-/* Salz für den Like-Abdruck. Bevorzugt eine eigene Umgebungsvariable
-   WUNSCH_SALZ; fehlt sie, dient die Datenbankadresse als Geheimnis — sie
-   enthält das Datenbankpasswort, steht nie in der Seite und ist ohnehin da.
+/* Salz für den Like-Abdruck: ausschließlich die Umgebungsvariable
+   WUNSCH_SALZ. Früher diente ersatzweise die Datenbankadresse als Geheimnis.
+   Das ist entfernt, weil das Salz dann an einem fremden Wert hing: wer das
+   Datenbankpasswort dreht (bei Neon ein Klick, etwa nach einem Leck), macht
+   unbemerkt alle Abdrücke neu, und die Adresse steht in jeder Vercel-
+   Umgebung, in die jemand die Datenbank einmal hineinverbindet. Fehlt
+   WUNSCH_SALZ, sind Likes eben abgeschaltet (salzDa = false, api/wunsch.js
+   antwortet 503) — Vorschläge und Liste gehen weiter. Lieber kein Like als
+   ein Abdruck mit schwachem oder fremdem Geheimnis.
+
    Absichtlich NICHT ADMIN_PASSWORT: das wird eher einmal geändert, und jede
    Änderung des Salzes macht alle Abdrücke neu — dann dürfte jeder jeden
-   Vorschlag ein zweites Mal liken. Dasselbe gilt, wenn WUNSCH_SALZ später
-   gesetzt oder das Datenbankpasswort gedreht wird: die Likes bleiben stehen,
-   nur die Sperre „schon geliked" beginnt von vorn. */
-const SALZ = process.env.WUNSCH_SALZ || URL_;
+   Vorschlag ein zweites Mal liken. Also WUNSCH_SALZ einmal setzen (lang,
+   zufällig) und stehen lassen. */
+const SALZ = process.env.WUNSCH_SALZ || "";
+export const salzDa = Boolean(SALZ);
 
-/**
- * Abdruck für „einmal liken": dieselbe Herkunft wie bei der Bremse
- * (herkunft), aber gesalzen und mit HMAC-SHA-256 statt mit kurz().
- *
- * Warum nicht einfach kurz(herkunft(req)) wie die Bremse: die Bremszeilen
- * verfallen nach Minuten, der Like-Abdruck bleibt liegen. Ein ungesalzener
- * 32-Bit-Hash einer IPv4-Adresse lässt sich in Sekunden durch alle vier
- * Milliarden Adressen zurückrechnen — gespeichert wäre dann faktisch die
- * Adresse. Mit geheimem Salz geht das nicht, solange das Salz nicht bekannt
- * ist. 24 Hexzeichen (96 Bit) genügen gegen Zufallstreffer bei weitem.
- *
- * `zweck` trennt die Abdrücke verschiedener Verwendungen, damit derselbe
- * Wert nicht über Tabellen hinweg dieselbe Person verknüpft.
- */
-export function abdruck(req, zweck) {
-  return createHmac("sha256", SALZ)
+/* Ersatzgeheimnis NUR für Bremsschlüssel, wenn WUNSCH_SALZ fehlt: zufällig je
+   Funktionsinstanz, nirgends abgelegt, stirbt mit ihr. Eine Bremse muss nur
+   zwei Minuten lang wiedererkennen, nicht über Instanzen hinweg — laufen
+   mehrere Instanzen parallel, bremst sie etwas lockerer, mehr nicht. Für den
+   Like-Abdruck taugt das nicht (der muss bis Jänner stabil bleiben), darum
+   gibt es dort keinen Ersatz. */
+const BREMS_ERSATZ = randomBytes(32).toString("hex");
+
+function hmacAbdruck(geheimnis, zweck, req) {
+  return createHmac("sha256", geheimnis)
     .update(zweck + ":" + herkunft(req))
     .digest("hex")
     .slice(0, 24);
 }
 
 /**
+ * Abdruck für „einmal liken": dieselbe Herkunft wie bei der Bremse
+ * (herkunft), aber gesalzen und mit HMAC-SHA-256 statt mit kurz().
+ * Gibt null zurück, wenn kein Salz gesetzt ist — der Aufrufer muss das
+ * prüfen (salzDa) und darf dann nichts ablegen.
+ *
+ * Warum nicht kurz(): ein ungesalzener 32-Bit-Hash einer IPv4-Adresse lässt
+ * sich in Sekunden durch alle vier Milliarden Adressen zurückrechnen —
+ * gespeichert wäre dann faktisch die Adresse. Mit geheimem Salz geht das
+ * nicht, solange das Salz nicht bekannt ist. 24 Hexzeichen (96 Bit) genügen
+ * gegen Zufallstreffer bei weitem.
+ *
+ * `zweck` trennt die Abdrücke verschiedener Verwendungen, damit derselbe
+ * Wert nicht über Tabellen hinweg dieselbe Person verknüpft.
+ */
+export function abdruck(req, zweck) {
+  return salzDa ? hmacAbdruck(SALZ, zweck, req) : null;
+}
+
+/**
+ * Bremsschlüssel nach derselben Machart wie abdruck(), aber nie null: ohne
+ * WUNSCH_SALZ mit dem zufälligen Ersatz (siehe BREMS_ERSATZ). So bleibt die
+ * Bremse für Vorschläge auch dann wirksam, wenn Likes abgeschaltet sind.
+ * Eigener `zweck` pflichtgemäß, damit ein Bremsschlüssel nie einem
+ * Like-Abdruck gleicht.
+ */
+export function bremsAbdruck(req, zweck) {
+  return hmacAbdruck(SALZ || BREMS_ERSATZ, zweck, req);
+}
+
+/**
  * Bremse: höchstens `wieviel` Vorgänge je `sekunden`.
  * Gibt true zurück, wenn es weitergehen darf.
  *
- * Abgelaufene Zeilen werden beim Zugriff überschrieben, alte nebenbei
- * weggeräumt — es sammelt sich also nichts an.
+ * Abgelaufene Zeilen werden bei JEDEM Aufruf gelöscht, nicht nur
+ * gelegentlich: ein Bremsschlüssel ist ein Abdruck der Adresse und soll
+ * nicht länger liegen, als die Bremse ihn braucht (höchstens fünf Minuten).
+ * Früher räumte nur jeder fünfzigste Aufruf auf, und das erst nach einem
+ * Tag — dann lagen Abdrücke tagelang herum, obwohl die Seite etwas anderes
+ * verspricht. Die zusätzliche Anfrage kostet Millisekunden; die Tabelle hat
+ * nie mehr als eine Handvoll Zeilen. Absichtlich abgewartet und nicht
+ * nebenher abgeschickt: eine Funktion, die schon geantwortet hat, darf
+ * Vercel jederzeit einfrieren, dann bliebe das Löschen liegen.
  */
 export async function bremse(schluessel, wieviel, sekunden) {
+  await sql`delete from bremse where bis < now()`;
   const [zeile] = await sql`
     insert into bremse (schluessel, zaehler, bis)
       values (${schluessel}, 1, now() + make_interval(secs => ${sekunden}))
@@ -161,11 +216,6 @@ export async function bremse(schluessel, wieviel, sekunden) {
                      then now() + make_interval(secs => ${sekunden})
                      else bremse.bis end
     returning zaehler`;
-
-  /* Gelegentlich aufräumen — nicht bei jedem Aufruf, das wäre Verschwendung. */
-  if (Math.random() < 0.02) {
-    sql`delete from bremse where bis < now() - interval '1 day'`.catch(() => {});
-  }
   return Number(zeile.zaehler) <= wieviel;
 }
 

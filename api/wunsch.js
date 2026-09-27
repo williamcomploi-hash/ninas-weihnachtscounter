@@ -25,14 +25,28 @@
  * einmal. Für eine Wunschliste auf einer Geschenkseite ist das genau richtig
  * einfach; alles Genauere hieße Anmeldung oder Geräte-Tracking.
  *
- * Was gespeichert wird: Titel, selbstgewählter Name, Zeitpunkt — und je Like
- * der Abdruck. Kein Klartext einer Adresse, kein Cookie.
+ * Was gespeichert wird: Titel, selbstgewählter Name, Zeitpunkt des
+ * Vorschlags — und je Like nur der Abdruck, ohne Zeitpunkt. Kein Klartext
+ * einer Adresse, kein Cookie. Die Abdrücke werden am 7. Jänner 2027 gelöscht
+ * (LOESCHFRIST unten); so steht es auch im Hinweis unter der Liste in
+ * index.html. Wer eines davon ändert, ändert das andere mit.
+ *
+ * Ohne Umgebungsvariable WUNSCH_SALZ sind Likes abgeschaltet (503), Liste und
+ * Vorschläge laufen weiter — Begründung bei SALZ in _lager.js.
  */
 
-import { sql, lagerDa, vorbereiten, bremse, herkunft, kurz, abdruck, antworte } from "./_lager.js";
+import { sql, lagerDa, vorbereiten, bremse, herkunft, kurz, abdruck, bremsAbdruck,
+         salzDa, antworte } from "./_lager.js";
 import { saeubern, sieht_aus_wie_admin, ohneVerweise } from "./gaestebuch.js";
 
-const HOECHSTENS = 50;     /* so viele werden angezeigt — die meistgelikten */
+/* Angezeigt wird die Vereinigung aus den 40 meistgelikten und den 10
+   neuesten Vorschlägen. Nur „die meistgelikten 50" hieß: ab dem 51.
+   Vorschlag landete jeder neue mit null Likes hinter der Grenze und war für
+   niemanden sichtbar — also konnte ihn auch niemand liken, und er kam nie
+   mehr nach oben. Die zehn neuesten sind darum immer dabei. Die Liste ist
+   so höchstens 50 lang, bei Überschneidung kürzer. */
+const TOP_LIKES  = 40;
+const NEUESTE    = 10;
 const NAME_MAX   = 24;
 const TITEL_MAX  = 80;
 const ID_MAX     = 40;     /* Kennungen sind ~13 Zeichen; mehr ist kein echter Aufruf */
@@ -43,6 +57,20 @@ const LIKES_JE_MINUTE = 60;/* reicht für flottes Durchklicken, nicht für ein S
    geändert, gelten alle bisherigen Likes als „von niemandem" — dann darf jeder
    noch einmal liken. Also stehen lassen. */
 const ZWECK = "wunsch-like";
+/* Eigene Zweck-Kennung für die Bremsschlüssel — getrennt vom Like-Abdruck,
+   damit man aus der Bremstabelle nicht ablesen kann, welche Likes zu wem
+   gehören. Darf geändert werden; es verfallen dann nur laufende Bremsen. */
+const ZWECK_BREMSE = "wunsch-bremse";
+
+/* Löschfrist der Like-Abdrücke: 7. Jänner 2027, 0 Uhr Wiener Zeit (im Jänner
+   gilt MEZ = UTC+1, darum 23 Uhr UTC am Vortag). Ab dann löscht JEDER Aufruf
+   von /api/wunsch alle Zeilen aus wunsch_likes — kein Zeitplan, kein Cron,
+   den jemand einrichten müsste: irgendwer öffnet die Seite schon, und bis
+   dahin ist der Befehl ein Leerlauf auf einer leeren Tabelle (billig und
+   beliebig oft wiederholbar). Mit den Abdrücken sind auch die Like-Zahlen
+   weg; nach Weihnachten ist das gewollt. Wer danach noch liked, dessen
+   Abdruck lebt nur bis zum nächsten Aufruf. Die Vorschläge selbst bleiben. */
+const LOESCHFRIST = Date.parse("2027-01-06T23:00:00Z");
 
 /** Nur JSON und nur von der eigenen Seite — dieselbe Prüfung wie im Gästebuch
  *  (dort steht sie im Handler). Ohne sie könnte eine fremde Seite per
@@ -59,9 +87,24 @@ function vonDerEigenenSeite(req) {
   return sfs ? (sfs === "same-origin" || sfs === "none") : eigene;
 }
 
+/** Der JSON-Körper als Objekt — oder null, wenn keiner da ist, er kaputt ist
+ *  oder kein Objekt ergibt (`null`, eine Zahl, eine Liste). Der Aufrufer
+ *  antwortet dann 400. Früher warf JSON.parse bis in den äußeren catch
+ *  (500 „nicht erreichbar", obwohl nur die Anfrage falsch war), und ein
+ *  Körper `null` lief als Objekt weiter, bis `roh.aktion` knallte.
+ *  Der Zugriff auf req.body steht mit im try: Vercel parst den Körper erst
+ *  beim Lesen und wirft dabei selbst, wenn das JSON kaputt ist. */
 function koerper(req) {
-  return typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+  let roh;
+  try {
+    roh = req.body;
+    if (typeof roh === "string") roh = roh ? JSON.parse(roh) : null;
+  } catch {
+    return null;
+  }
+  return roh && typeof roh === "object" && !Array.isArray(roh) ? roh : null;
 }
+const KAPUTT = "Die Anfrage war nicht lesbar.";
 
 /** Aktuelle Like-Zahl eines Vorschlags. */
 async function likesVon(id) {
@@ -77,22 +120,37 @@ export default async function handler(req, res) {
   try {
     await vorbereiten();
 
+    /* Löschfrist: siehe LOESCHFRIST oben. Vor allem anderen, damit auch ein
+       GET nach der Frist keine alten Abdrücke mehr auswertet. */
+    if (Date.now() >= LOESCHFRIST) {
+      await sql`delete from wunsch_likes`;
+    }
+
     /* ---------------- lesen ----------------
-       Sortiert nach Likes, bei Gleichstand der neuere zuerst — sonst stünde
-       ein frischer Vorschlag mit null Likes ganz unten hinter allen alten und
-       würde nie gesehen. `geliked` sagt, ob DIESER Aufrufer (sein Abdruck)
-       schon geliked hat; der Abdruck selbst geht nie an den Browser. */
+       Auswahl: die TOP_LIKES meistgelikten ∪ die NEUESTE neuesten (union
+       entfernt Doppelte), danach wie immer sortiert — nach Likes, bei
+       Gleichstand der neuere zuerst. `geliked` sagt, ob DIESER Aufrufer (sein
+       Abdruck) schon geliked hat; der Abdruck selbst geht nie an den Browser.
+       Ohne Salz ist `ich` null, der Vergleich ergibt null und coalesce macht
+       daraus false — die Liste kommt dann ohne gefüllte Herzen. */
     if (req.method === "GET") {
       const ich = abdruck(req, ZWECK);
       const zeilen = await sql`
-        select w.id, w.name, w.titel, w.zeit,
-               count(l.fingerabdruck)::int                       as likes,
-               coalesce(bool_or(l.fingerabdruck = ${ich}), false) as geliked
-          from wunsch w
-          left join wunsch_likes l on l.wunsch_id = w.id
-         group by w.id
-         order by likes desc, w.zeit desc
-         limit ${HOECHSTENS}`;
+        with gezaehlt as (
+          select w.id, w.name, w.titel, w.zeit,
+                 count(l.fingerabdruck)::int                       as likes,
+                 coalesce(bool_or(l.fingerabdruck = ${ich}), false) as geliked
+            from wunsch w
+            left join wunsch_likes l on l.wunsch_id = w.id
+           group by w.id
+        ), auswahl as (
+          (select id from gezaehlt order by likes desc, zeit desc limit ${TOP_LIKES})
+          union
+          (select id from gezaehlt order by zeit desc limit ${NEUESTE})
+        )
+        select g.* from gezaehlt g
+         where g.id in (select id from auswahl)
+         order by g.likes desc, g.zeit desc`;
       return antworte(res, 200, { wuensche: zeilen });
     }
 
@@ -102,13 +160,23 @@ export default async function handler(req, res) {
         return antworte(res, 403, { fehler: "So nicht." });
       }
       const roh = koerper(req);
-      const wer = kurz(herkunft(req));
+      if (!roh) return antworte(res, 400, { fehler: KAPUTT });
+
+      /* Bremsschlüssel gesalzen wie der Like-Abdruck, nicht mehr kurz():
+         auch Bremszeilen liegen in der Datenbank, und ein ungesalzener
+         32-Bit-Hash ist faktisch die Adresse (siehe abdruck in _lager.js). */
+      const wer = bremsAbdruck(req, ZWECK_BREMSE);
 
       /* ---- Like setzen oder zurücknehmen ----
          Zwei getrennte Aktionen statt eines Umschalters: kommt ein Doppelklick
          doppelt an, bleibt „like, like" ein Like — ein Umschalter würde es
          gleich wieder zurücknehmen und die Anzeige stünde falsch. */
       if (roh.aktion === "like" || roh.aktion === "unlike") {
+        /* Ohne Salz keine Likes — vor der Bremse, damit niemand für einen
+           Klick gebremst wird, der ohnehin nichts bewirken kann. */
+        if (!salzDa) {
+          return antworte(res, 503, { fehler: "Likes sind gerade nicht eingerichtet." });
+        }
         if (!(await bremse(`wunschlike:${wer}`, LIKES_JE_MINUTE, 60))) {
           return antworte(res, 429, { fehler: "Zu schnell. Gleich wieder." });
         }
@@ -122,9 +190,20 @@ export default async function handler(req, res) {
         if (roh.aktion === "like") {
           /* on conflict do nothing: ein zweites Like desselben Abdrucks
              prallt am Primärschlüssel ab, ohne Fehler — die Antwort sagt dann
-             einfach „geliked", mit unveränderter Zahl. */
-          await sql`insert into wunsch_likes (wunsch_id, fingerabdruck)
-                    values (${id}, ${ich}) on conflict do nothing`;
+             einfach „geliked", mit unveränderter Zahl. „zeit" bleibt leer
+             (siehe _lager.js).
+             23503 = Fremdschlüssel verletzt: die Verwaltung hat den Vorschlag
+             zwischen der Prüfung oben und diesem Insert gelöscht. Das ist
+             kein Serverfehler, sondern dasselbe wie „gibt es nicht" → 404. */
+          try {
+            await sql`insert into wunsch_likes (wunsch_id, fingerabdruck)
+                      values (${id}, ${ich}) on conflict do nothing`;
+          } catch (e) {
+            if (e?.code === "23503") {
+              return antworte(res, 404, { fehler: "Den Vorschlag gibt es nicht mehr." });
+            }
+            throw e;
+          }
         } else {
           await sql`delete from wunsch_likes
                      where wunsch_id = ${id} and fingerabdruck = ${ich}`;
@@ -186,6 +265,7 @@ export default async function handler(req, res) {
        Aufräumen im Gästebuch und hier sich nicht gegenseitig aufbraucht. */
     if (req.method === "DELETE") {
       const roh = koerper(req);
+      if (!roh) return antworte(res, 400, { fehler: KAPUTT });
       const erwartet = process.env.ADMIN_PASSWORT || "";
       if (!erwartet) {
         return antworte(res, 503, { fehler: "Es ist kein Passwort hinterlegt." });

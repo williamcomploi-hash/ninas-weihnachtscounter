@@ -28,6 +28,15 @@ export function saeubern(roh, hoechstens) {
   return String(roh ?? "")
     .normalize("NFKC")                 /* Vollbreite, Ligaturen usw. auf die Grundform */
     .replace(/\p{Cf}/gu, "")           /* unsichtbare Formatzeichen (Zero-Width, Richtungsmarken) */
+    /* „Zalgo": Dutzende kombinierende Zeichen auf einem Buchstaben türmen sich
+       über und unter die Zeile und überdecken Nachbareinträge. Echte Schrift
+       braucht höchstens zwei übereinander (vietnamesisch ệ, Umlaut + Akzent);
+       nach NFKC sind die meisten ohnehin in einem Zeichen zusammengefasst.
+       Also: jede Folge von \p{M} auf zwei kürzen. Erst nach dem Entfernen
+       der Formatzeichen, sonst trennt ein Zero-Width-Joiner die Folge und
+       die Grenze greift nicht. Gilt auch fürs Gästebuch — dort ebenso
+       harmlos. */
+    .replace(/(\p{M}{2})\p{M}+/gu, "$1")
     .replace(/[\u0000-\u001f\u007f-\u009f]/g, " ")   /* Steuerzeichen raus */
     .replace(/\s+/g, " ")
     .trim()
