@@ -1168,7 +1168,7 @@ body.verwaltet .buch-weg{display:block}
    mit ihren Fotos als Vorlage NEU gezeichnet, es sind keine freigestellten
    Fotos (auch wenn ältere Kommentare und Commits „Aufnahme“ sagen). Gesagt
    wird das im Satz im Fuß („Die Figur Snoopy …“). Wer dort den Satz kürzt,
-   nimmt Snoopy die einzige Kennzeichnung.
+   nimmt Snoopy (und den Katzenbildern, siehe unten) die einzige Kennzeichnung.
 
    Farbe fest, nicht --tinte/--rot: die wechseln mit der Tagesstimmung, und das
    Schild soll an jedem Tag gleich aussehen (wie das „Neu!“-Schild). Dunkler
@@ -1185,6 +1185,12 @@ body.verwaltet .buch-weg{display:block}
    und die sind kein erzeugtes Bild. */
 .kopfleiste .ki-schild{align-self:center}
 .buehne:not(.mit-foto):not(.mit-film) .kopfleiste .ki-schild{display:none}
+/* Ausnahme wie bei Snoopy (Inhaber, 03.10.2026): die drei Bühnenbilder mit
+   einer Katze als Hauptmotiv (tag-03, tag-12, jahr-07) tragen kein Schild,
+   sie sind nur über den Satz im Fuß gekennzeichnet. Die Klasse setzt
+   fotoSetzen(). Läuft der Film darüber, gilt wieder das Schild — dann ist
+   der Film zu sehen, nicht das Katzenbild. */
+.buehne.mit-foto.foto-katze:not(.mit-film) .kopfleiste .ki-schild{display:none}
 /* Am Handy schwebt oben rechts der runde Menüknopf (fest, 44 px, 12 px vom
    Rand — siehe .sprung-knopf). Ohne diesen Abstand läge das Schild genau
    darunter und wäre unsichtbar; so steht es links daneben. */
@@ -1621,7 +1627,7 @@ footer .ki-hinweis .ki-schild{cursor:default;flex-shrink:0;margin-top:.1em}
     <span>Für Nina &amp; Snoopy</span>
     <a class="studio" href="https://williamcomploi.tech/de" target="_blank" rel="noopener">Gebaut von Studio Comploi</a>
     <span id="fuss-jahr">Heiliger Abend</span>
-    <p class="ki-hinweis"><span class="ki-schild" aria-hidden="true">KI</span>Die Figur Snoopy (Vorlage: eigene Fotos) sowie mit „KI“ gekennzeichnete Bilder und Filme auf dieser Seite wurden mit KI erzeugt.</p>
+    <p class="ki-hinweis"><span class="ki-schild" aria-hidden="true">KI</span>Die Figur Snoopy (Vorlage: eigene Fotos), die Katzenbilder auf der Bühne sowie mit „KI“ gekennzeichnete Bilder und Filme auf dieser Seite wurden mit KI erzeugt. Texte und Zeichnungen wurden mit KI-Unterstützung erstellt.</p>
   </footer>
 </main>
 
@@ -2188,6 +2194,7 @@ function fotoFuer(){
   return "bilder/jahr-" + zweistellig(vorrat[(t - 1) % vorrat.length]) + ".jpg";
 }
 
+const fotoKatzen = ["tag-03.jpg", "tag-12.jpg", "jahr-07.jpg"];
 function fotoSetzen(pfad){
   const schicht = document.getElementById("buehne-foto");
   const w = document.getElementById("buehne");
@@ -2197,6 +2204,10 @@ function fotoSetzen(pfad){
     schicht.style.backgroundImage = "url('" + pfad + "')";
     schicht.classList.add("da");
     w.classList.add("mit-foto");
+    /* Katzenbilder ohne KI-Schild — siehe „KI-Kennzeichnung“ im Stil.
+       Erst hier beim Laden gesetzt, zusammen mit dem Bild selbst: so kann
+       ein später eintreffendes Bild nicht das Schild des vorigen erben. */
+    w.classList.toggle("foto-katze", fotoKatzen.some(n => pfad.endsWith(n)));
   };
   probe.onerror = () => { schicht.classList.remove("da"); w.classList.remove("mit-foto"); };
   probe.src = pfad;
