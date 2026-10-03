@@ -262,6 +262,49 @@ h1 em{font-style:normal;display:block;
 .heute-marke{font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
   color:var(--rot);margin-bottom:12px;display:block}
 
+/* ---------- Spoiler „Schneewittchen“ (03.10.2026) ----------
+   Eigene Karte UNTER der Highlight-Karte, nicht in ihr: die Highlight-Karte
+   gehört dem Tag (vor Dezember „noch verschlossen“, im Dezember das Türchen)
+   und wird vom Skript umgeschrieben. Der Spoiler soll davon unberührt immer
+   gleich dastehen — darum fester Text im HTML und kein Skript.
+   Rahmen, Rundung und Schatten wie .heute-karte, damit es als Geschwister
+   liest; der Verlauf läuft ins Gold statt ins Rosa, weil der Abschnitt sonst
+   zwei identische Kästen untereinander hätte.
+   Das Etikett ist bewusst GOLD, nicht rot: Rot heißt auf dieser Seite „neu“
+   (siehe .neu-schild), und ein Film, den es noch nicht gibt, ist nicht neu.
+   Farben fest statt --tinte, aus demselben Grund wie beim KI-Schild: die
+   Tagesstimmung soll das Etikett nicht umfärben. #4a2a24 auf #f3c987 ≈ 9:1.
+   Kein Abspielknopf — der Film kommt erst; ein Knopf, der nichts tut, wäre
+   genau der Zweifel, den die Seite nicht wecken darf.
+   KEIN KI-Schild am Bild: Hauptmotiv ist Snoopy, und die Figur ist nach
+   Vorgabe des Inhabers nur über den Satz im Fuß gekennzeichnet (siehe
+   „KI-Kennzeichnung“ unten). Kommt ein Spoilerbild ohne Snoopy als
+   Hauptmotiv, braucht es das Schild wieder. */
+.spoiler-karte{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
+  gap:clamp(18px,3vw,38px);align-items:center;padding:clamp(14px,2.2vw,24px);
+  margin-top:clamp(16px,2.4vw,24px);
+  border-radius:24px;border:1px solid rgba(221,148,51,.5);
+  background:linear-gradient(120deg,#fff 0%,#fdf3e4 55%,#fbe8cf 100%);
+  box-shadow:var(--schein)}
+/* aspect-ratio hält den Platz vor, solange das Bild (lazy) noch lädt —
+   sonst springt die Seite, wenn es eintrifft. object-fit:cover statt
+   Strecken: passt das Kästchen nicht exakt auf 16:9, wird am Rand
+   beschnitten, nie verzerrt. */
+.spoiler-bild{position:relative;overflow:hidden;border-radius:16px;aspect-ratio:16/9;
+  background:#c9d3e0}
+/* picture ist von Haus aus inline; ohne display:block hätte height:100% am
+   Bild keine Bezugshöhe und object-fit liefe ins Leere. */
+.spoiler-bild picture{display:block;width:100%;height:100%}
+.spoiler-bild img{display:block;width:100%;height:100%;object-fit:cover}
+.spoiler-marke{display:inline-block;font-family:var(--f-zahl);font-size:10.5px;line-height:1;
+  font-weight:700;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;
+  color:#4a2a24;background:linear-gradient(100deg,#f3c987,#f8dcaa);
+  border:1px solid rgba(221,148,51,.6);padding:6px 9px 5px;border-radius:7px;margin-bottom:12px}
+.spoiler-karte h3{font-size:clamp(24px,3.4vw,36px);margin-bottom:8px}
+.spoiler-karte p{margin:0;color:var(--tinte-matt)}
+@media(max-width:720px){.spoiler-karte{grid-template-columns:1fr}
+  .spoiler-text{padding:0 6px 6px}}
+
 /* ---------- Trailer (Snooptanic) ----------
    Abstand, Rundung, Rand und Schatten bewusst von .heute/.heute-karte
    übernommen: der Abschnitt soll wie ein Geschwister der Highlight-Karte
@@ -1196,6 +1239,24 @@ body.verwaltet .buch-weg{display:block}
 .geheim-zeigen:hover{color:var(--rot)}
 .geheim-zeigen:focus-visible{outline:2px solid var(--rot);outline-offset:2px}
 .geheim-meldung.fehler{color:var(--rot-tief)}
+/* „Bald verfügbar“ an den gesperrten Aktionen (Wunsch des Inhabers,
+   03.10.2026). Gleiche Machart und Stelle wie das „Neu!“-Schild — oben rechts
+   angeheftet, absolut, damit der Knopf nicht breiter wird und die Leiste
+   gleich umbricht wie ohne Schild —, aber GOLD statt Rot: Rot heißt auf der
+   Seite „neu“, und das hier ist ein Versprechen, keine Neuheit. Farben fest
+   (nicht --gold/--tinte), damit die Tagesstimmung es nicht umfärbt;
+   #4a2a24 auf #f3c987 ≈ 9:1. Etwas engere Laufweite als beim „Neu!“-Schild,
+   weil die zwei Wörter sonst über den linken Rand von „Kraulen“ ragen.
+   Es hängt an der Klasse „gesperrt“, die freiZeigen() setzt und nach dem
+   Freischalten nimmt — so verschwindet es mit dem Schloss, ohne dass am
+   Skript oder an der Sperre etwas geändert werden musste. aria-hidden wie
+   beim „Neu!“-Schild: Screenreader hören schon „…, gesperrt“ im aria-label. */
+.bald-schild{position:absolute;top:-8px;right:-6px;pointer-events:none;white-space:nowrap;
+  font-family:var(--f-zahl);font-size:9px;line-height:1;letter-spacing:.04em;
+  text-transform:uppercase;font-weight:600;color:#4a2a24;background:#f3c987;
+  border:1px solid rgba(169,102,47,.55);
+  padding:2px 5px 1px;border-radius:6px;box-shadow:0 3px 6px -3px rgba(120,70,20,.5)}
+.rufen .knopf:not(.gesperrt) .bald-schild{display:none}
 
 /* Kraulen am Handy: waagrecht über Snoopy wischen. pan-y überlässt dem
    Browser nur das senkrechte Wischen — die Seite scrollt weiter, auch wenn
@@ -1479,6 +1540,34 @@ footer .ki-hinweis .ki-schild{cursor:default;flex-shrink:0;margin-top:.1em}
         <p id="heute-text">—</p>
       </div>
     </div>
+
+    <!-- Spoiler auf den kommenden Film. Stil und Begründungen bei
+         .spoiler-karte im CSS. Bildquelle: Standbild aus dem Film
+         (Desktop\Schneewittchen-Snoopy\spoiler-b-1.5.jpg), unverändert als
+         bilder/spoiler-schneewittchen.jpg abgelegt; ausgeliefert werden die
+         verkleinerten Fassungen -640/-1280 (WebP, JPG als Rückfall).
+         sizes: am Handy fast volle Breite, ab 721 px gut die Hälfte der
+         höchstens 1180 px breiten Seite. loading="lazy": die Karte liegt
+         unter dem Zähler, am Handy also nicht im ersten Bild. -->
+    <article class="spoiler-karte" aria-labelledby="sp-titel">
+      <div class="spoiler-bild">
+        <picture>
+          <source type="image/webp"
+                  srcset="bilder/spoiler-schneewittchen-640.webp 640w, bilder/spoiler-schneewittchen-1280.webp 1280w"
+                  sizes="(max-width:720px) 92vw, 640px">
+          <img src="bilder/spoiler-schneewittchen-1280.jpg"
+               srcset="bilder/spoiler-schneewittchen-640.jpg 640w, bilder/spoiler-schneewittchen-1280.jpg 1280w"
+               sizes="(max-width:720px) 92vw, 640px"
+               width="1280" height="720" loading="lazy" decoding="async"
+               alt="Snoopy, eine dreifarbige Katze, im roten Cape mit weißem Fellsaum und roter Schleife im Ohr, stapft durch tiefen Schnee vor verschneiten Tannen">
+        </picture>
+      </div>
+      <div class="spoiler-text">
+        <span class="spoiler-marke">Spoiler · Demnächst</span>
+        <h3 id="sp-titel">Schneewittchen</h3>
+        <p>Ein Weihnachtsmärchen mit Snoopy · bald hier</p>
+      </div>
+    </article>
   </section>
 
   <!-- Trailer. preload="none": die knapp 5 MB kommen erst beim Tippen,
@@ -1754,9 +1843,9 @@ footer .ki-hinweis .ki-schild{cursor:default;flex-shrink:0;margin-top:.1em}
                data-befehl: das ist kein Ruf, und die kurze Sperre aller
                Ruf-Knöpfe nach jedem Ruf soll sie nicht mitnehmen. -->
           <button class="knopf gesperrt" type="button" data-aktion="kraulen" data-name="Kraulen"
-                  aria-label="Kraulen, gesperrt"><svg class="schloss" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 7.5V5.2a3 3 0 0 1 6 0v2.3" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="2.8" y="7" width="10.4" height="7.6" rx="1.8" fill="currentColor"/></svg>Kraulen</button>
+                  aria-label="Kraulen, gesperrt"><svg class="schloss" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 7.5V5.2a3 3 0 0 1 6 0v2.3" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="2.8" y="7" width="10.4" height="7.6" rx="1.8" fill="currentColor"/></svg>Kraulen<span class="bald-schild" aria-hidden="true">Bald verfügbar</span></button>
           <button class="knopf gesperrt" type="button" data-aktion="laser" data-name="Laserpointer"
-                  aria-label="Laserpointer, gesperrt" aria-pressed="false"><svg class="schloss" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 7.5V5.2a3 3 0 0 1 6 0v2.3" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="2.8" y="7" width="10.4" height="7.6" rx="1.8" fill="currentColor"/></svg>Laserpointer</button>
+                  aria-label="Laserpointer, gesperrt" aria-pressed="false"><svg class="schloss" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 7.5V5.2a3 3 0 0 1 6 0v2.3" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="2.8" y="7" width="10.4" height="7.6" rx="1.8" fill="currentColor"/></svg>Laserpointer<span class="bald-schild" aria-hidden="true">Bald verfügbar</span></button>
         </div>
         <!-- Das Geheimwort-Feld. KEIN Passwortfeld, mit Absicht (Lehre aus
              Dropino): type="password" oder ein Name wie „password“ lässt
