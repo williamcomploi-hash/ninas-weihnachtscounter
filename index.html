@@ -1154,6 +1154,64 @@ body.verwaltet .buch-weg{display:block}
   color:var(--tinte-matt);text-decoration:underline;text-underline-offset:3px}
 .halt-weiter:hover{color:var(--rot)}
 
+/* ---------------- KI-Kennzeichnung ----------------
+   Regel des Inhabers (03.10.2026): alles, was mit KI erzeugt wurde, trägt am
+   Element selbst das Schild „KI“. Die Seite ist nur Deutsch, die Abkürzung
+   genügt — ausgeschrieben steht es in title und aria-label („mit KI erzeugt“).
+   Betroffen sind heute: Bühnenbilder und Bühnenfilm (Higgsfield), alle
+   Snoopy-Haltungen (aus ihren Fotos als Vorlage NEU ERZEUGT, keine
+   freigestellten Fotos — auch wenn ältere Kommentare und Commits „Aufnahme“
+   sagen) und der Trailer „Snooptanic“ samt Ton. Wer ein KI-Bild neu einbaut,
+   setzt das Schild mit dazu; wer ein KI-Bild durch ein echtes Foto ersetzt,
+   nimmt es dort wieder weg — ein Schild an einem echten Foto wäre genauso falsch.
+
+   Farbe fest, nicht --tinte/--rot: die wechseln mit der Tagesstimmung, und das
+   Schild soll an jedem Tag gleich aussehen (wie das „Neu!“-Schild). Dunkler
+   Grund mit hellem Rand, weil es auf hellen Fotos UND auf dem dunklen
+   Bühnenfilm lesbar bleiben muss: #fff8f4 auf rgba(74,42,36,.84) ergibt über
+   Weiß rund 7:1. Bewusst neutral statt rot — Rot heißt hier „neu“, und das
+   Schild ist ein Hinweis, keine Werbung. */
+.ki-schild{display:inline-block;font-family:var(--f-zahl);font-size:10px;line-height:1;
+  font-weight:700;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;
+  color:#fff8f4;background:rgba(74,42,36,.84);padding:4px 5px 3px 6px;border-radius:6px;
+  box-shadow:0 0 0 1px rgba(255,248,244,.45),0 3px 8px -4px rgba(40,22,18,.6);cursor:help}
+/* Bühne: im Kopf rechts, gegenüber der Marke. Nur solange dort ein KI-Bild
+   oder der KI-Film liegt — ohne beides stehen die gezeichneten Motive da,
+   und die sind kein erzeugtes Bild. */
+.kopfleiste .ki-schild{align-self:center}
+.buehne:not(.mit-foto):not(.mit-film) .kopfleiste .ki-schild{display:none}
+/* Am Handy schwebt oben rechts der runde Menüknopf (fest, 44 px, 12 px vom
+   Rand — siehe .sprung-knopf). Ohne diesen Abstand läge das Schild genau
+   darunter und wäre unsichtbar; so steht es links daneben. */
+@media(max-width:640px){.kopfleiste .ki-schild{margin-right:40px}}
+/* Trailer: oben links über dem Bild, auch während er läuft (die Leiste des
+   Players liegt unten). Klickdurchlässig, sonst schluckt die Ecke das
+   „irgendwo aufs Poster tippen“ des großen Abspielknopfs. Im Vollbild des
+   Browsers ist es nicht zu sehen — dort zeigt der Browser nur das Video. */
+.trailer-karte .ki-schild{position:absolute;top:12px;left:12px;z-index:2;pointer-events:none}
+/* Snoopy, die durchs Bild läuft: klein unter den Pfoten, wie ein Namensschild.
+   Kind des Körpers, nicht des Bildes — gespiegelt wird nur das Bild (siehe
+   data-blick), das Schild bliebe sonst beim Blick nach links spiegelverkehrt. */
+/* z-index, weil die Haltungsbilder erst NACH dem Schild in den Körper
+   gehängt werden und es sonst mit ihrem (durchsichtigen) Rahmen überdecken. */
+.snoopy-koerper .ki-schild{position:absolute;z-index:1;bottom:-7px;left:50%;translate:-50% 0;
+  font-size:8.5px;padding:3px 4px 2px 5px}
+/* Ihre Karte in der Werkstatt, das große Bild bei den Regeln, der Zwischenruf. */
+.katze-karte .kopf{position:relative}
+.katze-karte .kopf .ki-schild{position:absolute;right:-10px;bottom:2px}
+#grosse-katze{position:relative;width:fit-content}
+/* 22 px eingerückt: das Bild ist quadratisch, die sitzende Katze schmal —
+   am Rand des Rahmens stünde das Schild sonst neben ihr in der Luft. */
+#grosse-katze .ki-schild{position:absolute;right:22px;bottom:8px}
+.halt-rahmen{position:relative;display:block;width:132px;margin:0 auto 12px}
+.halt-rahmen .halt-bild{margin:0}
+.halt-rahmen .ki-schild{position:absolute;right:-8px;bottom:4px}
+/* Der eine Satz im Fuß: eigene Zeile unter den drei Angaben, normal gesetzt
+   statt in Versalien — als Satz gelesen, nicht als Etikett. */
+footer .ki-hinweis{flex-basis:100%;margin:0;text-transform:none;letter-spacing:.02em;
+  font-size:11.5px;display:flex;align-items:center;gap:8px}
+footer .ki-hinweis .ki-schild{cursor:default}
+
 /* ---------------- Vorschau ----------------
    Nur sichtbar, wenn ?tag= in der Adresse steht. Ein Band, das keinen
    Zweifel laesst, dass hier ein anderer Tag gezeigt wird als der echte. */
@@ -1189,6 +1247,7 @@ body.verwaltet .buch-weg{display:block}
 
     <div class="kopfleiste">
       <span class="marke">Ninas Weihnachtscounter</span>
+      <span class="ki-schild" role="img" aria-label="mit KI erzeugt" title="mit KI erzeugt">KI</span>
     </div>
 
     <div class="buehne-inhalt">
@@ -1319,6 +1378,7 @@ body.verwaltet .buch-weg{display:block}
         <span class="rund" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3.5v17L20 12z"/></svg></span>
         <span class="schrift" aria-hidden="true">Trailer ansehen</span>
       </button>
+      <span class="ki-schild" role="img" aria-label="mit KI erzeugt" title="mit KI erzeugt">KI</span>
     </div>
   </section>
 
@@ -1571,6 +1631,7 @@ body.verwaltet .buch-weg{display:block}
     <span>Für Nina &amp; Snoopy</span>
     <a class="studio" href="https://williamcomploi.tech/de" target="_blank" rel="noopener">Gebaut von Studio Comploi</a>
     <span id="fuss-jahr">Heiliger Abend</span>
+    <p class="ki-hinweis"><span class="ki-schild" aria-hidden="true">KI</span>Mit KI gekennzeichnete Inhalte wurden mit KI erzeugt.</p>
   </footer>
 </main>
 
@@ -1596,7 +1657,10 @@ body.verwaltet .buch-weg{display:block}
 
 <div class="halt" id="halt" role="dialog" aria-modal="true" aria-labelledby="halt-titel">
   <div class="halt-inhalt">
-    <img class="halt-bild" src="bilder/snoopy/sitzen.png" alt="Snoopy sitzt und schaut" width="132" height="132">
+    <span class="halt-rahmen">
+      <img class="halt-bild" src="bilder/snoopy/sitzen.png" alt="Snoopy sitzt und schaut" width="132" height="132">
+      <span class="ki-schild" role="img" aria-label="mit KI erzeugt" title="mit KI erzeugt">KI</span>
+    </span>
     <h3 id="halt-titel">Hast du heute schon mal auf einen Keks geklickt?!</h3>
     <p>UND was ist mit Snoopy — <b>die verhungert</b>. JA!</p>
     <div class="halt-knoepfe">
@@ -1608,6 +1672,13 @@ body.verwaltet .buch-weg{display:block}
 </div>
 
 <script>
+/* ---------------- KI-Schild ----------------
+   Dasselbe Schild wie im HTML (Bühne, Trailer, Zwischenruf), für die Stellen,
+   die erst das Skript baut: Snoopy bei den Regeln, ihre Werkstattkarte, die
+   laufende Snoopy. Ein Baustein statt drei Abschriften — sonst weicht beim
+   nächsten Ändern eine ab. Gestaltung und Regel: „KI-Kennzeichnung“ im Stil. */
+const kiSchild = '<span class="ki-schild" role="img" aria-label="mit KI erzeugt" title="mit KI erzeugt">KI</span>';
+
 /* ---------------- Farben der Zeichnungen ---------------- */
 const GOLD="#dd9433", GOLDH="#f3c987", ROT="#c0303f", ROSA="#e8809a",
       LEB="#a9662f", LEBH="#d59a5f", CREME="#fff8f4", TANNE="#3f6e56", TINTE="#4a2a24";
@@ -2499,7 +2570,7 @@ document.getElementById("alle-zu").addEventListener("click",()=>{
 });
 document.getElementById("grosse-katze").innerHTML =
   '<img src="bilder/snoopy/sitzen.png" alt="Snoopy" ' +
-  'style="width:210px;height:210px;object-fit:contain;display:block">';
+  'style="width:210px;height:210px;object-fit:contain;display:block">' + kiSchild;
 
 
 /* ---------------- Werkstatt ---------------- */
@@ -2521,7 +2592,7 @@ elfen.forEach(e=>{
   d.className="elf"+(e.katze?" katze-karte":"");
   /* Snoopy steht mit ihrer eigenen Aufnahme da, nicht als Zeichnung. */
   const kopfbild = e.echt
-    ? '<img src="bilder/snoopy/'+e.echt+'.png" alt="" style="width:100%;height:100%;object-fit:contain">'
+    ? '<img src="bilder/snoopy/'+e.echt+'.png" alt="" style="width:100%;height:100%;object-fit:contain">' + kiSchild
     : bild[e.bild];
   d.innerHTML='<div class="kopf">'+kopfbild+'</div>'+
               '<span class="amt">'+e.amt+'</span>'+
@@ -2704,6 +2775,9 @@ const snoopySprueche = {
   const blase = document.createElement("div");
   blase.className = "snoopy-blase";
   koerper.appendChild(blase);
+  /* KI-Schild unter den Pfoten (siehe „KI-Kennzeichnung“ im Stil). Die ganze
+     Schicht ist aria-hidden, darum hier nur das sichtbare Schild mit title. */
+  koerper.insertAdjacentHTML("beforeend", kiSchild);
   buehneEl.appendChild(koerper);
 
   let x = Math.random() * (window.innerWidth - 140);
