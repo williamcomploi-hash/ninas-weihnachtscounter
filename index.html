@@ -484,6 +484,52 @@ body.verwaltet .wunsch-weg{display:block}
    mit hellem Ring, damit er auch auf dem dunklen aktiven Knopf steht. */
 .sprung-neu{position:absolute;top:6px;right:7px;width:7px;height:7px;border-radius:50%;
   background:#c0303f;box-shadow:0 0 0 2px #fff8f4;pointer-events:none}
+/* Wichtige Reiter (Inhaber, 03.10.2026: Countdown, Märkte, Keks, Snoopy).
+   Sie tragen .wichtig am <a>; das Handy-Blatt klont die Links samt Klasse,
+   darum gilt jede Regel hier für Leiste UND Raster.
+   - Goldrand und je ein eigenes Zeichen, nie --rot und nie Rot: --rot ist
+     im Ton „rosa“ genau #c0303f, die Farbe des Neu-Punkts. „Wichtig“ darf
+     nie wie „neu“ aussehen.
+   - Aktiv bleibt --tinte gefüllt wie bei allen Reitern; Ring und Zeichen
+     bleiben als --gold-hell daran, damit man „aktiv“ (dunkel) und „wichtig“
+     (Gold) getrennt lesen kann.
+   - Knopfhöhe bleibt 40 px: die Leiste wird gemessen (--leiste-hoehe), und
+     eine höhere Leiste verschöbe jeden Sprung. Der doppelte Rand ist darum
+     ein inset-Schatten statt border-width — sonst würde die Bahn breiter.
+   Kontrast (gerechnet über alle acht Stimmungen): Ring und Zeichen aus
+   color-mix(--gold 70 %, --tinte) auf Weiß 3,9–5,6 : 1 (über 3 : 1 für
+   Bedeutungsträger); reines --gold käme im Ton „rosa“ nur auf 2,5 : 1.
+   Auf dem dunklen aktiven Knopf statt dessen --gold-hell. */
+.sprung a.wichtig,
+.blatt-raster a.wichtig{
+  --ring:color-mix(in srgb,var(--gold) 70%,var(--tinte));
+  background:#fff;color:var(--tinte);font-weight:700;
+  border-color:var(--ring);box-shadow:inset 0 0 0 1px var(--ring)}
+.sprung a.wichtig{padding-left:12px}
+.sprung a.wichtig::before,
+.blatt-raster a.wichtig::before{
+  content:"";flex:none;width:14px;height:14px;margin-right:7px;
+  background:var(--ring);
+  -webkit-mask:var(--symbol) center/contain no-repeat;mask:var(--symbol) center/contain no-repeat}
+.sprung a.wichtig[aria-current="true"],
+.blatt-raster a.wichtig[aria-current="true"]{
+  background:var(--tinte);border-color:var(--tinte);color:#fff8f4;
+  box-shadow:inset 0 0 0 2px var(--gold-hell)}
+.sprung a.wichtig[aria-current="true"]::before,
+.blatt-raster a.wichtig[aria-current="true"]::before{background:var(--gold-hell)}
+/* Je Reiter ein eigenes Zeichen statt eines gemeinsamen Sterns: so sagt das
+   Symbol, wohin es geht, und ist nicht nur Schmuck. Als Maske, damit es die
+   Farbe von --ring bzw. --gold-hell annimmt. Neuer wichtiger Reiter: Klasse
+   setzen und hier ein Zeichen ergänzen — ohne bleibt nur der Ring. */
+a.wichtig[href="#countdown"]{--symbol:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='8' cy='8.6' r='5.9'/%3E%3Cpath d='M8 5.4v3.3l2.2 1.4M6.3 1.6h3.4'/%3E%3C/svg%3E")}
+a.wichtig[href="#maerkte"]{--symbol:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.8 6.2 3.6 2h8.8l1.8 4.2zM3 6.2V14M13 6.2V14M3 10.4h10'/%3E%3C/svg%3E")}
+a.wichtig[href="#keks"]{--symbol:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8 1.2a6.8 6.8 0 1 1 0 13.6A6.8 6.8 0 0 1 8 1.2zM5.6 4.3a1.2 1.2 0 1 0 0 2.4a1.2 1.2 0 0 0 0-2.4zM10.4 6.2a1.1 1.1 0 1 0 0 2.2a1.1 1.1 0 0 0 0-2.2zM6.6 9.6a1.2 1.2 0 1 0 0 2.4a1.2 1.2 0 0 0 0-2.4z'/%3E%3C/svg%3E")}
+a.wichtig[href="#regeln"]{--symbol:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cellipse cx='8' cy='11' rx='3.6' ry='3'/%3E%3Cellipse cx='3' cy='7' rx='1.5' ry='1.9'/%3E%3Cellipse cx='6' cy='3.9' rx='1.5' ry='1.9'/%3E%3Cellipse cx='10' cy='3.9' rx='1.5' ry='1.9'/%3E%3Cellipse cx='13' cy='7' rx='1.5' ry='1.9'/%3E%3C/svg%3E")}
+/* Hover wie bei allen Reitern (Rand und Schrift im Ton des Tages) — die
+   Regeln oben sind spezifischer als .sprung a:hover und schluckten es sonst.
+   Muss darum nach ihnen stehen. */
+.sprung a.wichtig:not([aria-current="true"]):hover{border-color:var(--rot);color:var(--rot);
+  box-shadow:inset 0 0 0 1px var(--rot)}
 /* Außenabstand für den Sprung. Gilt für alle Abschnitte im Inhalt, auch
    künftige — wer einen neuen einbaut, muss hier nichts nachtragen. */
 .huelle > section{scroll-margin-top:calc(var(--leiste-hoehe) + 16px)}
@@ -1351,17 +1397,17 @@ footer .ki-hinweis .ki-schild{cursor:default;flex-shrink:0;margin-top:.1em}
 <nav class="sprung" id="sprung" aria-label="Schnellnavigation">
   <div class="sprung-bahn" id="sprung-bahn">
     <ul class="sprung-liste">
-      <li><a href="#countdown">Countdown</a></li>
+      <li><a class="wichtig" href="#countdown">Countdown</a></li>
       <li><a href="#highlight">Heute</a></li>
       <li><a href="#snooptanic" aria-label="Snooptanic, neu">Snooptanic<span class="sprung-neu" aria-hidden="true"></span></a></li>
       <li><a href="#wunsch" aria-label="Wünsche, neu">Wünsche<span class="sprung-neu" aria-hidden="true"></span></a></li>
       <li><a href="#tuerchen">Türchen</a></li>
-      <li><a href="#maerkte" aria-label="Märkte, neu">Märkte<span class="sprung-neu" aria-hidden="true"></span></a></li>
+      <li><a class="wichtig" href="#maerkte" aria-label="Märkte, neu">Märkte<span class="sprung-neu" aria-hidden="true"></span></a></li>
       <li><a href="#werkstatt">Werkstatt</a></li>
       <li><a href="#tisch">Tisch</a></li>
-      <li><a href="#keks">Keks</a></li>
+      <li><a class="wichtig" href="#keks">Keks</a></li>
       <li><a href="#gaestebuch">Gästebuch</a></li>
-      <li><a href="#regeln">Snoopy</a></li>
+      <li><a class="wichtig" href="#regeln">Snoopy</a></li>
     </ul>
   </div>
   <!-- Burger-Menü, nur am Handy (≤ 640 px) und erst, wenn das Skript
