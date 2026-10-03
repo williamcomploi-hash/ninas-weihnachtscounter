@@ -685,7 +685,10 @@ footer{position:relative;z-index:2;margin-top:clamp(44px,6vw,70px);padding:26px 
   opacity:0;transition:opacity .11s linear;
   transform-origin:calc(var(--sx,.5) * 100%) calc(var(--sy,.5) * 100%);
   transform:translate(calc(var(--dx,0) * 100%), calc(var(--dy,0) * 100%))
-            scale(var(--s,1)) scaleX(var(--flip,1))}
+            scale(var(--s,1)) scaleX(var(--flip,1)) scaleX(var(--spiegel,1))}
+/* --spiegel: für die wenigen Aufnahmen, die von Haus aus nach LINKS schauen
+   (snoopySpiegeln im Skript). Alle anderen schauen nach rechts; damit
+   [data-blick] für alle gleich stimmt, werden diese einmal umgedreht. */
 .snoopy-koerper img.da{opacity:1}
 /* Auch innerhalb einer Bildfolge wird weich überblendet, nur kürzer.
    Das Doppelbild von vorher kam nicht vom Blenden, sondern davon, dass die
@@ -1118,6 +1121,75 @@ body.verwaltet .buch-weg{display:block}
   font-family:var(--f-display);font-size:15px;letter-spacing:0;text-transform:none;
   font-weight:600;padding:7px 15px}
 
+/* ---------- Geheime Aktionen: Kraulen und Laserpointer ----------
+   Zwei Knöpfe in der Ruf-Leiste, gesperrt mit Schloss, bis das Geheimwort
+   stimmt (geprüft nur auf dem Server, api/snoopy.js). Das Schloss steht im
+   Markup und wird per Klasse ein- und ausgeblendet — so stimmt die Breite
+   des Knopfs schon vor dem Skript, und die Leiste springt nicht. */
+.rufen .knopf .schloss{width:11px;height:11px;margin:0 6px 0 -2px;vertical-align:-1px;display:none}
+.rufen .knopf.gesperrt .schloss{display:inline-block}
+.rufen .knopf.gesperrt{border-style:dashed}
+/* Laser läuft: der Knopf zeigt es, damit man weiß, wo man ihn ausschaltet.
+   Fest #c0303f wie das „Neu!“-Schild, nicht der Ton des Tages. */
+.rufen .knopf[aria-pressed="true"]{background:#c0303f;border-color:#c0303f;color:#fff}
+/* Das Feld fürs Geheimwort. 16 px Schrift im Feld: darunter zoomt Safari am
+   iPhone beim Antippen die ganze Seite heran. */
+.geheim{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.geheim[hidden]{display:none}
+.geheim .rufen-schrift{margin:0}
+.geheim .buch-feld{width:auto;flex:1 1 150px;max-width:220px;padding:9px 13px}
+.geheim .knopf{padding:9px 16px}
+.geheim-meldung{flex-basis:100%;margin:0;font-size:13.5px;color:var(--tinte-matt);min-height:1em}
+/* Getipptes nur optisch verdecken (Begründung am Feld im Markup). Kein
+   type=password — das hielte Chrome für ein Login. Firefox und Safari
+   kennen die Eigenschaft ebenfalls; wo nicht, steht das Wort lesbar da. */
+.geheim .buch-feld.verdeckt{-webkit-text-security:disc}
+.geheim-zeigen{background:none;border:0;padding:6px 4px;cursor:pointer;
+  font-family:var(--f-zahl);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--tinte-matt);text-decoration:underline;text-underline-offset:3px}
+.geheim-zeigen:hover{color:var(--rot)}
+.geheim-zeigen:focus-visible{outline:2px solid var(--rot);outline-offset:2px}
+.geheim-meldung.fehler{color:var(--rot-tief)}
+
+/* Kraulen am Handy: waagrecht über Snoopy wischen. pan-y überlässt dem
+   Browser nur das senkrechte Wischen — die Seite scrollt weiter, auch wenn
+   der Finger auf der Katze aufsetzt, und waagrechtes Streichen kommt als
+   Zeigerbewegung beim Skript an. touch-action:none hätte das Scrollen über
+   der Katze ganz gesperrt; ohne Regel nähme der Browser jedes Wischen für
+   sich. Nur solange Kraulen frei ist: gesperrt bleibt alles wie vorher. */
+.snoopy-koerper.kraulbar{touch-action:pan-y}
+/* Bei der Jagd setzt das Skript jede Lage selbst, Bild für Bild; der weiche
+   Übergang aus .snoopy-koerper zöge den Sprung sonst flach und hinterher. */
+.snoopy-koerper.jagd{transition:none}
+.snoopy-herz{position:absolute;pointer-events:none;font-size:18px;line-height:1;color:#c0303f;
+  text-shadow:0 2px 6px rgba(255,255,255,.9);animation:snoopyherz 1.1s ease-out forwards}
+@keyframes snoopyherz{0%{opacity:0;transform:translateY(0) scale(.6)}
+  25%{opacity:1;transform:translateY(-9px) scale(1)}
+  100%{opacity:0;transform:translateY(-40px) scale(1.15)}}
+
+/* Laserpointer: eine durchsichtige Fläche über der ganzen Seite fängt Maus
+   und Finger. Ohne sie löste das Tippen am Handy Links und Knöpfe darunter
+   aus, und das Ziehen des Fingers scrollte die Seite statt den Punkt zu
+   bewegen. Das Mausrad scrollt weiterhin. Unter dem Zwischenruf (80) und dem
+   Blatt (75), über allem anderen. Der Mauszeiger verschwindet über der
+   Fläche — der rote Punkt IST der Zeiger. */
+.laser-flaeche{position:fixed;inset:0;z-index:60;cursor:none;touch-action:none;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.laser-punkt{position:fixed;left:0;top:0;width:14px;height:14px;margin:-7px 0 0 -7px;z-index:61;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,#fff 0 16%,#ff2b2b 42%,rgba(255,30,30,0) 74%);
+  box-shadow:0 0 10px 4px rgba(255,40,40,.5)}
+.laser-punkt[hidden]{display:none}
+/* Oben in der Mitte: unten läuft Snoopy, und dort soll der Punkt hin.
+   Am Rechner unter der angehefteten Schnellnavigation (rund 54 px hoch),
+   sonst läge der Knopf auf ihren Reitern. Am Handy ist dort nur der runde
+   Menüknopf rechts — mittig ist frei. */
+.laser-aus{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;translate:-50% 0;z-index:62;
+  background:#c0303f;border-color:#c0303f;color:#fff;
+  box-shadow:0 10px 24px -12px rgba(120,20,30,.8)}
+.laser-aus:hover{color:#fff;border-color:#fff}
+@media(min-width:641px){.laser-aus{top:68px}}
+
 /* ---------- Tisch ---------- */
 .tisch{position:relative;z-index:2;margin-top:clamp(46px,7vw,84px)}
 .speisen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.8vw,20px)}
@@ -1195,11 +1267,20 @@ body.verwaltet .buch-weg{display:block}
    Rand — siehe .sprung-knopf). Ohne diesen Abstand läge das Schild genau
    darunter und wäre unsichtbar; so steht es links daneben. */
 @media(max-width:640px){.kopfleiste .ki-schild{margin-right:40px}}
-/* Trailer: oben links über dem Bild, auch während er läuft (die Leiste des
-   Players liegt unten). Klickdurchlässig, sonst schluckt die Ecke das
-   „irgendwo aufs Poster tippen“ des großen Abspielknopfs. Im Vollbild des
-   Browsers ist es nicht zu sehen — dort zeigt der Browser nur das Video. */
+/* Trailer: oben links über dem Poster. Klickdurchlässig, sonst schluckt die
+   Ecke das „irgendwo aufs Poster tippen“ des großen Abspielknopfs.
+   NUR SOLANGE DAS POSTER ZU SEHEN IST: Der Film (bilder/snooptanic-ki.mp4)
+   trägt das Schild seit 03.10.2026 eingebrannt, an genau dieser Stelle oben
+   links. Liefe das CSS-Schild weiter mit, stünden zwei übereinander. Sobald
+   der Film einmal läuft, setzt das Skript (siehe „Trailer“ unten) die
+   Klasse „lief“, und ab dann trägt das eingebrannte Schild die
+   Kennzeichnung — auch im Vollbild, wo der Browser nur das Video zeigt und
+   ein CSS-Schild ohnehin nicht zu sehen wäre. Die Klasse bleibt auch nach
+   Pause und Ende: dann steht ein Filmbild da, und das trägt sein Schild.
+   Wer den Film wieder gegen eine Fassung OHNE eingebranntes Schild tauscht,
+   muss diese Ausblendung wieder entfernen. */
 .trailer-karte .ki-schild{position:absolute;top:12px;left:12px;z-index:2;pointer-events:none}
+.trailer-karte.lief .ki-schild{display:none}
 /* Der eine Satz im Fuß: eigene Zeile unter den drei Angaben, normal gesetzt
    statt in Versalien — als Satz gelesen, nicht als Etikett. */
 footer .ki-hinweis{flex-basis:100%;margin:0;text-transform:none;letter-spacing:.02em;
@@ -1220,9 +1301,13 @@ footer .ki-hinweis .ki-schild{cursor:default;flex-shrink:0;margin-top:.1em}
   padding:6px 13px;text-decoration:none}
 .vorschau a:hover{background:rgba(255,255,255,.3)}
 
+/* Snoopy bleibt bei reduzierter Bewegung sichtbar (seit 03.10.2026). Vorher
+   war sie ausgeblendet, und die Ruf-Knöpfe taten nichts — für jemanden, der
+   Bewegung abgeschaltet hat, sah das kaputt aus. Jetzt sitzt sie still an
+   einer Stelle und wechselt nur die Haltung: kein Laufen, keine Bildfolgen,
+   keine Sprünge, keine schwebenden Herzen (siehe `ruhig` im Snoopy-Skript). */
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}
-  #zauber{display:none}
-  #snoopy{display:none}}
+  #zauber{display:none}}
 </style>
 
 <div class="grund"></div>
@@ -1367,7 +1452,10 @@ footer .ki-hinweis .ki-schild{cursor:default;flex-shrink:0;margin-top:.1em}
       <video id="trailer-film" controls preload="none" playsinline
              poster="bilder/snooptanic-poster.jpg"
              aria-label="Trailer „Snooptanic“ mit Snoopy als Rose, 34 Sekunden, mit Ton">
-        <source src="bilder/snooptanic.mp4" type="video/mp4">
+        <!-- Fassung mit eingebranntem „KI“ oben links. Neuer Dateiname statt
+             Überschreiben, damit kein Zwischenspeicher die alte liefert;
+             bilder/snooptanic.mp4 bleibt als Sicherung liegen. -->
+        <source src="bilder/snooptanic-ki.mp4" type="video/mp4">
       </video>
       <button class="trailer-start" id="trailer-start" type="button" hidden
               aria-label="Trailer „Snooptanic“ abspielen, mit Ton">
@@ -1615,7 +1703,40 @@ footer .ki-hinweis .ki-schild{cursor:default;flex-shrink:0;margin-top:.1em}
           <button class="knopf" data-befehl="sitzen">Sitz</button>
           <button class="knopf" data-befehl="betteln" aria-label="Leckerli, neu">Leckerli<span class="neu-schild" aria-hidden="true">Neu!</span></button>
           <button class="knopf" data-befehl="werfen" aria-label="Schüssel, neu">Schüssel<span class="neu-schild" aria-hidden="true">Neu!</span></button>
+          <!-- Geheime Aktionen. Gesperrt, bis das Geheimwort stimmt; geprüft
+               wird nur auf dem Server (api/snoopy.js). Absichtlich KEIN
+               data-befehl: das ist kein Ruf, und die kurze Sperre aller
+               Ruf-Knöpfe nach jedem Ruf soll sie nicht mitnehmen. -->
+          <button class="knopf gesperrt" type="button" data-aktion="kraulen" data-name="Kraulen"
+                  aria-label="Kraulen, gesperrt"><svg class="schloss" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 7.5V5.2a3 3 0 0 1 6 0v2.3" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="2.8" y="7" width="10.4" height="7.6" rx="1.8" fill="currentColor"/></svg>Kraulen</button>
+          <button class="knopf gesperrt" type="button" data-aktion="laser" data-name="Laserpointer"
+                  aria-label="Laserpointer, gesperrt" aria-pressed="false"><svg class="schloss" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 7.5V5.2a3 3 0 0 1 6 0v2.3" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="2.8" y="7" width="10.4" height="7.6" rx="1.8" fill="currentColor"/></svg>Laserpointer</button>
         </div>
+        <!-- Das Geheimwort-Feld. KEIN Passwortfeld, mit Absicht (Lehre aus
+             Dropino): type="password" oder ein Name wie „password“ lässt
+             Chrome und die Passwortmanager ein Login vermuten — dann bieten
+             sie an, das Wort zu speichern, oder füllen ein gespeichertes
+             Passwort hinein. Darum type="text", autocomplete="off", ein
+             unverdächtiger Name und die Ignorier-Merkmale von 1Password
+             (data-1p-ignore), LastPass (data-lpignore), Bitwarden
+             (data-bwignore) und Dashlane (data-form-type).
+             EHRLICH: Solange kein eigenes SNOOPY_GEHEIMWORT gesetzt ist, IST
+             das Geheimwort das Admin-Passwort (api/snoopy.js) — wer es kennt,
+             kann im Gästebuch löschen. Darum wird das Getippte trotzdem
+             ausgeblendet, nur optisch (-webkit-text-security, Klasse
+             „verdeckt“), mit einem Knopf zum Anzeigen; nach jedem Versuch
+             wird das Feld geleert. maxlength = WORT_MAX in api/snoopy.js. -->
+        <form class="geheim" id="snoopy-geheim" hidden novalidate autocomplete="off">
+          <label class="rufen-schrift" for="snoopy-zauberwort">Geheimwort</label>
+          <input class="buch-feld verdeckt" id="snoopy-zauberwort" name="snoopy-zauberwort" type="text"
+                 maxlength="200" autocomplete="off" autocapitalize="off" autocorrect="off"
+                 spellcheck="false" enterkeyhint="go"
+                 data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other">
+          <button class="geheim-zeigen" type="button" id="snoopy-geheim-zeigen" aria-pressed="false"
+                  aria-controls="snoopy-zauberwort">Zeigen</button>
+          <button class="knopf" type="submit" id="snoopy-geheim-los">Freischalten</button>
+          <p class="geheim-meldung" id="snoopy-geheim-meldung" aria-live="polite"></p>
+        </form>
         <p class="rufen-antwort" id="rufen-antwort">Sie läuft irgendwo herum. Ruf sie, wenn du magst.</p>
         <p class="rufen-fussnote">Sie hört in sieben von zehn Fällen. Die anderen drei Male
            ist sie nicht kaputt — sie hat einfach keine Lust.</p>
@@ -2721,7 +2842,24 @@ const snoopyAusgleich = {
   betteln1:[0.982, -0.0433, 0.0076, 0.5116, 0.5769],
   betteln2:[0.951, -0.0306, 0.043, 0.4836, 0.5533],
   werfen1:[1.035, -0.0576, -0.029, 0.529, 0.7347],
-  werfen2:[1.249, -0.0919, 0.0377, 0.4623, 0.7815]
+  werfen2:[1.249, -0.0919, 0.0377, 0.4623, 0.7815],
+  /* Die sieben Posen der geheimen Aktionen (03.10.2026): gleiche Messung und
+     Regel wie die Einzelhaltungen oben (Bezugsmaß 0,444, Exponent 0,7,
+     Fußlinie 0,900, Schwerpunkt mittig). Das Skript rechnet sitzen zur
+     Kontrolle mit und kommt auf dieselben Werte wie oben.
+     Mess-Skript: scratchpad/snoopy-aktionen/messen-posen.mjs.
+     Ausnahme fauchen: nach der Flächenregel käme es auf 0,784 — dann stünde
+     die fauchende Katze ein gutes Zehntel kleiner da als die genießende
+     davor und schrumpfte sichtbar beim Wechsel (gebuckelt bedeckt sie mehr
+     Fläche bei weniger Höhe). Darum auf dieselbe sichtbare Höhe wie
+     geniessen gesetzt (0,890), Fußlinie wieder auf 0,900 gerechnet. */
+  geniessen:[0.84, 0.0129, 0.0248, 0.4752, 0.556],
+  "schnurren-liegen":[1.039, 0.1889, -0.0031, 0.5031, 0.5442],
+  fauchen:[0.89, 0.0154, 0.0349, 0.4651, 0.5478],
+  ducken:[0.868, 0.1602, 0.021, 0.479, 0.517],
+  sprung:[1.017, 0.0708, -0.0017, 0.5017, 0.5122],
+  landen:[0.852, 0.058, 0.0419, 0.4581, 0.5495],
+  verwirrt:[0.84, 0.0188, 0.0686, 0.4314, 0.544]
 };
 /* Für jede Haltung eine Aufnahme. Das Gehen wechselt zwischen zwei Schritten. */
 /* Welche Aufnahmen zu welcher Haltung gehören. Mehrere Namen = Bildfolge. */
@@ -2737,8 +2875,27 @@ const snoopyHaltungen = {
   spielen: ["spiel1","spiel2","spiel3","spiel4"],
   putzen:  ["putzen"],
   betteln: ["betteln1","betteln2"],
-  werfen:  ["werfen1","werfen2"]
+  werfen:  ["werfen1","werfen2"],
+  /* Haltungen der geheimen Aktionen (Kraulen, Laserpointer). Eigene Posen,
+     03.10.2026 mit KI nach dem Vorbild von sitzen.png erzeugt (Freigabe des
+     Inhabers) und freigestellt. Wie alle Snoopy-Bilder OHNE KI-Schild —
+     gekennzeichnet über den Satz im Fuß. Ausgleich oben in snoopyAusgleich.
+       geniessen        — sitzt, Augen zu, Kinn hoch (Kraulen, erste Stufe)
+       schnurren-liegen — liegt auf der Seite (Kraulen, lange gekrault)
+       fauchen          — Ohren angelegt, faucht („hat genug")
+       ducken / sprung  — Jagdhaltung / im Sprung (Laser)
+       landen           — Pfoten am Boden, schaut hinunter (getroffen)
+       verwirrt         — schaut fragend auf die leere Pfote (daneben) */
+  geniessen: ["geniessen"],
+  schnurren: ["schnurren-liegen"],
+  fauchen:   ["fauchen"],
+  ducken:    ["ducken"],
+  springen:  ["sprung"],
+  fangen:    ["landen"],
+  verwirrt:  ["verwirrt"]
 };
+/* Aufnahmen, die von Haus aus nach links schauen (siehe --spiegel im Stil). */
+const snoopySpiegeln = new Set(["schnurren-liegen"]);
 /* Folgen, die EINMAL ablaufen und dann auf dem letzten Bild stehen bleiben.
    Eine Schüssel, die in Schleife weggehauen wird und zurückspringt, sähe aus
    wie ein Bildfehler. */
@@ -2758,8 +2915,13 @@ const snoopySprueche = {
 };
 
 (function(){
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
+  /* Bei reduzierter Bewegung (`ruhig`, oben einmal gelesen) lief hier früher
+     gar nichts — Snoopy war unsichtbar und die Ruf-Knöpfe ins Leere. Jetzt
+     die ruhige Fassung: sie sitzt an EINER Stelle und wechselt nur die
+     Haltung. Was dafür abgeschaltet ist, steht jeweils dort, wo es passiert:
+     kein Gehen (wechsle), keine Bildfolgen (zeichnen), keine Jagd und kein
+     Sprung beim Laser, keine schwebenden Herzen beim Kraulen. Eine
+     Haltung, die einfach umspringt, ist keine Bewegung über den Schirm. */
   const buehneEl = document.getElementById("snoopy");
   const koerper = document.createElement("div");
   koerper.className = "snoopy-koerper";
@@ -2789,6 +2951,7 @@ const snoopySprueche = {
               el.style.setProperty("--dx", a[2]);
               el.style.setProperty("--sx", a[3]);
               el.style.setProperty("--sy", a[4]); }
+      if (snoopySpiegeln.has(name)) el.style.setProperty("--spiegel", -1);
       koerper.appendChild(el);
       return el;
     });
@@ -2803,10 +2966,17 @@ const snoopySprueche = {
     koerper.classList.remove("folge");     /* erstes Bild weich einblenden */
     alleAus();
     schrittZaehler = 0;
-    reihe[0].classList.add("da");
 
     clearInterval(schrittUhr); schrittUhr = null;
     clearTimeout(hartUhr);
+    /* Ruhig: keine Bildfolge, nur ein Standbild. Bei Folgen, die einmal
+       ablaufen (Schüssel), das letzte — das zeigt, was passiert ist; sonst
+       das erste. */
+    if (ruhig){
+      reihe[snoopyEinmal.has(h) ? reihe.length - 1 : 0].classList.add("da");
+      return;
+    }
+    reihe[0].classList.add("da");
     if (reihe.length > 1){
       /* Nach dem Einblenden hart weiterschalten, sonst überlagern sich zwei
          Beinstellungen und die Katze sieht doppelt aus. */
@@ -2834,13 +3004,17 @@ const snoopySprueche = {
     setTimeout(() => blase.classList.remove("da"), 2200);
   }
   function wechsle(h, dauerMs, wort){
+    /* Ruhig geht sie nirgendwohin. Hier und nicht bei jedem Aufrufer: so
+       kann weder der eigene Tageslauf noch eine Abfuhr beim Rufen („sie
+       geht einfach weg") noch das Kraulen sie doch über den Schirm schicken. */
+    if (ruhig && h === "gehen") h = "sitzen";
     if (wort !== null) blase.classList.remove("trotzig");
     haltung = h;
     bisWann = performance.now() + dauerMs;
     koerper.classList.remove("geht","atmet","streckt");
     koerper.classList.toggle("hoch", h === "betteln");
     if (h === "gehen") koerper.classList.add("geht");
-    else if (h === "liegen" || h === "sitzen" || h === "stehen" || h === "trinken")
+    else if (h === "liegen" || h === "sitzen" || h === "stehen" || h === "trinken" || h === "geniessen" || h === "schnurren")
       koerper.classList.add("atmet");
     else if (h === "strecken") koerper.classList.add("streckt");
     zeichnen(h);
@@ -2957,12 +3131,477 @@ const snoopySprueche = {
     });
   });
 
+  /* ---- Geheime Aktionen: Kraulen und Laserpointer ----
+     Gesperrt hinter einem Geheimwort, das NUR der Server kennt (api/snoopy.js,
+     vorerst ADMIN_PASSWORT, später ein eigenes SNOOPY_GEHEIMWORT mit Vorrang).
+     Die Freigabe ist kein Admin-Recht (Begründung im Kopf von api/snoopy.js).
+     Die Seite schickt das getippte Wort
+     hin; stimmt es, setzt der Server ein Cookie mit unterschriebener Freigabe,
+     an das dieses Skript nicht herankommt (HttpOnly). Hier im localStorage
+     liegt nur die Liste der freien Aktionen als Gedächtnis der Anzeige — beim
+     Laden fragt die Seite den Server, ob die Freigabe noch gilt (etwa nach
+     einem neuen Geheimwort nicht mehr), und richtet sich nach ihm.
+     Ohne gemerkte Freigabe gibt es keine Anfrage: wer nie ein Wort getippt
+     hat, verursacht auch keinen Aufruf von /api/snoopy.
+
+     Die Namen in SNOOPY_AKTIONEN müssen zu AKTIONEN in api/snoopy.js passen. */
+  const SNOOPY_AKTIONEN = ["kraulen", "laser"];
+  const FREI_MERKER = "snoopy-frei";
+  const aktionsKnoepfe = [...document.querySelectorAll("[data-aktion]")];
+  const geheimForm   = document.getElementById("snoopy-geheim");
+  const geheimFeld   = document.getElementById("snoopy-zauberwort");
+  const geheimLos    = document.getElementById("snoopy-geheim-los");
+  const geheimMeldEl = document.getElementById("snoopy-geheim-meldung");
+  const geheimZeigen = document.getElementById("snoopy-geheim-zeigen");
+  geheimZeigen.addEventListener("click", () => {
+    const verdeckt = geheimFeld.classList.toggle("verdeckt");
+    geheimZeigen.textContent = verdeckt ? "Zeigen" : "Verbergen";
+    geheimZeigen.setAttribute("aria-pressed", String(!verdeckt));
+    geheimFeld.focus({ preventScroll: true });
+  });
+  /* Maus oder Finger — nur für die Anleitung („über sie fahren" / „wischen").
+     Geräte mit beidem bekommen die Maus-Fassung; wischen geht dort trotzdem. */
+  const mitMaus = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  let frei = new Set();
+  try {
+    JSON.parse(localStorage.getItem(FREI_MERKER) || "[]")
+      .forEach(a => { if (SNOOPY_AKTIONEN.includes(a)) frei.add(a); });
+  } catch (e) {}
+
+  function freiZeigen(){
+    aktionsKnoepfe.forEach(k => {
+      const offen = frei.has(k.dataset.aktion);
+      k.classList.toggle("gesperrt", !offen);
+      k.setAttribute("aria-label", k.dataset.name + (offen ? "" : ", gesperrt"));
+    });
+    koerper.classList.toggle("kraulbar", frei.has("kraulen"));
+  }
+  function freiSetzen(liste){
+    frei = new Set(liste.filter(a => SNOOPY_AKTIONEN.includes(a)));
+    try {
+      if (frei.size) localStorage.setItem(FREI_MERKER, JSON.stringify([...frei]));
+      else localStorage.removeItem(FREI_MERKER);
+    } catch (e) {}
+    if (!frei.has("laser") && laser) laserAus("gesperrt");
+    freiZeigen();
+  }
+  freiZeigen();
+  /* Nachfragen nur mit gemerkter Freigabe. Antwortet der Server nicht (kein
+     Netz, Fehler), bleibt es, wie es war — wer einmal frei war, soll nicht
+     wegen eines Funklochs wieder vor dem Schloss stehen. */
+  if (frei.size){
+    fetch("/api/snoopy", { cache: "no-store", credentials: "same-origin" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && Array.isArray(d.frei)) freiSetzen(d.frei); })
+      .catch(() => {});
+  }
+
+  function geheimMelden(text, fehler){
+    geheimMeldEl.textContent = text;
+    geheimMeldEl.classList.toggle("fehler", Boolean(fehler));
+  }
+  const GEHEIM_HINWEIS = "Stimmt es, merkt sich dein Browser die Freigabe — ein Cookie, nur dafür.";
+  function geheimOeffnen(){
+    geheimForm.hidden = false;
+    if (!geheimMeldEl.textContent) geheimMelden(GEHEIM_HINWEIS);
+    geheimFeld.focus({ preventScroll: true });
+  }
+
+  geheimForm.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    if (!geheimFeld.value.trim()){ geheimMelden("Erst das Geheimwort eintippen.", true); return; }
+    geheimLos.disabled = true;
+    geheimMelden("wird geprüft …");
+    let code = 0, d = null;
+    try {
+      const r = await fetch("/api/snoopy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ geheimwort: geheimFeld.value })
+      });
+      code = r.status;
+      d = await r.json().catch(() => null);
+    } catch (e) {}
+    geheimLos.disabled = false;
+    /* Nach JEDEM Versuch leeren, auch nach einem falschen: solange das
+       Admin-Passwort gilt, soll kein (beinahe richtiges) Passwort im Feld
+       stehen bleiben, wenn jemand anderes ans Gerät kommt. Früher blieb es
+       nach einem Fehlversuch markiert stehen. Und wieder verdecken. */
+    geheimFeld.value = "";
+    geheimFeld.classList.add("verdeckt");
+    geheimZeigen.textContent = "Zeigen";
+    geheimZeigen.setAttribute("aria-pressed", "false");
+
+    if (code === 200 && d && Array.isArray(d.frei)){
+      freiSetzen(d.frei);
+      geheimForm.hidden = true;
+      geheimMelden("");
+      antwortEl.classList.remove("trotz");
+      antwortEl.innerHTML = "<b>Frei</b>Kraulen und Laserpointer gehen jetzt. Tipp einen davon an.";
+      return;
+    }
+    if (d && d.eingerichtet === false){
+      geheimMelden("Die geheimen Aktionen sind noch nicht eingerichtet. Schau später wieder vorbei.", true);
+      return;
+    }
+    geheimMelden((d && d.fehler) || "Gerade nicht erreichbar. Später noch einmal.", true);
+    if (code === 401) geheimFeld.focus();
+  });
+
+  aktionsKnoepfe.forEach(k => k.addEventListener("click", ev => {
+    const a = k.dataset.aktion;
+    if (!frei.has(a)){
+      if (geheimForm.hidden) geheimOeffnen(); else geheimForm.hidden = true;
+      return;
+    }
+    if (a === "kraulen") kraulenRufen();
+    else if (a === "laser") laser ? laserAus("knopf") : laserAn(ev);
+  }));
+
+  /* -- Kraulen --
+     Am Rechner: mit der Maus über sie fahren. Am Handy: waagrecht über sie
+     wischen (senkrecht scrollt die Seite, siehe .kraulbar im Stil). Gezählt
+     wird der Weg, den Zeiger oder Finger auf ihr zurücklegen — ein Zeiger,
+     der nur kurz über sie hinwegzieht, krault noch nicht.
+
+     CHARAKTER: Sie genießt es nicht jedes Mal bis zum Ende. Beim Ansetzen
+     wird ausgewürfelt, wann sie genug hat: in zwei von zehn Fällen früh
+     (sie faucht und geht), sonst erst nach langem Kraulen. Irgendwann hat
+     jede Katze genug — darum gibt es kein „für immer". Danach schmollt sie
+     ein paar Sekunden, Kraulen prallt dann ab. */
+  const KRAUL_START   = 90;     /* px Weg, bis sie es bemerkt (ein Wisch am Handy) */
+  const KRAUL_GENUSS  = 420;    /* px Weg, bis sie die Augen schließt und genießt */
+  const KRAUL_LIEGEN  = 1300;   /* px Weg, bis sie sich auf die Seite legt */
+  const KRAUL_PAUSE   = 900;    /* ms ohne Bewegung, dann beginnt es von vorn */
+  const SCHMOLL_MS    = 6000;
+  let kraul = null, schmollenBis = 0, letzterPunkt = null, schmollGesagt = 0;
+
+  function kraulenRufen(){
+    if (Math.random() < 0.2){
+      const [wort, satz] = zufaellig(ignoriert);
+      wechsle("putzen", dauer.putzen(), null);
+      blase.classList.add("trotzig");
+      sagen(wort);
+      antwortEl.classList.add("trotz");
+      antwortEl.innerHTML = "<b>Snoopy will nicht</b>" + satz;
+      return;
+    }
+    wechsle("sitzen", 9000, "kraul mich");
+    antwortEl.classList.remove("trotz");
+    antwortEl.innerHTML = "<b>Snoopy wartet</b>" + (mitMaus
+      ? "Fahr mit der Maus über sie, hin und her."
+      : "Wisch mit dem Finger über sie, hin und her.");
+  }
+
+  function herz(){
+    const h = document.createElement("span");
+    h.className = "snoopy-herz";
+    h.textContent = "♥";
+    h.setAttribute("aria-hidden", "true");
+    /* Am Kopf (je nach Blickrichtung) und tief genug, dass sie samt Steigen
+       unter der Sprechblase bleiben (die sitzt fest 112 px über dem Rand). */
+    const b = koerper.offsetWidth;
+    const anteil = koerper.dataset.blick === "links" ? 0.1 + Math.random() * 0.28
+                                                     : 0.62 + Math.random() * 0.28;
+    h.style.left = (x + b * anteil).toFixed(0) + "px";
+    h.style.bottom = (b * 0.3 + Math.random() * 10).toFixed(0) + "px";
+    buehneEl.appendChild(h);
+    setTimeout(() => h.remove(), ruhig ? 900 : 1150);
+  }
+
+  function genug(jetzt){
+    kraul = null;
+    schmollenBis = jetzt + SCHMOLL_MS;
+    wechsle("fauchen", 900, null);
+    blase.classList.add("trotzig");
+    sagen(zufaellig(["Fauch!", "Pfff!", "Hsss!", "Genug."]));
+    antwortEl.classList.add("trotz");
+    antwortEl.innerHTML = "<b>Snoopy hat genug</b>" + zufaellig([
+      "Das war ihr jetzt zu viel Zuneigung.",
+      "Sie hat entschieden, dass es reicht.",
+      "Kraulen ist gut. Aufhören ist besser, findet sie."]);
+    /* Danach zieht sie weg — weg vom Zeiger, ein Stück die Leiste entlang.
+       Ruhig dreht sie nur den Rücken zu (wechsle macht aus „gehen" ein
+       Sitzen, die Blickrichtung kippt). */
+    setTimeout(() => {
+      if (laser) return;
+      const b = koerper.offsetWidth;
+      const rand = window.innerWidth - b - 16;
+      const zeigerLinks = letzterPunkt ? letzterPunkt.x < x + b / 2 : Math.random() < .5;
+      richtung = zeigerLinks ? 1 : -1;
+      if (ruhig){ wechsle("sitzen", 6000, null); return; }
+      ziel = Math.max(0, Math.min(rand, x + richtung * (b * 1.6 + Math.random() * b)));
+      if (Math.abs(ziel - x) < b * 0.6){        /* an der Wand: dann in die andere Richtung */
+        richtung = -richtung;
+        ziel = Math.max(0, Math.min(rand, x + richtung * b * 2));
+      }
+      wechsle("gehen", 6000, null);
+    }, 850);
+  }
+
+  function kraulBewegung(ev){
+    if (!frei.has("kraulen") || laser) return;
+    const jetzt = performance.now();
+    const vorher = letzterPunkt;
+    letzterPunkt = { x: ev.clientX, y: ev.clientY, t: jetzt };
+    if (!vorher || jetzt - vorher.t > 200) return;
+    const weg = Math.hypot(ev.clientX - vorher.x, ev.clientY - vorher.y);
+    if (!weg) return;
+
+    if (jetzt < schmollenBis){
+      if (jetzt - schmollGesagt > 2500){ schmollGesagt = jetzt; blase.classList.add("trotzig"); sagen("Nö."); }
+      return;
+    }
+    if (!kraul || jetzt - kraul.letzte > KRAUL_PAUSE){
+      kraul = { weg: 0, letzte: jetzt, stufe: 0, herzZeit: 0,
+                genugBei: Math.random() < 0.2 ? 260 + Math.random() * 360
+                                              : 2400 + Math.random() * 2000 };
+    }
+    kraul.weg += weg;
+    kraul.letzte = jetzt;
+
+    if (kraul.stufe === 0 && kraul.weg >= KRAUL_START){
+      kraul.stufe = 1;
+      wechsle("sitzen", 4000, zufaellig(["schnurrt", "rrrr …", "mrrr"]));
+      antwortEl.classList.remove("trotz");
+      antwortEl.innerHTML = "<b>Snoopy schnurrt</b>" + zufaellig([
+        "Genau da, hinterm Ohr.", "Sie lehnt sich in die Hand.", "Weitermachen, sagt der Blick."]);
+    }
+    if (kraul.stufe === 2 && kraul.weg >= KRAUL_LIEGEN){
+      kraul.stufe = 3;
+      wechsle("schnurren", 4000, zufaellig(["rrrrrrrr …", "schnurrt laut"]));
+      antwortEl.innerHTML = "<b>Snoopy genießt</b>" + zufaellig([
+        "Sie hat sich auf die Seite gelegt. Das heißt: weiter.", "Bauch frei — aber Vorsicht, das ist eine Falle."]);
+    }
+    if (kraul.stufe === 1 && kraul.weg >= KRAUL_GENUSS){
+      kraul.stufe = 2;
+      wechsle("geniessen", 4000, zufaellig(["rrrrrr …", "schnurrt laut", "Augen zu"]));
+      antwortEl.innerHTML = "<b>Snoopy genießt</b>" + zufaellig([
+        "Augen zu, Motor an.", "Sie schnurrt so laut, dass man es fast hört.", "So könnte es bleiben."]);
+    }
+    if (kraul.stufe >= 1){
+      /* Solange gekrault wird, bleibt sie, wo sie ist — der eigene Tageslauf
+         wartet. Nach dem letzten Strich noch ein paar Sekunden Nachglühen. */
+      bisWann = Math.max(bisWann, jetzt + 3500);
+      if (jetzt - kraul.herzZeit > (ruhig ? 900 : 260)){ kraul.herzZeit = jetzt; herz(); }
+    }
+    if (kraul.weg >= kraul.genugBei) genug(jetzt);
+  }
+  koerper.addEventListener("pointermove", kraulBewegung);
+  koerper.addEventListener("pointerdown", () => { letzterPunkt = null; });
+  koerper.addEventListener("pointerleave", () => { letzterPunkt = null; });
+
+  /* -- Laserpointer --
+     Einschalten über den Knopf. Dann liegt eine durchsichtige Fläche über der
+     Seite (Begründung bei .laser-flaeche im Stil), der rote Punkt folgt Maus
+     oder Finger, und Snoopy jagt ihn: hinlaufen, ducken, springen — und nicht
+     immer treffen. Am Handy: hintippen oder mit dem Finger ziehen.
+     Aus: derselbe Knopf, der Knopf „Laser aus" oben, die Esc-Taste — oder von
+     selbst nach LASER_MS. Mit der Tastatur bewegen die Pfeiltasten den Punkt.
+
+     Snoopy lebt am unteren Rand und läuft nur waagrecht. Liegt der Punkt
+     höher, als sie springen kann, stellt sie sich auf und reckt die Pfote.
+
+     RUHIG: kein Laufen, kein Sprung. Sie dreht sich zum Punkt, duckt sich,
+     wenn er nah und still liegt, und schlägt dann nach ihm — nur als
+     Haltungswechsel, an ihrer Stelle. */
+  const LASER_MS   = 45000;
+  const LAUF_TEMPO = 0.32;     /* px/ms — gut doppelt so schnell wie ihr Spaziergang */
+  const SPRUNG_MS  = 480;
+  let laser = null;
+  let hoehe = 0;                   /* px über dem Rand — nur im Sprung nicht 0 */
+
+  function laserPunktSetzen(px, py){
+    if (!laser) return;
+    laser.px = Math.max(0, Math.min(window.innerWidth, px));
+    laser.py = Math.max(0, Math.min(window.innerHeight, py));
+    laser.bewegt = performance.now();
+    laser.punkt.hidden = false;
+    laser.punkt.style.transform = "translate(" + laser.px.toFixed(0) + "px," + laser.py.toFixed(0) + "px)";
+  }
+  function laserTaste(ev){
+    if (!laser) return;
+    if (ev.key === "Escape"){ laserAus("knopf"); return; }
+    const schritte = { ArrowLeft:[-40,0], ArrowRight:[40,0], ArrowUp:[0,-40], ArrowDown:[0,40] };
+    const s = schritte[ev.key];
+    if (s){ ev.preventDefault(); laserPunktSetzen(laser.px + s[0], laser.py + s[1]); }
+  }
+
+  function laserAn(ev){
+    const flaeche = document.createElement("div");
+    flaeche.className = "laser-flaeche";
+    flaeche.setAttribute("aria-hidden", "true");
+    const punkt = document.createElement("div");
+    punkt.className = "laser-punkt";
+    punkt.setAttribute("aria-hidden", "true");
+    const aus = document.createElement("button");
+    aus.type = "button";
+    aus.className = "knopf laser-aus";
+    aus.textContent = "Laser aus";
+    document.body.append(flaeche, punkt, aus);
+
+    laser = { flaeche, punkt, aus, px: 0, py: 0, bewegt: 0, zustand: "jagen", bis: 0,
+              sprung: null, laune: performance.now() + 9000 + Math.random() * 6000,
+              uhr: setTimeout(() => laserAus("zeit"), LASER_MS) };
+    /* Startpunkt: wo geklickt wurde. Per Tastatur ausgelöst (keine
+       Koordinaten), mitten ins untere Drittel, wo sie ihn sieht. */
+    const vonTastatur = !ev || (ev.clientX === 0 && ev.clientY === 0);
+    laserPunktSetzen(vonTastatur ? window.innerWidth / 2 : ev.clientX,
+                     vonTastatur ? window.innerHeight * 0.8 : ev.clientY);
+
+    flaeche.addEventListener("pointermove", e => laserPunktSetzen(e.clientX, e.clientY));
+    flaeche.addEventListener("pointerdown", e => laserPunktSetzen(e.clientX, e.clientY));
+    /* Maus verlässt das Fenster: Punkt weg, sie wartet. Ein Finger, der
+       loslässt, lässt den Punkt dagegen liegen — wie ein echter Laser. */
+    flaeche.addEventListener("pointerleave", e => {
+      if (e.pointerType === "mouse" && laser) laser.punkt.hidden = true;
+    });
+    aus.addEventListener("click", () => laserAus("knopf"));
+    document.addEventListener("keydown", laserTaste);
+
+    const knopf = aktionsKnoepfe.find(k => k.dataset.aktion === "laser");
+    if (knopf) knopf.setAttribute("aria-pressed", "true");
+    koerper.classList.add("jagd");
+    kraul = null;
+    wechsle("stehen", LASER_MS, zufaellig(["!", "Was ist das?", "Oh."]));
+    antwortEl.classList.remove("trotz");
+    antwortEl.innerHTML = "<b>Laser an</b>" + (mitMaus
+      ? "Beweg die Maus. Esc oder „Laser aus“ beendet es."
+      : "Tipp oder zieh mit dem Finger. „Laser aus“ oben beendet es.");
+  }
+
+  function laserAus(grund){
+    if (!laser) return;
+    clearTimeout(laser.uhr);
+    laser.flaeche.remove(); laser.punkt.remove(); laser.aus.remove();
+    document.removeEventListener("keydown", laserTaste);
+    laser = null;
+    hoehe = 0;
+    koerper.classList.remove("jagd");
+    const knopf = aktionsKnoepfe.find(k => k.dataset.aktion === "laser");
+    if (knopf){
+      knopf.setAttribute("aria-pressed", "false");
+      if (grund === "knopf") knopf.focus({ preventScroll: true });
+    }
+    if (grund === "gesperrt") return;
+    wechsle("sitzen", 5000, zufaellig(["…?", "Wo ist er hin?", "Hm."]));
+    antwortEl.classList.remove("trotz");
+    antwortEl.innerHTML = "<b>Laser aus</b>" + zufaellig([
+      "Sie starrt noch eine Weile auf die Stelle, wo er war.",
+      "Sie sucht unter dem Sofa. Er ist nicht dort.",
+      "Gewonnen hat sie nicht. Verloren auch nicht, findet sie."]);
+  }
+
+  /* Ein Bild der Jagd, aus schritt() aufgerufen. Zustände:
+     jagen → (nah genug) ducken → springen → fangen | verfehlt → jagen
+     jagen → (Punkt zu hoch) recken → jagen
+     jagen → (keine Lust mehr, selten) pause → jagen */
+  function laserSchritt(jetzt, dt){
+    const L = laser;
+    const b = koerper.offsetWidth;
+    const rand = window.innerWidth - b - 16;
+    const mitte = x + b / 2;
+    const dx = L.px - mitte;
+    const ueberBoden = window.innerHeight - L.py;      /* Höhe des Punkts über dem Rand */
+    const reichweite = b * 1.7;                        /* so hoch kommt sie im Sprung */
+    const sichtbar = !L.punkt.hidden;
+    const stillSeit = jetzt - L.bewegt;
+    const setze = (h, wort) => { if (haltung !== h || wort) wechsle(h, LASER_MS, wort || undefined); };
+
+    if (Math.abs(dx) > 4 && L.zustand !== "springen") richtung = dx < 0 ? -1 : 1;
+
+    switch (L.zustand){
+      case "jagen": {
+        if (!sichtbar){ setze("sitzen"); break; }
+        /* Launen: ab und zu verliert sie das Interesse — mitten in der Jagd. */
+        if (jetzt > L.laune){
+          L.laune = jetzt + 9000 + Math.random() * 7000;
+          if (Math.random() < 0.25){
+            L.zustand = "pause"; L.bis = jetzt + 2600;
+            setze(zufaellig(["putzen", "gaehnen"]), zufaellig(["Langweilig.", "Gleich.", "Pause."]));
+            blase.classList.add("trotzig");     /* nach wechsle, das sie sonst wieder abnimmt */
+            break;
+          }
+        }
+        const nah = Math.abs(dx) < b * (ruhig ? 1.4 : 0.35);
+        if (!nah){
+          if (ruhig){ setze("stehen"); break; }
+          setze("gehen");
+          x += Math.sign(dx) * Math.min(Math.abs(dx), dt * LAUF_TEMPO);
+          x = Math.max(0, Math.min(rand, x));
+          break;
+        }
+        if (ueberBoden > reichweite){
+          L.zustand = "recken"; setze("betteln", zufaellig(["Zu hoch!", "Komm runter."]));
+          break;
+        }
+        /* Nah und am Boden: sie lauert erst, wenn der Punkt kurz stillhält —
+           ein Punkt, der flitzt, wird weiter verfolgt. */
+        if (stillSeit > 180){
+          L.zustand = "ducken"; L.bis = jetzt + 550 + Math.random() * 700;
+          setze("ducken");
+        } else setze("stehen");
+        break;
+      }
+      case "recken":
+        if (ueberBoden <= reichweite || Math.abs(dx) > b * (ruhig ? 1.4 : 0.6)) L.zustand = "jagen";
+        break;
+      case "ducken":
+        if (Math.abs(dx) > b * (ruhig ? 1.6 : 0.9) || ueberBoden > reichweite){ L.zustand = "jagen"; break; }
+        if (jetzt < L.bis) break;
+        if (ruhig){ landen(jetzt, b); break; }
+        L.zustand = "springen";
+        L.sprung = { start: jetzt, von: x,
+                     nach: Math.max(0, Math.min(rand, L.px - b / 2)),
+                     /* Mindestens ein Drittel Körperhöhe: auch auf einen Punkt am
+                        Boden springt eine Katze im Bogen, nicht flach. */
+                     h: Math.max(b * 0.35, Math.min(reichweite, ueberBoden - b * 0.25)) };
+        setze("springen");
+        break;
+      case "springen": {
+        const s = L.sprung;
+        const t = Math.min(1, (jetzt - s.start) / SPRUNG_MS);
+        x = s.von + (s.nach - s.von) * t;
+        hoehe = 4 * s.h * t * (1 - t);
+        if (t >= 1){ hoehe = 0; landen(jetzt, b); }
+        break;
+      }
+      case "fangen":
+      case "verfehlt":
+      case "pause":
+        if (jetzt > L.bis) L.zustand = "jagen";
+        break;
+    }
+  }
+  /* Getroffen, wenn der Punkt bei der Landung noch unter ihr liegt — und
+     selbst dann nur in sieben von zehn Fällen. Wer den Punkt im letzten
+     Moment wegzieht, gewinnt immer. */
+  function landen(jetzt, b){
+    const L = laser;
+    const dx = L.px - (x + b / 2);
+    const ueberBoden = window.innerHeight - L.py;
+    const drunter = Math.abs(dx) < b * (ruhig ? 1.5 : 0.5) && ueberBoden < b * 1.9;
+    if (drunter && Math.random() < 0.7){
+      L.zustand = "fangen"; L.bis = jetzt + 1300;
+      blase.classList.remove("trotzig");
+      wechsle("fangen", LASER_MS, zufaellig(["Hab ihn!", "Erwischt!", "Meins."]));
+    } else {
+      L.zustand = "verfehlt"; L.bis = jetzt + 1000;
+      blase.classList.remove("trotzig");
+      wechsle("verwirrt", LASER_MS, zufaellig(["Weg!", "Hm?", "Wo …?", "Daneben."]));
+    }
+  }
+
   let zuletzt = performance.now();
   function schritt(jetztMs){
     const dt = Math.min(64, jetztMs - zuletzt);
     zuletzt = jetztMs;
 
-    if (haltung === "gehen"){
+    if (laser){
+      laserSchritt(jetztMs, dt);
+    } else if (haltung === "gehen"){
       /* Tempo und Bildwechsel müssen zusammenpassen, sonst tritt sie auf der
          Stelle: fünf Bilder à 200 ms sind ein Zyklus von einer Sekunde, und in
          dieser Sekunde soll sie etwa eine Körperlänge weit kommen (rund 130 px).
@@ -2975,10 +3614,11 @@ const snoopySprueche = {
     }
     /* Gespiegelt wird nur die Katze — die Sprechblase bleibt lesbar.
        Deshalb steht die Drehung an <img>, nicht am ganzen Körper. */
-    koerper.style.transform = "translateX(" + x.toFixed(1) + "px)";
+    koerper.style.transform = "translate(" + x.toFixed(1) + "px," + (-hoehe).toFixed(1) + "px)";
     koerper.dataset.blick = richtung < 0 ? "links" : "rechts";
 
-    if (jetztMs > bisWann){
+    /* Während der Jagd entscheidet laserSchritt, nicht der Tageslauf. */
+    if (!laser && jetztMs > bisWann){
       const h = naechste();
       if (h === "gehen") neuesZiel();
       wechsle(h, dauer[h](), snoopySprueche[h]);
@@ -4114,6 +4754,14 @@ const MAERKTE_AUSNAHMEN = {
   start.hidden = false;
   film.controls = false;
   film.addEventListener("play", freigeben, {once:true});
+  /* Ab dem ersten Abspielen trägt das eingebrannte Schild im Film die
+     KI-Kennzeichnung; das CSS-Schild über dem Poster tritt ab (Begründung
+     bei „.trailer-karte.lief“ im Stil). Absichtlich am "play"-Ereignis und
+     nicht am Knopf: auch Start über die Steuerleiste, die Mediensteuerung
+     oder im Vollbild landet hier. Ohne Skript bleibt das CSS-Schild stehen
+     — dann liegen beim Abspielen zwei übereinander, aber keins fehlt. */
+  const karte = film.closest(".trailer-karte");
+  film.addEventListener("play", () => karte && karte.classList.add("lief"), {once:true});
   start.addEventListener("click", () => {
     freigeben();
     film.muted = false;

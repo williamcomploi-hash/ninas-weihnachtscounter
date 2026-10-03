@@ -219,6 +219,29 @@ export async function bremse(schluessel, wieviel, sekunden) {
   return Number(zeile.zaehler) <= wieviel;
 }
 
+/**
+ * Gemeinsame Bremse für JEDE Prüfung von ADMIN_PASSWORT: höchstens zehn
+ * Versuche je fünf Minuten und Adresse, über alle Wege zusammen (Löschen im
+ * Gästebuch, in der Wunschliste, Keks zurücksetzen, Snoopy-Geheimwort,
+ * solange dort ADMIN_PASSWORT gilt). Gibt true zurück, wenn geprüft werden darf.
+ *
+ * Warum gemeinsam: jeder Weg hat seine eigene Bremse (10, 10, 5, 5). Einzeln
+ * genommen ließ sich das Admin-Passwort so 30 Mal je fünf Minuten
+ * durchprobieren — ein Angreifer wechselt einfach den Weg. Die Eigenbremsen
+ * bleiben stehen; diese hier liegt zusätzlich darüber.
+ *
+ * Gezählt wird jede Prüfung, auch die richtige — sonst ließe sich mit einem
+ * bekannten Passwort zwischendurch zurücksetzen. Die Folge im Alltag: wer
+ * mehr als zehn Einträge in fünf Minuten löscht, wartet kurz. Das war mit
+ * den Eigenbremsen je Weg vorher schon so.
+ *
+ * Gesalzener Abdruck (bremsAbdruck), eigener Zweck, damit der Schlüssel
+ * keinem anderen Abdruck gleicht.
+ */
+export async function adminBremse(req) {
+  return bremse(`admin:${bremsAbdruck(req, "admin-bremse")}`, 10, 300);
+}
+
 export function antworte(res, code, daten) {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");

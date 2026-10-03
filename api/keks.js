@@ -7,7 +7,7 @@
  * es gibt hier nichts, was einer Person zuzuordnen wäre.
  */
 
-import { sql, lagerDa, vorbereiten, bremse, herkunft, kurz, antworte } from "./_lager.js";
+import { sql, lagerDa, vorbereiten, bremse, adminBremse, herkunft, kurz, antworte } from "./_lager.js";
 
 const HOECHSTENS_JE_ANFRAGE = 25;   /* mehr als 25 auf einmal ist kein Klopfen mehr */
 const JE_MINUTE = 120;              /* je Adresse */
@@ -60,6 +60,10 @@ export default async function handler(req, res) {
 
       const wer = kurz(herkunft(req));
       if (!(await bremse(`keksnull:${wer}`, 5, 300))) {
+        return antworte(res, 429, { fehler: "Zu viele Versuche. In fünf Minuten wieder." });
+      }
+      /* Dazu die gemeinsame Admin-Bremse über alle Wege (siehe _lager.js). */
+      if (!(await adminBremse(req))) {
         return antworte(res, 429, { fehler: "Zu viele Versuche. In fünf Minuten wieder." });
       }
 

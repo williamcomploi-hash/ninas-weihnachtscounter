@@ -14,7 +14,7 @@
  * Die Bremse arbeitet mit einem Fingerabdruck, der von selbst verfällt.
  */
 
-import { sql, lagerDa, vorbereiten, bremse, herkunft, kurz, antworte } from "./_lager.js";
+import { sql, lagerDa, vorbereiten, bremse, adminBremse, herkunft, kurz, antworte } from "./_lager.js";
 
 const HOECHSTENS = 200;    /* so viele werden angezeigt */
 const NAME_MAX   = 24;
@@ -152,6 +152,10 @@ export default async function handler(req, res) {
       /* Auch Rateversuche werden gebremst. */
       const wer = kurz(herkunft(req));
       if (!(await bremse(`loeschen:${wer}`, 10, 300))) {
+        return antworte(res, 429, { fehler: "Zu viele Versuche. In fünf Minuten wieder." });
+      }
+      /* Dazu die gemeinsame Admin-Bremse über alle Wege (siehe _lager.js). */
+      if (!(await adminBremse(req))) {
         return antworte(res, 429, { fehler: "Zu viele Versuche. In fünf Minuten wieder." });
       }
 

@@ -35,7 +35,7 @@
  * Vorschläge laufen weiter — Begründung bei SALZ in _lager.js.
  */
 
-import { sql, lagerDa, vorbereiten, bremse, herkunft, kurz, abdruck, bremsAbdruck,
+import { sql, lagerDa, vorbereiten, bremse, adminBremse, herkunft, kurz, abdruck, bremsAbdruck,
          salzDa, antworte } from "./_lager.js";
 import { saeubern, sieht_aus_wie_admin, ohneVerweise } from "./gaestebuch.js";
 
@@ -76,8 +76,12 @@ const LOESCHFRIST = Date.parse("2027-01-06T23:00:00Z");
  *  (dort steht sie im Handler). Ohne sie könnte eine fremde Seite per
  *  no-cors-fetch (text/plain, kein Preflight) im Namen jedes Besuchers
  *  Vorschläge anlegen oder liken (CSRF). Kommt eine Domain dazu: hier UND in
- *  gaestebuch.js nachtragen. */
-function vonDerEigenenSeite(req) {
+ *  gaestebuch.js nachtragen.
+ *  Exportiert, weil api/snoopy.js (Geheimwort) dieselbe Prüfung braucht —
+ *  dort verhindert sie, dass eine fremde Seite das Geheimwort über die
+ *  Browser ihrer Besucher durchprobieren lässt (jeder Besucher eine andere
+ *  Adresse, die Bremse griffe ins Leere). Eine Fassung für beide. */
+export function vonDerEigenenSeite(req) {
   const typ = String(req.headers["content-type"] || "").toLowerCase();
   if (!typ.startsWith("application/json")) return false;
   const sfs    = String(req.headers["sec-fetch-site"] || "").toLowerCase();
@@ -273,6 +277,10 @@ export default async function handler(req, res) {
 
       const wer = kurz(herkunft(req));
       if (!(await bremse(`wunschweg:${wer}`, 10, 300))) {
+        return antworte(res, 429, { fehler: "Zu viele Versuche. In fünf Minuten wieder." });
+      }
+      /* Dazu die gemeinsame Admin-Bremse über alle Wege (siehe _lager.js). */
+      if (!(await adminBremse(req))) {
         return antworte(res, 429, { fehler: "Zu viele Versuche. In fünf Minuten wieder." });
       }
 
